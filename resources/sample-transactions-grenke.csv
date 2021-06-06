@@ -1,0 +1,31 @@
+"GRENKE BANK AG"
+
+"Umsatzanzeige"
+
+"BLZ:";"20130400";;"Datum:";"26.05.2021"
+"Konto:";"12345678";;"Uhrzeit: ";"14:50:37"
+"Abfrage von:";"Marge Simpson";;"Kontoinhaber:";"Homer & Marge Simpson"
+
+"Zeitraum";"1 Woche";"von:";"01.03.2021";"bis:";"25.05.2021"
+"Betrag in EUR";;"von:";" ";"bis:";" "
+"Primanotanummer";;"von:";;"bis";
+"Textschlüssel";;"von:";;"bis:";
+
+
+
+"Buchungstag";"Valuta";"Textschlüssel";"Primanota";"Zahlungsempfänger";"ZahlungsempfängerKto";"ZahlungsempfängerIBAN";"ZahlungsempfängerBLZ";"ZahlungsempfängerBIC";"Vorgang/Verwendungszweck";"Kundenreferenz";"Währung";"Umsatz";"Soll/Haben"
+"03.05.2021";"03.05.2021";"20 Überweisung";"821";"SPRFIBANKEMPF";;"DE47500500000987654321";;"XYXYXYXYXYX";"Kontogebühren TAN:
+XYZXYZ IBAN: DE475005000009
+87654321 BIC: XYXYXYXYXYX";;"EUR";"4,00";"S"
+"09.03.2021";"09.03.2021";"20 Überweisung";"821";"FIRSTBANKEMPF";;"DE81700700111555999777";;"XYXYXYXYXYX";"Mortgage Simpsons Family 
+. First Bank of Springfield -
+ 742 Evergreen Terrace, Sprin
+gfield, Massachusetts, United
+States TAN:XYZXYZ IBAN: DE817
+00700111555999777 BIC: XYXY
+XYXYXYX";;"EUR";"20.000,00";"S"
+
+"09.03.2021";;;;;;;;;;;"EUR";"120.000,00";"H"
+"03.05.2021";;;;;;;;;;;"EUR";"99.996,00";"H"
+
+"Umsätze von 09.03.2021 bis 03.05.2021"

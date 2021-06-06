@@ -1,0 +1,25 @@
+"GLS Bank"
+
+"Umsatzanzeige"
+
+"BLZ:";"70190000";;"Datum:";"31.01.2021"
+"Konto:";"1234567";;"Uhrzeit:";"12:00:00"
+"Abfrage von:";"Homer Simpson";;"Kontoinhaber:";"Homer and Marge Simpson"
+
+"Zeitraum:";"Alle Umsätze (TAN erforderlich)";"von:";;"bis:";
+"Betrag in EUR:";;"von:";" ";"bis:";" "
+"Sortiert nach:";"Buchungstag";"absteigend"
+
+"Buchungstag";"Valuta";"Auftraggeber/Zahlungsempfänger";"Empfänger/Zahlungspflichtiger";"Konto-Nr.";"IBAN";"BLZ";"BIC";"Vorgang/Verwendungszweck";"Kundenreferenz";"Währung";"Umsatz";" "
+"31.01.2021";"31.01.2021";;;;;;;"ABSCHLUSS
+
+ABSCHLUSS PER 31.01.2021";;"EUR";"4,00";"S"
+"17.01.2021";"17.01.2021";"ISSUER";"Kwik-E-Mart";;;;;"Basislastschrift
+XXXM103XXXKWIK E MA/SPRINGF
+IELD/US
+16.01.2021 um 18:21:27 Uhr
+33333333/444444/ECTL/
+70190000/0001234567/2/1222";;"EUR";"25,00";"S"
+
+"01.01.2021";;;;;;;;;"Anfangssaldo";"EUR";"1.029,00";"H"
+"31.01.2021";;;;;;;;;"Endsaldo";"EUR";"1.000,00";"H"

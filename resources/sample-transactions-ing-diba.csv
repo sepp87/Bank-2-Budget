@@ -1,0 +1,18 @@
+Umsatzanzeige;Datei erstellt am: 31.01.2021 12:00
+;Letztes Update: aktuell
+
+IBAN;DE27 1007 7777 0222 22222 22
+Kontoname;Girokonto
+Bank;ING
+Kunde;Homer and Marge Simpson
+Zeitraum;01.01.2021 - 31.01.2021
+Saldo;800,00;EUR
+
+Sortierung;Datum absteigend
+
+In der CSV-Datei finden Sie alle bereits gebuchten Umsätze. Die vorgemerkten Umsätze werden nicht aufgenommen, auch wenn sie in Ihrem Internetbanking angezeigt werden.
+
+Buchung;Valuta;Auftraggeber/Empfänger;Buchungstext;Verwendungszweck;Saldo;Währung;Betrag;Währung
+31.03.2020;31.03.2020;Kwik-E-Mart;Lastschrift;E01-4444444-2222222 Kindle Svcs 46G 5FF77GGGGGXXX;1.080,800;EUR;-20,00;EUR
+26.03.2020;26.03.2020;Maggie Simpson;Überweisung;Future Savings;1.100,00;EUR;-500,00;EUR
+26.03.2020;26.03.2020;Lisa Simpson;Überweisung;College Fund;1.600,00;EUR;-1.000,00;EUR

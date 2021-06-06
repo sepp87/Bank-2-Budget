@@ -1,0 +1,16 @@
+# Compiled class file
+*.class
+
+
+# Package Files
+*.jar
+
+
+# Maven
+target/
+
+
+# NetBeans
+build/
+nbactions.xml
+nb-configuration.xml

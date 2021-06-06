@@ -1,0 +1,30 @@
+;
+"Umsätze Girokonto";"Zeitraum: 30 Tage";
+"Neuer Kontostand";"1.750,00 EUR";
+
+"Buchungstag";"Wertstellung (Valuta)";"Vorgang";"Buchungstext";"Umsatz in EUR";
+"offen";"--";"Kartenverfügung";"Kto/IBAN: 555555544444  Buchungstext: KWIK E MART>SPRINGFIELD US        2021-01-25T17:38:21                 ";"-21,00";
+"01.02.2021";"01.02.2021";"Übertrag / Überweisung";"Empfänger: Marge SimpsonKto/IBAN: DE65701900000001234567 BLZ/BIC: COBADEHD044  Buchungstext: Emergency savings Ref. HE44444422222222/2";"-250,00";
+"24.01.2021";"24.01.2021";"Übertrag / Überweisung";"Auftraggeber: Montgomery Burns Buchungstext: Lohn/Gehalt 09000540/202101 Ref. H0000000G0000000/00000";"1.000,00";
+"19.01.2021";"19.01.2021";"Lastschrift / Belastung";"Auftraggeber: Kwik-E-Mart Buchungstext: Kwik-E-Mart SPRINGFIELD//SPRINGFI 2021-01-18T07:58:43 KFN 0 VJ 2112 Ref. 00D22222C1111111/55555";"-10,00";
+
+"Alter Kontostand";"1010,00 EUR";
+
+"Umsätze Visa-Karte (Kreditkarte)";"Zeitraum: 30 Tage";
+"Neuer Kontostand";"-0,99 EUR";
+
+"Buchungstag";"Umsatztag";"Vorgang";"Referenz";"Buchungstext";"Umsatz in EUR";
+"15.02.2021";"14.02.2021";"Visa-Umsatz";"555555222222222";" APPLE.COM/BILL 66666666666 007 ";"-0,99";
+"29.01.2021";"29.01.2021";"Visa-Kartenabrechnung";"111111111110000";" SUMME MONATSABRECHNUNG VISA ";"2,50";
+"27.01.2021";"26.01.2021";"Visa-Umsatz";"222222111111111";" APPLE.COM/BILL 66666666666 007 ";"-2,50";
+
+"Alter Kontostand";"-2,50 EUR";
+
+"Umsätze Tagesgeld PLUS-Konto";"Zeitraum: 30 Tage";
+"Neuer Kontostand";"1.250,00 EUR";
+
+"Buchungstag";"Wertstellung (Valuta)";"Vorgang";"Buchungstext";"Umsatz in EUR";
+"01.02.2021";"01.02.2021";"Kontoübertrag";"Auftraggeber: Marge SimpsonKto/IBAN: DE27100777770222222222 BLZ/BIC: COBADEHD044  Buchungstext: Emergency savings Ref. HE44444422222222/1";"250,00";
+
+"Alter Kontostand";"1000,00 EUR";
+

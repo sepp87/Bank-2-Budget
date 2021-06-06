@@ -1,0 +1,11 @@
+;
+"Umsätze Girokonto";"Zeitraum: 10 Tage";
+"Neuer Kontostand";"2.000,00 EUR";
+
+"Buchungstag";"Wertstellung (Valuta)";"Vorgang";"Buchungstext";"Umsatz in EUR";
+"offen";"--";"Kartenverfügung";"Kto/IBAN: 555555222222  Buchungstext: KWIK E MART>SPRINGFIELD US        2021-01-25T17:38:21                 ";"-21,00";
+"24.01.2021";"24.01.2021";"Übertrag / Überweisung";"Auftraggeber: Montgomery Burns Buchungstext: Lohn/Gehalt 99999555/202101 Ref. H0000000G0000000/00000";"1.000,00";
+"19.01.2021";"19.01.2021";"Lastschrift / Belastung";"Auftraggeber: Kwik-E-Mart Buchungstext: Kwik-E-Mart SPRINGFIELD//SPRINGFI 2021-01-18T07:58:43 KFN 0 VJ 2112 Ref. 00D22222C1111111/33333";"-10,00";
+
+"Alter Kontostand";"1010,00 EUR";
+

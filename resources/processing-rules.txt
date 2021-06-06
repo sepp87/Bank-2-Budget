@@ -1,0 +1,35 @@
+var serializedRules = `[
+    {
+        "if": {
+            "internal": false
+        },
+        "then": {
+            "label": "BOOLEAN_TEST"
+        }
+    },
+    {
+        "if": {
+            "contraAccountName": null
+        },
+        "then": {
+            "label": "UNKNOWN"
+        }
+    },
+    {
+        "if": {
+            "contraAccountName": "Kwik-E-Mart"
+        },
+        "then": {
+            "label": "GROCERIES"
+        }
+    },
+	{
+        "if": {
+            "contraAccountName": "Montgomery Burns",
+			"transactionType": "CREDIT"
+        },
+        "then": {
+            "label": "SALARY"
+        }
+    }
+]`

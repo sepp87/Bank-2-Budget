@@ -1,0 +1,391 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Bank 2 Budget - Rule Builder</title>
+</head>
+
+<body>
+    <h1>
+        Rule Builder
+        <button style="font-size: x-large;" onclick="download()">💾</button>
+        <button style="font-size: x-large;" onclick="copyRulesToClipboard()">📋</button>
+    </h1>
+    <p style="width: 700px;">
+        Define your rules here, start
+        by adding a new rule. Processing rules are used
+        to change or add values to your digital bank
+        statement e.g. if description contains the word
+        "restaurant" then it gets labeled "dining out".
+    </p>
+    <p style="width: 700px;">
+        Rules can be triggered by values set through previous
+        rules. That also means rules can overwrite values
+        set by earlier rules. Each rule can have multiple "if"
+        and "then" statements. Each subsequent statement
+        adds an additional check or change. For example, all
+        cash transcations in July are labeled vacation, but the
+        electrical bill should still be appointed to fix costs.
+    </p>
+    <p style="width: 700px;">
+        After finishing
+        press the floppy icon to save the rules to your
+        drive or press the clipboard icon to copy the rules
+        to the clipboard. Create, edit or overwrite
+        "processing-rules.txt" file in the "config" folder
+        (yeah, not such an elegant solution 😅).
+    </p>
+    <div id="container">
+    </div>
+    <button onclick="new Rule()">Add Rule</button>
+    <script src="config/processing-rules.txt"></script>
+    <script src="build/config/processing-rules.txt"></script>
+    <script>
+        //#SpaghettiCode
+        var rules = [];
+
+        var container = document.getElementById('container');
+
+        function loadRules() {
+            var list = JSON.parse(serializedRules);
+            for (var i in list) {
+                var item = list[i];
+                new Rule(item);
+            }
+        }
+
+        function serializeRules() {
+            var list = [];
+            for (var i in rules) {
+                var rule = rules[i];
+                list.push(rule.serialize());
+            }
+            return 'var serializedRules = `' + JSON.stringify(list, null, 4) + '`';
+        }
+
+        function copyRulesToClipboard() {
+            var toCopy = document.createElement('textarea');
+            toCopy.value = serializeRules();
+            container.appendChild(toCopy);
+            toCopy.select();
+            toCopy.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            toCopy.remove();
+
+        }
+
+        // https://stackoverflow.com/questions/13405129/javascript-create-and-save-file
+        // Function to download data to a file
+        function download(data, filename, type) {
+            data = serializeRules();
+            filename = "processing-rules.txt";
+            type = "txt";
+            var file = new Blob([data], { type: type });
+            if (window.navigator.msSaveOrOpenBlob) // IE10+
+                window.navigator.msSaveOrOpenBlob(file, filename);
+            else { // Others
+                var a = document.createElement("a"),
+                    url = URL.createObjectURL(file);
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function () {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+        }
+
+        loadRules();
+
+        function Rule(config) {
+            rules.push(this);
+
+            if (Rule.index === undefined) {
+                Rule.index = -1;
+            }
+            Rule.index++;
+
+            if (this.ifIndex === undefined) {
+                this.ifIndex = -1;
+                this.thenIndex = -1;
+            }
+
+            this.id = 'rule_' + Rule.index;
+
+            this.variables = ['label', 'amount', 'transactionNumber',
+                'date', 'accountBalance', 'accountNumber',
+                'accountName', 'contraAccountNumber', 'contraAccountName',
+                'internal', 'transactionType', 'description'
+            ];
+
+            this.ifStatementList = [];
+            this.thenStatementList = [];
+
+            this.getTransactionTypeSelect = function () {
+                var select = document.createElement('select');
+                var transactionTypes = ['CREDIT', 'DEBIT'];
+                for (var i in transactionTypes) {
+                    var transactionType = transactionTypes[i];
+                    var option = document.createElement('option');
+                    option.innerHTML = transactionType;
+                    select.appendChild(option);
+                }
+                select.style.width = '406px';
+                return select;
+            }
+
+            this.getBooleanSelect = function () {
+                var select = document.createElement('select');
+                var transactionTypes = ['TRUE', 'FALSE'];
+                for (var i in transactionTypes) {
+                    var transactionType = transactionTypes[i];
+                    var option = document.createElement('option');
+                    option.innerHTML = transactionType;
+                    select.appendChild(option);
+                }
+                select.style.width = '406px';
+                return select;
+            }
+
+            this.getValueElement = function () {
+                var valueElement = document.createElement('input');
+                valueElement.style.width = '400px';
+                valueElement.type = 'text';
+                valueElement.placeholder = 'e.g. Restaurant, 250, 2021-05-23'
+                return valueElement;
+            }
+
+
+            this.getKeyElement = function () {
+                var select = document.createElement('select');
+                for (var i in this.variables) {
+                    var variable = this.variables[i];
+                    var option = document.createElement('option');
+                    option.innerHTML = variable;
+                    select.appendChild(option);
+                }
+                return select;
+            }
+
+            this.getPopulatedStatementsElement = function (type, statements) {
+                var statementList = this.getStatementList(type);
+                var statementsElement = document.createElement('div');
+                statementsElement.id = this.id + '_' + type;
+                var keys = Object.keys(statements);
+                var values = Object.values(statements);
+                for (var i in keys) {
+                    var statement = {
+                        key: keys[i],
+                        value: values[i]
+                    };
+                    var statementElement = this.getStatementElement(statement, type);
+                    statementsElement.appendChild(statementElement);
+                    statementList.push(statementElement);
+                }
+                return statementsElement;
+            }
+
+            this.getStatementsElement = function (type) {
+                var statementList = this.getStatementList(type);
+                var statementsElement = document.createElement('div');
+                statementsElement.id = this.id + '_' + type;
+                var statementElement = this.getStatementElement(null, type);
+                statementsElement.appendChild(statementElement);
+                statementList.push(statementElement);
+                return statementsElement;
+            }
+
+            this.getStatementList = function (type) {
+                if (type === 'if') {
+                    return this.ifStatementList;
+                } else if (type == 'then') {
+                    return this.thenStatementList;
+                }
+            }
+
+            this.getStatementElement = function (statement, type) {
+                var i = -1;
+                if (type === 'if') {
+                    this.ifIndex++;
+                    i = this.ifIndex;
+                } else if (type === 'then') {
+                    this.thenIndex++;
+                    i = this.thenIndex;
+                }
+                var statementElement = document.createElement('div');
+                statementElement.id = this.id + '_' + type + '_' + i;
+                var keyElement = this.getKeyElement();
+                keyElement.id = statementElement.id + '_key';
+                keyElement.addEventListener('change', this.switchValueElement(this));
+                var valueElement = this.getValueElement();
+                valueElement.id = statementElement.id + '_value';
+
+                if (statement !== null) {
+                    keyElement.value = statement.key;
+                    valueElement.value = statement.value;
+                }
+
+                var statementText = document.createElement('span');
+                statementText.id = statementElement.id + '_text';
+                statementText.innerHTML = type + ' ';
+                if (i > 0) {
+                    statementText.innerHTML = 'and ';
+                } else {
+                    statementText.style.fontWeight = 'bold';
+                }
+                statementText.style.display = 'inline-block';
+                statementText.style.width = '50px';
+                var operatorText = document.createElement('span');
+                operatorText.innerHTML = ' = ';
+
+                var removeStatementButton = document.createElement('button');
+                var addStatementButton = document.createElement('button');
+                removeStatementButton.innerText = '-';
+                addStatementButton.innerText = '+';
+                addStatementButton.value = type;
+                removeStatementButton.onclick = this.removeStatement(this, type);
+                addStatementButton.onclick = this.addStatement(this, type);
+
+                statementElement.appendChild(statementText);
+                statementElement.appendChild(keyElement);
+                statementElement.appendChild(operatorText);
+                statementElement.appendChild(valueElement);
+                statementElement.appendChild(removeStatementButton);
+                statementElement.appendChild(addStatementButton);
+
+                return statementElement;
+            }
+
+            this.switchValueElement = function (that) {
+                return function (event) {
+                    var key = event.target.value;
+                    var statementId = event.target.parentElement.id;
+                    var valueElement = document.getElementById(statementId + '_value');
+                    var newValueElement;
+                    if (key === 'transactionType') {
+                        newValueElement = that.getTransactionTypeSelect();
+                    } else if (key === 'internal') {
+                        newValueElement = that.getBooleanSelect();
+                    } else if (valueElement.tagName !== 'INPUT') {
+                        newValueElement = that.getValueElement();
+                    }
+                    newValueElement.id = valueElement.id;
+                    valueElement.replaceWith(newValueElement);
+
+                    console.log(valueElement);
+                    // if(key)
+                    console.log(event);
+                    console.log(event.originalTarget.value);
+                }
+            }
+
+            //https://stackoverflow.com/questions/8941183/pass-multiple-arguments-along-with-an-event-object-to-an-event-handler
+            this.removeStatement = function (that, type) {
+                return function (event) {
+                    var statementList = that.getStatementList(type);
+                    if (statementList.length === 1) {
+                        return;
+                    }
+                    var statementId = event.target.parentElement.id;
+                    var index = -1;
+                    for (var i in statementList) {
+                        var statement = statementList[i];
+                        if (statement.id === statementId) {
+                            index = i;
+                            break;
+                        }
+                    }
+
+                    event.target.parentElement.remove();
+                    statementList.splice(index, 1);
+
+                    var firstStatementText = document.getElementById(statementList[0].id + '_text');
+                    firstStatementText.innerHTML = type + ' ';
+                    firstStatementText.style.fontWeight = 'bold';
+                }
+            }
+
+            this.addStatement = function (that, type) {
+                return function (event) {
+                    var statementList = that.getStatementList(type);
+                    var statementsElement = event.target.parentElement.parentElement;
+                    var statementElement = that.getStatementElement(null, type);
+                    statementsElement.appendChild(statementElement);
+                    statementList.push(statementElement);
+                }
+            }
+
+            this.removeRule = function (event) {
+                var ruleId = event.target.parentElement.id;
+                var index = -1;
+                for (var i in rules) {
+                    var rule = rules[i];
+                    if (rule.id === ruleId) {
+                        index = i;
+                        break;
+                    }
+                }
+                event.target.parentElement.remove();
+                rules.splice(index, 1);
+            }
+
+            this.serializeStatements = function (statements) {
+                var serializedStatements = {};
+                for (var i in statements) {
+                    var statement = statements[i];
+                    var key = document.getElementById(statement.id + '_key').value;
+                    var value = document.getElementById(statement.id + '_value').value
+                    if (key === 'internal') {
+                        value = value === 'TRUE';
+                    } else if (key === 'amount' || key === 'accountBalance') {
+                        //check for number & set number
+                    } 
+                    if (value === '') { 
+                        value = null;
+                    }
+                    serializedStatements[key] = value;
+                }
+                return serializedStatements;
+            }
+
+            this.serialize = function () {
+                var serializedRule = { if: {}, then: {} };
+                var statementList = this.getStatementList('if');
+                serializedRule.if = this.serializeStatements(statementList);
+                statementList = this.getStatementList('then');
+                serializedRule.then = this.serializeStatements(statementList);
+                return serializedRule;
+            }
+
+            var rule = document.createElement('div');
+            rule.id = this.id;
+
+            if (config === undefined) {
+                rule.appendChild(this.getStatementsElement('if'));
+                rule.appendChild(this.getStatementsElement('then'));
+            } else {
+                rule.appendChild(this.getPopulatedStatementsElement('if', config.if));
+                rule.appendChild(this.getPopulatedStatementsElement('then', config.then));
+            }
+
+            var removeRuleButton = document.createElement('button');
+            removeRuleButton.onclick = this.removeRule;
+            removeRuleButton.innerText = 'Remove Rule';
+            rule.appendChild(removeRuleButton);
+
+            var lineBreak = document.createElement('br');
+            var lineBreak2 = document.createElement('br');
+            rule.appendChild(lineBreak);
+            rule.appendChild(lineBreak2);
+
+
+            container.appendChild(rule);
+        }
+    </script>
+</body>
+
+</html>

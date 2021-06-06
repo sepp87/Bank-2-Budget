@@ -1,0 +1,4 @@
+Auftragskonto;Buchungstag;Valutadatum;Buchungstext;Verwendungszweck;Glaeubiger ID;Mandatsreferenz;Kundenreferenz (End-to-End);Sammlerreferenz;Lastschrift Ursprungsbetrag;Auslagenersatz Ruecklastschrift;Beguenstigter/Zahlungspflichtiger;Kontonummer/IBAN;BIC (SWIFT-Code);Betrag;Waehrung;Info
+DE05783500000123456789;12.03.2021;15.03.2021;FOLGELASTSCHRIFT;PP.2222.PP . KWIK-E-MART, Your purchase at KWIK-E-MART ;LU69YYY0000000000500000222;WW3U3J4JJJ222;1114444448888 PP.2222.PP PAYPAL;;;;PayPal (Europe) S.a.r.l. et Cie., S.C.A.;DE88500700303777777777;DEUTDEFFXXX;-5;EUR;Umsatz vorgemerkt
+DE05783500000123456789;12.03.2021;12.03.2021;GUTSCHR. UEBERWEISUNG;Auslagen ;;;;;;;Montgomery Burns;DE81700700111555999777;DEUTDEDBMUC;6,96;EUR;Umsatz gebucht
+DE05783500000123456789;05.03.2021;05.03.2021;KARTENZAHLUNG;2021-03-03T16:10 Debitk.2 2023-12 ;;;FFF33WWWWW6;;;;SumUp .Moe's coffee//Springfield/US/0;DE47500500000987654321;HELADEFF;-6,4;EUR;Umsatz gebucht

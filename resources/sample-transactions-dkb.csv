@@ -1,0 +1,10 @@
+"Kontonummer:";"DE27100777770222222222 / Girokonto";
+
+"Von:";"01.01.2021";
+"Bis:";"31.01.2021";
+"Kontostand vom 31.01.2021:";"100,00 EUR";
+
+"Buchungstag";"Wertstellung";"Buchungstext";"Auftraggeber / Begünstigter";"Verwendungszweck";"Kontonummer";"BLZ";"Betrag (EUR)";"Gläubiger-ID";"Mandatsreferenz";"Kundenreferenz";
+"09.01.2021";"09.01.2021";"Kartenzahlung/-abrechnung";"Kwik-E-Mart";"2021-01-06T10:15      Debitk.1 2025-06";"DE00000000000000000000";"BYLADEM1001";"-7,75";"";"";"00000000000000000000000000";
+"06.01.2021";"06.01.2021";"Gutschrift";"HOMER SIMPSON";"Pizza Hawai";"DE770209299702777777777";"BYLADEM1001";"10,00";"";"";"NOTPROVIDED";
+"06.01.2021";"06.01.2021";"Überweisung";"MARGE SIMPSON";"Autogramm                 DATUM 06.01.2021, 12.36 UHR1.TAN 888222";"DE92770200777099999999";"BYLADEM1001";"-20,00";"";"";"NOTPROVIDED";
