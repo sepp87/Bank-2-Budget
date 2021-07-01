@@ -35,7 +35,7 @@ public class TransactionManager {
     public static final String MY_ACCOUNTS_PROPERTIES = "my-accounts.txt";
     public static final String OTHER_ACCOUNTS_PROPERTIES = "other-accounts.txt";
     public static final String PROCESSING_RULES = "processing-rules.txt";
-    public static final String BUILD_DIRECTORY = "D:\\dev\\MoneyScribble\\build\\";
+    public static final String BUILD_DIRECTORY = "D:\\dev\\Bank-2-Budget\\build\\";
     public static final char DECIMAL_SEPERATOR = new DecimalFormatSymbols(Locale.getDefault()).getDecimalSeparator();
 
     public Properties myAccounts;

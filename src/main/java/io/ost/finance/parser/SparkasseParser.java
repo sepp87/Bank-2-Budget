@@ -39,14 +39,31 @@ public class SparkasseParser extends TransactionParser {
 
     @Override
     public List<CSVRecord> getTransactionRecordsFrom(List<CSVRecord> allRecords) {
+        currentBalance = calculateBalanceDeltaFrom(allRecords);
         Collections.reverse(allRecords);
         return allRecords;
+    }
+
+    
+    private double calculateBalanceDeltaFrom(List<CSVRecord> allRecords) {
+        double delta = 0;
+        for (CSVRecord record : allRecords) {
+            if (isNotProcessedByBank(record)) {
+                continue;
+            }
+            delta -= getDoubleFrom(record.get("Betrag"));
+        }
+        return delta;
+    }
+    
+    private boolean isNotProcessedByBank(CSVRecord record) {
+        return record.get("Info").equals("Umsatz vorgemerkt");
     }
 
     @Override
     public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
         CashTransaction transaction = new CashTransaction();
-        if (record.get("Info").equals("Umsatz vorgemerkt")) {
+        if (isNotProcessedByBank(record)) {
             Logger.getLogger(SparkasseParser.class.getName()).log(Level.WARNING, "Record skipped since value date was left open, meaning the cash transaction was NOT yet processed by the bank.");
             return null;
         }
