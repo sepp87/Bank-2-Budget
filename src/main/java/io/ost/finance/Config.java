@@ -41,7 +41,7 @@ public class Config implements Runnable {
     private final Mode mode = Mode.CSV;
 
     @Parameters
-    private static String[] paths;
+    private static String[] paths = {};
     private static ArrayList<File> csvFiles;
 
     public static char getDecimalSeperator() {
