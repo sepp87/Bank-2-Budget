@@ -11,18 +11,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import picocli.CommandLine;
 
 /**
- * AccountHandler reads CSV files from the todo directory or command line. It
+ * Bank-to-Budget app reads CSV files from the todo directory and command line. It
  * saves the cash transactions - parsed from the CSV files - to the done
  * directory. It is also responsible for loading the config for the parsers.
- *
- * TODO AccountHandler class name does not describe the function of the class.
  *
  * @author joost
  */
@@ -78,18 +75,8 @@ public class App {
                 break;
         }
 
-//        File[] files = getFileFromString(args);
-//        app.processCsv(files);
         System.exit(exitCode);
 
-    }
-
-    private static File[] getFileFromString(String... args) {
-        File[] files = new File[args.length];
-        for (int i = 0; i < args.length; i++) {
-            files[i] = new File(args[i]);
-        }
-        return files;
     }
 
     private App() {
