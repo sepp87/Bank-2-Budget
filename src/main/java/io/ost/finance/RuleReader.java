@@ -22,15 +22,22 @@ import java.util.logging.Logger;
  *
  * @author joost
  */
-public class RuleParser {
+public class RuleReader {
 
+    public static final String PROCESSING_RULES = "processing-rules.txt";
     private final JsonParser parser;
 
-    public RuleParser() {
+    public RuleReader() {
         parser = new JsonParser();
     }
 
-    public List<Rule> parse(File file) {
+    public List<Rule> read() {
+        String path = App.getConfigDirectory() + PROCESSING_RULES;
+        File file = new File(path);
+        return readFrom(file);
+    }
+
+    private List<Rule> readFrom(File file) {
         List<Rule> rules = new ArrayList<>();
         String jsString = readFileAsString(file);
         String jsonString = jsString.split("`")[1];
@@ -49,7 +56,7 @@ public class RuleParser {
         try {
             jsonString = Util.readFileAsString(file);
         } catch (IOException ex) {
-            Logger.getLogger(RuleParser.class.getName()).log(Level.INFO, "Could NOT read file, proceeding without {0}", file.getPath());
+            Logger.getLogger(RuleReader.class.getName()).log(Level.INFO, "Could NOT read file, proceeding without {0}", file.getPath());
         }
         return jsonString;
     }
@@ -58,16 +65,27 @@ public class RuleParser {
         Rule rule = new Rule();
         JsonObject compareObject = ruleObject.get("if").getAsJsonObject();
         JsonObject outcomeObject = ruleObject.get("then").getAsJsonObject();
-        rule = setJsonObjectToRuleByStatementType(compareObject, rule, StatementType.COMPARE);
-        rule = setJsonObjectToRuleByStatementType(outcomeObject, rule, StatementType.OUTCOME);
+        rule = setStatementsToRuleByType(compareObject, rule, StatementType.COMPARE);
+        rule = setStatementsToRuleByType(outcomeObject, rule, StatementType.OUTCOME);
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().serializeNulls().create();
         rule.setCompareObject(gson.fromJson(compareObject, CashTransaction.class));
         rule.setOutcomeObject(gson.fromJson(outcomeObject, CashTransaction.class));
+        JsonObject operatorObject = (ruleObject.get("operator") != null) ? ruleObject.get("operator").getAsJsonObject() : new JsonObject();
+        rule = setOperatorsForIfStatementsToRule(operatorObject, rule);
         return rule;
     }
 
-    private Rule setJsonObjectToRuleByStatementType(JsonObject jsonObject, Rule rule, StatementType type) {
-        for (Entry<String, JsonElement> statement : jsonObject.entrySet()) {
+    private Rule setOperatorsForIfStatementsToRule(JsonObject operators, Rule rule) {
+        for (Entry<String, JsonElement> entry : operators.entrySet()) {
+            String property = entry.getKey();
+            String operator = entry.getValue().getAsString();
+            rule.addOperator(property, operator);
+        }
+        return rule;
+    }
+
+    private Rule setStatementsToRuleByType(JsonObject statements, Rule rule, StatementType type) {
+        for (Entry<String, JsonElement> statement : statements.entrySet()) {
             String property = statement.getKey();
             rule.addStatement(property, type);
         }

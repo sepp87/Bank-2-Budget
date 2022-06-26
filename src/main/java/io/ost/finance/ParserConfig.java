@@ -9,12 +9,12 @@ import java.io.File;
 public class ParserConfig {
 
     private final CreditInstitution creditInstitution;
-    private final File csvFile;
+    private final File file;
     private final char delimiter;
 
 
-    public ParserConfig(CreditInstitution creditInstitution, File csvFile, char delimiter) {
-        this.csvFile = csvFile;
+    public ParserConfig(CreditInstitution creditInstitution, File file, char delimiter) {
+        this.file = file;
         this.creditInstitution = creditInstitution;
         this.delimiter = delimiter;
     }
@@ -23,8 +23,8 @@ public class ParserConfig {
         return creditInstitution;
     }
 
-    public File getCsvFile() {
-        return csvFile;
+    public File getFile() {
+        return file;
     }
 
     public char getDelimiter() {

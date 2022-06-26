@@ -7,24 +7,25 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
-public class UnifiedFormatParser extends TransactionParser {
+public class UnifiedCsvParser extends TransactionParser {
 
-    public UnifiedFormatParser(ParserConfig config) {
+    public UnifiedCsvParser(ParserConfig config) {
         super(config);
     }
 
     @Override
     public CSVFormat getCsvFormat() {
         String[] header = new String[]{
-            "label", "amount", "transactionNumber", "date", "accountBalance",
-            "accountNumber", "accountName", "contraAccountNumber",
-            "contraAccountName", "internal", "transactionType", "description"
+            "label", "amount", "transactionNumber", "date",
+            "accountBalance", "accountInstitution", "accountNumber", "accountName",
+            "contraAccountNumber", "contraAccountName", "internal", "transactionType", "description"
         };
         return CSVFormat.DEFAULT.withFirstRecordAsHeader();
     }
 
     @Override
     public List<CSVRecord> getTransactionRecordsFrom(List<CSVRecord> allRecords) {
+        allRecords.get(0);
         return allRecords.subList(1, allRecords.size());
     }
 

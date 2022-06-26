@@ -2,7 +2,10 @@ package io.ost.finance;
 
 import java.util.Collection;
 import java.util.HashSet;
-import static io.ost.finance.TransactionManager.getTransactionManager;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import static io.ost.finance.App.get;
+import java.util.List;
 
 /**
  * CashTransaction is parsed from one single Record in a CSV file. It checks
@@ -21,7 +24,7 @@ public class CashTransaction {
     private static int count = 0;
     private final int number;
     public String label;
-    public Double amount;
+    public double amount;
     /**
      * The transaction number is a unique number bound to this transaction.
      * Everytime this cash transaction is parsed this number should remain the
@@ -30,7 +33,7 @@ public class CashTransaction {
     public int transactionNumber;
     public String date;
     public long dateUnix;
-    public double accountBalance;
+    public Double accountBalance;
     public String accountNumber;
     public String accountName;
     public CreditInstitution accountInstitution;
@@ -64,6 +67,8 @@ public class CashTransaction {
         if (Util.isMyAccountNumber(accountNumber)) {
             if (!Util.isMyAccountName(accountName)) {
                 accountName = getAccountNameFrom(accountNumber);
+//                String name = getAccountNameFrom(accountNumber);
+//                setAccountName(name);
             }
         }
         this.internal = Util.isMyAccountNumber(accountNumber) && Util.isMyAccountNumber(contraAccountNumber);
@@ -115,9 +120,9 @@ public class CashTransaction {
         if (accountNumber == null) {
             return null;
         }
-        String name = getTransactionManager().myAccounts.getProperty(accountNumber);
+        String name = get().myAccounts.getProperty(accountNumber);
         if (name == null) {
-            name = getTransactionManager().otherAccounts.getProperty(accountNumber);
+            name = get().otherAccounts.getProperty(accountNumber);
         }
         return name;
     }
@@ -200,7 +205,7 @@ public class CashTransaction {
     }
 
     public void setDescription(String description) {
-         if (description == null || description.equals("")) {
+        if (description == null || description.equals("")) {
             return;
         }
         this.description = description;
@@ -230,38 +235,74 @@ public class CashTransaction {
             "transactionNumber",
             "date",
             "accountBalance",
+            "accountInstitution",
             "accountNumber",
             "accountName",
             "contraAccountNumber",
             "contraAccountName",
             "internal",
             "transactionType",
-            "description",
-            "accountInstitution"
+            "description"
         };
     }
 
     public String[] toRecord() {
+        Object[] values = toObjectRecord();
+        String[] stringValues = new String[values.length];
+        int i = 0;
+        for (Object value : values) {
+            stringValues[i] = valueToString(value);
+            i++;
+        }
+        return stringValues;
+    }
 
-        return new String[]{
-            label,
-            (amount + "").replace('.', TransactionManager.DECIMAL_SEPERATOR),
-            transactionNumber + "",
-            date,
-            (accountBalance + "").replace('.', TransactionManager.DECIMAL_SEPERATOR),
-            accountNumber,
-            accountName,
-            contraAccountNumber,
-            contraAccountName,
-            internal.toString(),
-            transactionType.toString(),
-            description,
-            accountInstitution.toString(),};
+    public Object[] toObjectRecord() {
+        String[] header = getHeader();
+        Object[] values = new Object[header.length];
+        try {
+            int i = 0;
+            for (String column : header) {
+                Object value = CashTransaction.class.getField(column).get(this);
+                values[i] = value;
+                i++;
+            }
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+            Logger.getLogger(CashTransaction.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return values;
+    }
+
+    private String valueToString(Object value) {
+        if (value == null) {
+            return null;
+        } else if (value instanceof String) {
+            return value.toString();
+        } else if (value instanceof Number) {
+            return (value + "").replace('.', Config.getDecimalSeperator());
+        }
+        return value.toString();
     }
 
     public enum TransactionType {
         DEBIT,
         CREDIT,
+    }
+
+    public static List<CashTransaction> sortAscending(List<CashTransaction> transactions) {
+        int n = transactions.size();
+        CashTransaction temp = null;
+        for (int i = 0; i < n; i++) {
+            for (int j = 1; j < (n - i); j++) {
+                if (transactions.get(j - 1).transactionNumber > transactions.get(j).transactionNumber) {
+                    //swap elements  
+                    temp = transactions.get(j - 1);
+                    transactions.set(j - 1, transactions.get(j));
+                    transactions.set(j, temp);
+                }
+            }
+        }
+        return transactions;
     }
 
 }

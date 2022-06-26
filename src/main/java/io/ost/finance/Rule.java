@@ -1,8 +1,13 @@
 package io.ost.finance;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,12 +31,15 @@ public class Rule {
 
     private CashTransaction compareObject;
     private CashTransaction outcomeObject;
+    private final Map<String, String> compareOperators;
     private final Set<String> compareStatements;
     private final Set<String> outcomeStatements;
 
     public Rule() {
+        this.compareOperators = new TreeMap<>();
         this.compareStatements = new HashSet<>();
         this.outcomeStatements = new HashSet<>();
+
     }
 
     public void addStatement(String property, StatementType type) {
@@ -42,7 +50,12 @@ public class Rule {
         }
     }
 
+    public void addOperator(String property, String operator) {
+        compareOperators.put(property, operator);
+    }
+
     public void process(CashTransaction cashTransaction) {
+//        System.out.println();
         if (isApplicableTo(cashTransaction)) {
             setOutcomeTo(cashTransaction);
         }
@@ -50,19 +63,33 @@ public class Rule {
 
     private boolean isApplicableTo(CashTransaction cashTransaction) {
         for (String property : compareStatements) {
+            String operator = compareOperators.containsKey(property) ? compareOperators.get(property) : "==";
+            boolean result = true;
             try {
                 Field propertyField = CashTransaction.class.getField(property);
+                Type type = propertyField.getAnnotatedType().getType();
+
                 Object propertyValue = propertyField.get(cashTransaction);
                 Object compareValue = propertyField.get(compareObject);
-                if (propertyValue == null) {
-                    return compareValue == null;
+
+                if (operator.equals("==")) {
+                    result = isEqual(propertyValue, compareValue);
+                } else if (operator.equals("!=")) {
+                    result = !isEqual(propertyValue, compareValue);
+                } else if (operator.equals(">")) {
+                    result = isLarger(propertyValue, compareValue, type);
+                } else if (operator.equals("<")) {
+                    result = isLarger(compareValue, propertyValue, type);
+                } else if (operator.equals("<=")) {
+                    result = !isLarger(propertyValue, compareValue, type);
+                } else if (operator.equals(">=")) {
+                    result = !isLarger(compareValue, propertyValue, type);
                 }
-                if (propertyValue instanceof String && compareValue != null) {
-                    String propertyString = (String) propertyValue;
-                    String compareString = (String) compareValue;
-                    return propertyString.toLowerCase().contains(compareString.toLowerCase());
-                } else {
-                    return propertyValue.equals(compareValue);
+
+//                System.out.println(result + "\t" + property);
+
+                if (result == false) {
+                    return false;
                 }
 
             } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
@@ -70,7 +97,53 @@ public class Rule {
                 return false;
             }
         }
+//        System.out.println(Arrays.toString(cashTransaction.toRecord()));
         return true;
+    }
+
+    private boolean isEqual(Object propertyValue, Object compareValue) {
+        boolean result = true;
+        if (propertyValue == null) {
+            result = compareValue == null;
+
+        } else if (propertyValue instanceof String && compareValue != null) {
+            String propertyString = (String) propertyValue;
+            String compareString = (String) compareValue;
+            result = propertyString.toLowerCase().contains(compareString.toLowerCase());
+
+        } else {
+            result = propertyValue.equals(compareValue);
+        }
+        return result;
+    }
+
+    // testing is smaller, can be done by switching the variables when calling the method "isLarger"
+    // 1    <   2 true              2 > 1     
+    // 2    <   2 false            2 > 2
+    // 3    <   2 false            2 > 3
+    //
+    // testing is smaller or the same, can be done by negating the outcome of the method "isLarger"
+    // testing is bigger or the same, can be done by switching the variables and negating the outcome
+    // 1    >   2 false        true     2   >=  1       1   <=  2
+    // 2    >   2 false        true     2   >=  2       2   <=  2
+    // 3    >   2 true          false   2   >=  3       3   <=  2
+    private boolean isLarger(Object propertyValue, Object compareValue, Type type) {
+        if (propertyValue == null || compareValue == null) {
+            return false;
+        }
+
+        if (type.equals(Double.class) || type.equals(double.class)) {
+            return (double) propertyValue > (double) compareValue;
+
+        } else if (type.equals(Integer.class) || type.equals(int.class)) {
+            return (int) propertyValue > (int) compareValue;
+
+        } else if (type.equals(String.class) && Util.isDateIsoFormatted((String) propertyValue)) {
+            LocalDate propertyDate = LocalDate.parse((String) propertyValue);
+            LocalDate compareDate = LocalDate.parse((String) compareValue);
+            return propertyDate.isAfter(compareDate);
+        }
+        return false;
     }
 
     private void setOutcomeTo(CashTransaction cashTransaction) {

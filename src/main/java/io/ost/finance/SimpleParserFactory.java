@@ -3,7 +3,7 @@ package io.ost.finance;
 import io.ost.finance.parser.TransactionParser;
 import io.ost.finance.parser.MuenchnerBankParser;
 import io.ost.finance.parser.GlsParser;
-import io.ost.finance.parser.UnifiedFormatParser;
+import io.ost.finance.parser.UnifiedCsvParser;
 import io.ost.finance.parser.SparkasseParser;
 import io.ost.finance.parser.RabobankParser;
 import io.ost.finance.parser.DkbParser;
@@ -65,13 +65,13 @@ public class SimpleParserFactory {
         } else if (firstLine.startsWith("Auftragskonto;Buchungstag;Valutadatum;Buchungstext;Verwendungszweck;")) {
             parser = new SparkasseParser(new ParserConfig(CreditInstitution.SPARKASSE, csvFile, ';'));
         } else if (firstLine.startsWith("\"label\",\"amount\",\"transactionNumber\",\"date\",\"accountBalance\"")) {
-            parser = new UnifiedFormatParser(new ParserConfig(CreditInstitution.UNKNOWN, csvFile, ','));
+            parser = new UnifiedCsvParser(new ParserConfig(CreditInstitution.UNKNOWN, csvFile, ','));
         }
 
         if (parser == null) {
             throw new Exception("ERROR: Unknown bank, please validate your CSV file. Does the file exist? Create transaction parser terminated.");
         }
-        System.out.println("\n\n\nIdentified " + parser.getConfig().getCreditInstitution().toString() + " from file \"" + csvFile.getName() + "\"");
+        System.out.println("\nIdentified " + parser.getConfig().getCreditInstitution().toString() + " from file \"" + csvFile.getName() + "\"");
         return parser;
     }
 

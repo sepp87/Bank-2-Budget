@@ -12,10 +12,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -24,7 +22,7 @@ import java.util.logging.Logger;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import static io.ost.finance.TransactionManager.getTransactionManager;
+import static io.ost.finance.App.get;
 
 /**
  * The abstract class TransactionParser parses the CashTranasactions inside the
@@ -47,24 +45,13 @@ public abstract class TransactionParser {
 
     protected final ParserConfig config;
 
-    // TODO Create a utility function for getting date formats
-    // https://balusc.omnifaces.org/2007/09/dateutil.html
-    // SRC https://stackoverflow.com/questions/11310065/how-to-detect-the-given-date-format-using-java
-    static final Map<String, String> DATE_FORMAT_REGEX = new HashMap<String, String>() {
-        {
-            put("^\\d{8}$", "yyyyMMdd");
-            put("^\\d{1,2}\\.\\d{1,2}\\.\\d{4}$", "dd.MM.yyyy");
-            put("^\\d{4}-\\d{1,2}-\\d{1,2}$", "yyyy-MM-dd");
-            put("^\\d{2}-\\d{2}-\\d{4}$", "dd-MM-yyyy");
-        }
-    };
 
     public TransactionParser(ParserConfig config) {
         this.config = config;
     }
 
     public List<CashTransaction> parse() {
-        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getCsvFile()), "Cp1252"), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
+        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), "Cp1252"), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
             List<CashTransaction> transactions = parseRecordsWith(parser);
             return transactions;
         } catch (IOException ex) {
@@ -124,7 +111,7 @@ public abstract class TransactionParser {
 
     public void postProcess(CashTransaction transaction) {
         transaction.setAccountInstitution(config.getCreditInstitution());
-        for (Rule rule : getTransactionManager().rules) {
+        for (Rule rule : get().rules) {
             rule.process(transaction);
         }
         deriveAccountNumberFrom(transaction);
@@ -157,32 +144,11 @@ public abstract class TransactionParser {
     }
 
     protected void parseDateFrom(String date, CashTransaction transaction) throws ParseException {
-        String isoDate = getDateIsoFormattedFrom(date);
+        String isoDate = Util.getDateIsoFormattedFrom(date);
         transaction.setDate(isoDate);
-        transaction.setDateUnix(getDateUnixFormattedFrom(isoDate));
+        transaction.setDateUnix(Util.getDateUnixFormattedFrom(isoDate));
     }
 
-    private String getDateIsoFormattedFrom(String dateString) throws ParseException {
-        String dateStringFormat = getDateFormatFrom(dateString);
-        SimpleDateFormat format = new SimpleDateFormat(dateStringFormat);
-        Date date = format.parse(dateString);
-        return new SimpleDateFormat("yyyy-MM-dd").format(date);
-    }
-
-    private long getDateUnixFormattedFrom(String isoDate) throws ParseException {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = format.parse(isoDate);
-        return date.getTime() / 1000;
-    }
-
-    private String getDateFormatFrom(String dateString) throws ParseException {
-        for (String regex : DATE_FORMAT_REGEX.keySet()) {
-            if (dateString.matches(regex)) {
-                return DATE_FORMAT_REGEX.get(regex);
-            }
-        }
-        throw new ParseException("Date parsing NOT supported for value \"" + dateString + "\".", 0);
-    }
 
     // https://www.sparkonto.org/manuelles-berechnen-der-iban-pruefziffer-sepa/
     protected String getGermanIban(String bankleitzahl, String kontonummer) {
@@ -219,7 +185,7 @@ public abstract class TransactionParser {
             int number = yyMMdd * 1000 + count;
             transaction.setTransactionNumber(number);
         } catch (ParseException ex) {
-            Logger.getLogger(DkbParser.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

@@ -1,0 +1,27 @@
+var budgetConfig = `[
+    {
+        "firstOfMonth": 26,
+        "budgetTemplate": [
+			{
+				"category": "PIZZA",
+				"budget": 100
+			},
+			{
+				"category": "RENT",
+				"budget": 500
+			},
+			{
+				"category": "ELECTRICITY",
+				"budget": 50
+			},
+			{
+				"category": "INTERNET",
+				"budget": 50
+			},
+			{
+				"category": "BUDGET",
+				"budget": -1000
+			}
+		]
+    }
+]`
