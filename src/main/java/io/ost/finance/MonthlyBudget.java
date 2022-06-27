@@ -54,7 +54,7 @@ public class MonthlyBudget {
         this.remainderForCategoriesLastMonth.putAll(getRemainderLastMonth());
         calculateExpenses(); // can yield new categories, so before alignCategories
         alignBudgetedForCategories(); // should come before alignCategories, otherwise the budgeted costs won't show up
-        alignCategories(); // should come before calculateRemainder, otherwise null pointers eveywhere
+        alignCategories(); // should come before calculateRemainder, otherwise null pointers everywhere
         calculateRemainder();
     }
 
@@ -158,9 +158,16 @@ public class MonthlyBudget {
         if (previous == null) {
             return Collections.EMPTY_MAP;
         }
+        Map<String, Double> result = new TreeMap<>();
+        for (Entry<String, Double> previousRemainderForCategory : previous.remainderForCategories.entrySet()) {
+            if (previousRemainderForCategory.getValue() == 0.) {
+                continue;
+            }
+            result.put(previousRemainderForCategory.getKey(), previousRemainderForCategory.getValue());
+        }
         this.unassignedExpensesRemainderLastMonth = previous.unassignedExpensesRemainder;
         this.unassignedIncomeRemainderLastMonth = previous.unassignedIncomeRemainder;
-        return previous.remainderForCategories;
+        return result;
     }
 
     private MonthlyBudget getPreviousMonthlyBudget() {
