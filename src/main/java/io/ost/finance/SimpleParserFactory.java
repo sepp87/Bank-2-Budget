@@ -69,7 +69,7 @@ public class SimpleParserFactory {
         }
 
         if (parser == null) {
-            throw new Exception("ERROR: Unknown bank, please validate your CSV file. Does the file exist? Create transaction parser terminated.");
+            throw new Exception("ERROR: Unknown bank, please validate if "  + csvFile.getName() + " is really a CSV file. Does the file exist? Create transaction parser terminated.");
         }
         System.out.println("\nIdentified " + parser.getConfig().getCreditInstitution().toString() + " from file \"" + csvFile.getName() + "\"");
         return parser;

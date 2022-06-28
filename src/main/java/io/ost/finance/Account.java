@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -26,9 +24,6 @@ public class Account {
         this.accountNumber = accountNumber;
     }
 
-//    public Account(List<CashTransaction> transactions) {
-//
-//    }
     // including from-date and excluding to-date
     public List<CashTransaction> getTransactionsBetween(LocalDate start, LocalDate end) {
         List<CashTransaction> result = new ArrayList<>();
@@ -69,13 +64,19 @@ public class Account {
 
         if (allTransactionsIndex.containsKey(transaction.transactionNumber)) {
             CashTransaction indexed = allTransactionsIndex.get(transaction.transactionNumber);
-            boolean isSame = transaction.description.equals(indexed.description);
+            boolean isSame = areValuesSameBetween(transaction, indexed);
             if (!isSame) {
 //                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});
                 return;
             }
         }
         allTransactionsIndex.put(transaction.transactionNumber, transaction);
+    }
+
+    private boolean areValuesSameBetween(CashTransaction a, CashTransaction b) {
+        String accountNameNumberAndDescriptionA = a.accountName + " " + a.accountNumber + " " + a.description ;
+        String accountNameNumberAndDescriptionB = b.accountName + " " + b.accountNumber + " " + b.description ;
+        return accountNameNumberAndDescriptionA.equals(accountNameNumberAndDescriptionB);
     }
 
     public static Collection<Account> addTransactionsToAccounts(List<CashTransaction> transactions) {
@@ -92,7 +93,6 @@ public class Account {
         // TBD maybe want to bubble sort all transactions per account by age ascending here
         return accounts.values();
     }
-
 
     public static Collection<Account> getAccounts() {
         return accounts.values();
