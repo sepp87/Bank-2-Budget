@@ -180,14 +180,13 @@ public class MonthlyBudget {
         return result;
     }
 
-    // expense is the negated transaction amount
     private void calculateExpenses() {
         for (CashTransaction transaction : transactions) {
-            double expense = -transaction.amount;
+            double expense = transaction.amount;
             if (transaction.label != null) {
                 addExpenseToCategory(expense, transaction.label);
             } else {
-                if (expense > 0) {
+                if (expense < 0) {
                     unassignedExpenses += expense;
                 } else {
                     unassignedIncome += expense;
@@ -222,11 +221,11 @@ public class MonthlyBudget {
                 budgeted = budgetedForCategories.get(category);
             }
 
-            double remainder = Util.round(remainderLastMonth + budgeted - expenses);
+            double remainder = Util.round(remainderLastMonth + budgeted + expenses);
             remainderForCategories.put(category, remainder);
         }
 
-        this.unassignedExpensesRemainder = Util.round(unassignedExpensesRemainderLastMonth - unassignedExpenses);
-        this.unassignedIncomeRemainder = Util.round(unassignedIncomeRemainderLastMonth - unassignedIncome);
+        this.unassignedExpensesRemainder = Util.round(unassignedExpensesRemainderLastMonth + unassignedExpenses);
+        this.unassignedIncomeRemainder = Util.round(unassignedIncomeRemainderLastMonth + unassignedIncome);
     }
 }
