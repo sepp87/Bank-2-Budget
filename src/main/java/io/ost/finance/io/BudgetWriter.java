@@ -113,7 +113,6 @@ public class BudgetWriter {
                     double budgeted = entry.getValue();
                     double expenses = expensesForCategory.get(category);
                     double remainderLastMonth = remainderForCategoryLastMonth.get(category);
-                    double remainder = remainderForCategory.get(category);
 
                     if (budgeted < 0) {
                         continue;
@@ -123,7 +122,8 @@ public class BudgetWriter {
                     row.createCell(1).setCellValue(budgeted);
                     row.createCell(2).setCellValue(expenses);
                     row.createCell(3).setCellValue(remainderLastMonth);
-                    row.createCell(4).setCellValue(remainder);
+                    int excelRowNum = i + 1;
+                    row.createCell(4).setCellFormula("B" + excelRowNum + "+C" + excelRowNum + "+D" + excelRowNum);
 
                     i++;
                 }
@@ -143,7 +143,6 @@ public class BudgetWriter {
                     double budgeted = entry.getValue();
                     double expenses = expensesForCategory.get(category);
                     double remainderLastMonth = remainderForCategoryLastMonth.get(category);
-                    double remainder = remainderForCategory.get(category);
 
                     if (budgeted >= 0) {
                         continue;
@@ -154,7 +153,8 @@ public class BudgetWriter {
                     row.createCell(1).setCellValue(budgeted);
                     row.createCell(2).setCellValue(expenses);
                     row.createCell(3).setCellValue(remainderLastMonth);
-                    row.createCell(4).setCellValue(remainder);
+                    int excelRowNum = i + 1;
+                    row.createCell(4).setCellFormula("B" + excelRowNum + "+C" + excelRowNum + "+D" + excelRowNum);
 
                     i++;
                 }
@@ -169,9 +169,18 @@ public class BudgetWriter {
                 sheet.createRow(i++); // empty row between income and total
 
                 Row totalRow = sheet.createRow(i++);
+
+                String formula = "";
+                int rowNum = 3;
+                while (rowNum < i) {
+                    formula += "B" + rowNum + "+";
+                    rowNum++;
+                }
+                formula = formula.substring(0, formula.length() - 1);
+
                 totalRow.createCell(0).setCellValue("TOTAL");
-                totalRow.createCell(1).setCellValue(month.getBudgetedTotal());
-                totalRow.createCell(4).setCellValue(month.getRemainderTotal());
+                totalRow.createCell(1).setCellFormula(formula);
+                totalRow.createCell(4).setCellFormula(formula.replace("B", "E"));
                 totalRow.setHeight((short) 400);
 
                 // Style the table

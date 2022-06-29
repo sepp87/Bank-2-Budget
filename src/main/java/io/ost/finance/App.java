@@ -17,8 +17,8 @@ import java.util.logging.Logger;
 import picocli.CommandLine;
 
 /**
- * Bank-to-Budget app reads CSV files from the todo directory and command line. It
- * saves the cash transactions - parsed from the CSV files - to the done
+ * Bank-to-Budget app reads CSV files from the todo directory and command line.
+ * It saves the cash transactions - parsed from the CSV files - to the done
  * directory. It is also responsible for loading the config for the parsers.
  *
  * @author joost
@@ -73,6 +73,11 @@ public class App {
                 budget.addAccount(Account.getAccounts().iterator().next());
                 new BudgetWriter().write(budget);
                 break;
+        }
+
+        if (Config.isClearTodo()) {
+            System.out.println("Clear \"todo\" folder not implemented.");
+                   
         }
 
         System.exit(exitCode);
