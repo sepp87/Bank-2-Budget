@@ -23,6 +23,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import static io.ost.finance.App.get;
+import java.nio.charset.StandardCharsets;
 
 /**
  * The abstract class TransactionParser parses the CashTranasactions inside the
@@ -51,7 +52,10 @@ public abstract class TransactionParser {
     }
 
     public List<CashTransaction> parse() {
-        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), "Cp1252"), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
+        //ANSI files are  read correctly, but now UTF-8 files are not
+          try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), config.getCharset()), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
+        
+//        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), "Cp1252"), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
             List<CashTransaction> transactions = parseRecordsWith(parser);
             return transactions;
         } catch (IOException ex) {

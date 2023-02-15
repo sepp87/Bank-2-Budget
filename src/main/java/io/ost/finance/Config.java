@@ -35,7 +35,7 @@ public class Config implements Runnable {
     }
 
     @Option(names = {"-c", "--clear-todo"}, description = "Clear the todo folder after processing it.")
-    private final boolean clearTodo = false;
+    private boolean clearTodo = false;
     
     @Option(names = {"-d", "--decimal-separator"}, description = "Decimal separator options: DOT or COMMA. If not specified the system's locale default is used.")
     private final DecimalSeparator decimalSepator = DecimalSeparator.LOCALE;

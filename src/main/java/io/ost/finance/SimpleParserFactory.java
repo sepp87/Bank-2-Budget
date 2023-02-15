@@ -2,7 +2,8 @@ package io.ost.finance;
 
 import io.ost.finance.parser.TransactionParser;
 import io.ost.finance.parser.MuenchnerBankParser;
-import io.ost.finance.parser.GlsParser;
+import io.ost.finance.parser.GlsParser2019;
+import io.ost.finance.parser.GlsParser2022;
 import io.ost.finance.parser.UnifiedCsvParser;
 import io.ost.finance.parser.SparkasseParser;
 import io.ost.finance.parser.RabobankParser;
@@ -45,7 +46,9 @@ public class SimpleParserFactory {
         } else if (firstLine.startsWith("Buchtag;Valuta;BIC / BLZ;IBAN / Kontonummer;Buchungsinformationen;")) {
             parser = new FlatexParser(new ParserConfig(CreditInstitution.FLATEX, csvFile, ';'));
         } else if (firstLine.startsWith("\"GLS Bank\"")) {
-            parser = new GlsParser(new ParserConfig(CreditInstitution.GLS, csvFile, ';'));
+            parser = new GlsParser2019(new ParserConfig(CreditInstitution.GLS, csvFile, ';'));
+        } else if (firstLine.startsWith("Bezeichnung Auftragskonto;IBAN Auftragskonto;BIC Auftragskonto;Bankname Auftragskonto;Buchungstag;Valutadatum;Name Zahlungsbeteiligter;IBAN Zahlungsbeteiligter;BIC (SWIFT-Code) Zahlungsbeteiligter;Buchungstext;Verwendungszweck;Betrag;Waehrung;Saldo nach Buchung;Bemerkung;Kategorie;Steuerrelevant;Glaeubiger ID;Mandatsreferenz")) {
+            parser = new GlsParser2022(new ParserConfig(CreditInstitution.GLS, csvFile, ';', "UTF-8"));
         } else if (firstLine.startsWith("\"GRENKE BANK AG\"")) {
             parser = new GrenkeBankParser(new ParserConfig(CreditInstitution.GRENKE_BANK, csvFile, ';'));
         } else if (firstLine.startsWith("Umsatzanzeige;Datei erstellt am:")) {
@@ -69,7 +72,7 @@ public class SimpleParserFactory {
         }
 
         if (parser == null) {
-            throw new Exception("ERROR: Unknown bank, please validate if "  + csvFile.getName() + " is really a CSV file. Does the file exist? Create transaction parser terminated.");
+            throw new Exception("ERROR: Unknown bank, please validate if " + csvFile.getName() + " is really a CSV file. Does the file exist? Create transaction parser terminated.");
         }
         System.out.println("\nIdentified " + parser.getConfig().getCreditInstitution().toString() + " from file \"" + csvFile.getName() + "\"");
         return parser;

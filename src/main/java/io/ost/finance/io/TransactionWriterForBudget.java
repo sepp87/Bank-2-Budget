@@ -49,8 +49,6 @@ public class TransactionWriterForBudget {
                 // Create a Font for styling header cells
                 Font headerFont = workbook.createFont();
                 headerFont.setBold(true);
-//            headerFont.setFontHeightInPoints((short) 14);
-//            headerFont.setColor(IndexedColors.RED.getIndex());
 
                 // Create a CellStyle with the font
                 CellStyle headerCellStyle = workbook.createCellStyle();
@@ -79,7 +77,7 @@ public class TransactionWriterForBudget {
                 int rowNum = 1;
                 List<CashTransaction> reversedTransactions = new ArrayList<>(account.getAllTransactions());
                 Collections.reverse(reversedTransactions);
-                
+
                 for (CashTransaction transaction : reversedTransactions) {
                     Row row = sheet.createRow(rowNum++);
 

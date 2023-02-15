@@ -97,23 +97,4 @@ public class SingleAccountBudget {
         return account.getTransactionsBetween(firstOfMonth, nextFirst);
     }
 
-    private double getTotalBudgetSum() {
-        double totalBudget = 0;
-        for (Double budget : budgetedForCategory.values()) {
-            totalBudget += budget;
-        }
-        return totalBudget;
-    }
-
-    // FinancialMonth
-    // MonthYear
-    // Labels
-    // Budgeted
-    // Expenses
-    // RemainderOfLastMonth
-    // RemainderOfThisMonth
-    public class Category {
-
-    }
-
 }
