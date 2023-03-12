@@ -47,7 +47,7 @@ public class BudgetSettingsReader {
     }
 
     private String readFileAsString(File file) {
-        String jsonString = "`[]";
+        String jsonString = "`[{\"firstOfMonth\": 1, \"budgetTemplate\": []}]";
         try {
             jsonString = Util.readFileAsString(file);
         } catch (IOException ex) {

@@ -23,17 +23,6 @@ public class TransactionWriterForBudget {
 
     public static final String BUDGET_TRANSACTIONS = "transactions.xlsx";
 
-    public void process() {
-        File budgetDirectory = new File(App.getBudgetDirectory());
-        if (budgetDirectory.exists() && budgetDirectory.isDirectory()) {
-
-//            saveTransactions(budgetTransactions);
-        } else {
-            budgetDirectory.mkdir();
-            process();
-        }
-    }
-
     public void write(Collection<Account> accounts) {
         File file = new File(App.getBudgetDirectory() + BUDGET_TRANSACTIONS);
 
