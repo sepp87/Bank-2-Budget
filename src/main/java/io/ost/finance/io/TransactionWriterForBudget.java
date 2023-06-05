@@ -23,6 +23,7 @@ public class TransactionWriterForBudget {
 
     public static final String BUDGET_TRANSACTIONS = "transactions.xlsx";
 
+    // TODO when there is no label yet, add the label to the transaction
     public void write(Collection<Account> accounts) {
         File file = new File(App.getBudgetDirectory() + BUDGET_TRANSACTIONS);
 

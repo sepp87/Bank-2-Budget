@@ -59,13 +59,13 @@ public class Account {
         // newer bank statements get prejudice.
         // 
         // different transactions, but with duplicate ids should not replace already registered transactions
-        // because we assume, the first batch of transactions are new and contains are most complete
-        // and we assume, the second batch of transactions was from an earlier point in time
+        // because we assume, the first batch of transactions are new and are most complete
+        // the second batch of transactions are older and can have missing entries
 
         if (allTransactionsIndex.containsKey(transaction.transactionNumber)) {
             CashTransaction indexed = allTransactionsIndex.get(transaction.transactionNumber);
             boolean isSame = areValuesSameBetween(transaction, indexed);
-            if (!isSame) {
+            if (isSame) {
 //                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});
                 return;
             }
