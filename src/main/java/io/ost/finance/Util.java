@@ -42,6 +42,10 @@ public class Util {
         try {
             URI uri = any.getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
             String path = new File(uri).getAbsolutePath();
+            String targetSeperatorCharClasses = "target" + File.separatorChar + "classes";
+            if (path.endsWith(targetSeperatorCharClasses)) {
+                fallbackPath = path.substring(0, path.length() - targetSeperatorCharClasses.length()) + fallbackPath + File.separatorChar;
+            }
             return path.endsWith(".jar") ? path.substring(0, path.lastIndexOf(File.separatorChar) + 1) : fallbackPath;
         } catch (URISyntaxException ex) {
             Logger.getLogger(Util.class.getName()).log(Level.SEVERE, null, ex);
@@ -156,6 +160,5 @@ public class Util {
     public static double round(double value) {
         return (double) Math.round(value * 100) / 100;
     }
-
 
 }

@@ -16,6 +16,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import picocli.CommandLine;
 
+// TODO FIX BUILD POM 
+
 /**
  * Bank-to-Budget app reads CSV files from the todo directory and command line.
  * It saves the cash transactions - parsed from the CSV files - to the done
@@ -35,7 +37,7 @@ public class App {
     private static final String MY_ACCOUNTS_PROPERTIES = "my-accounts.txt";
     private static final String OTHER_ACCOUNTS_PROPERTIES = "other-accounts.txt";
 
-    private static final String BUILD_DIRECTORY = "D:\\dev\\Bank-2-Budget\\build\\";
+    private static final String BUILD_DIRECTORY = "build";
 
     public SingleAccountBudget budget;
     public boolean hasBudget;
@@ -44,6 +46,7 @@ public class App {
     public Collection<Rule> rules;
 
     public static void main(String[] args) throws Exception {
+
 
         int exitCode = new CommandLine(Config.get()).execute(args);
 
@@ -64,6 +67,7 @@ public class App {
                 TransactionWriterForBudget newBudgetTransactions = new TransactionWriterForBudget();
                 newBudgetTransactions.write(Account.getAccounts());
 
+                // stop here, if mode is only XLSX 
                 if (mode != BUDGET) {
                     break;
                 }
@@ -77,7 +81,7 @@ public class App {
 
         if (Config.isClearTodo()) {
             System.out.println("Clear \"todo\" folder not implemented.");
-                   
+
         }
 
         System.exit(exitCode);

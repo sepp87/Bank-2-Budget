@@ -93,7 +93,7 @@ public class Config implements Runnable {
     }
 
     public enum Mode {
-        CSV, XLSX, BUDGET
+        CSV, XLSX, BUDGET, SQLITE
     }
 
 }
