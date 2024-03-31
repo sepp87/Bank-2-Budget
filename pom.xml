@@ -7,8 +7,6 @@
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -58,14 +56,17 @@
         <plugins>   
             
             <!-- See https://maven.apache.org/plugins/ for more plugins -->    
-            <!-- runs tests (not the newest) 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.1</version>
-            </plugin>          
-            -->
-                  
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
+                 
             <!-- Set main class and add classplath -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -98,7 +99,7 @@
                             <!-- exclude junit, we need runtime dependency only -->
                             <includeScope>runtime</includeScope>
                             <!--<outputDirectory>${project.build.directory}/lib/</outputDirectory>-->
-                            <outputDirectory>build/lib/</outputDirectory>
+                            <outputDirectory>${basedir}/build/lib/</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -118,13 +119,13 @@
                             <outputDirectory>${basedir}/build</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>/target</directory>
+                                    <directory>${basedir}/target</directory>
                                     <includes>
                                         <include>Bank-2-Budget.jar</include>
                                     </includes>
                                 </resource>
                                 <resource>
-                                    <directory>/</directory>
+                                    <directory>${basedir}/</directory>
                                     <includes>
                                         <include>Rule-Builder.html</include>
                                     </includes>

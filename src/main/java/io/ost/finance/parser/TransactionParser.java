@@ -61,7 +61,7 @@ public abstract class TransactionParser {
         } catch (IOException ex) {
             Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     /**

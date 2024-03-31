@@ -40,9 +40,9 @@ public class TransactionWriterForDone {
 //        try (CSVPrinter printer = new CSVPrinter(new FileWriter(toCsvFile, StandardCharsets.UTF_8), CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL))) {
         CSVFormat csvFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL).withQuote('"');
         try (CSVPrinter printer = new CSVPrinter(new FileWriter(toCsvFile, StandardCharsets.UTF_8), csvFormat)) {
-            printer.printRecord(CashTransaction.getHeader());
+            printer.printRecord((Object[]) CashTransaction.getHeader());
             for (CashTransaction transaction : transactions) {
-                printer.printRecord(transaction.toRecord());
+                printer.printRecord((Object[]) transaction.toRecord());
             }
         } catch (IOException ex) {
             Logger.getLogger(TransactionWriterForDone.class.getName()).log(Level.SEVERE, null, ex);

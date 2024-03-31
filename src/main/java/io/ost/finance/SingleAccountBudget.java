@@ -81,7 +81,7 @@ public class SingleAccountBudget {
     }
 
     private void calculateMonthlyBudgetFor(LocalDate firstOfMonth) {
-        List transactions = getTransactionsFromAccountFor(firstOfMonth);
+        List<CashTransaction> transactions = getTransactionsFromAccountFor(firstOfMonth);
         // check for existing months before creating a new one
         if (monthlyBudgets.containsKey(firstOfMonth.toString())) {
             MonthlyBudget month = monthlyBudgets.get(firstOfMonth.toString());

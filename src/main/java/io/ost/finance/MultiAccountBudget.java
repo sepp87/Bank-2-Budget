@@ -98,7 +98,7 @@ public class MultiAccountBudget {
     }
 
     private void calculateMonthlyBudgetFor(LocalDate firstOfMonth) {
-        List transactions = getTransactionsFromAccountsFor(firstOfMonth);
+        List<CashTransaction> transactions = getTransactionsFromAccountsFor(firstOfMonth);
         // check for existing months before creating a new one
         if (monthlyBudgets.containsKey(firstOfMonth.toString())) {
             MultiMonthlyBudget month = monthlyBudgets.get(firstOfMonth.toString());

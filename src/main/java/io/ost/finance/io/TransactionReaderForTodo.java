@@ -139,7 +139,7 @@ public class TransactionReaderForTodo {
 
         } catch (Exception ex) {
             Logger.getLogger(App.class.getName()).log(Level.SEVERE, "Unknown bank, could NOT load transactions from file", ex);
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
     }
 

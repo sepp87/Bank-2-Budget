@@ -16,8 +16,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import picocli.CommandLine;
 
-// TODO FIX BUILD POM 
-
 /**
  * Bank-to-Budget app reads CSV files from the todo directory and command line.
  * It saves the cash transactions - parsed from the CSV files - to the done
@@ -46,7 +44,6 @@ public class App {
     public Collection<Rule> rules;
 
     public static void main(String[] args) throws Exception {
-
 
         int exitCode = new CommandLine(Config.get()).execute(args);
 

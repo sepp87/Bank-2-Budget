@@ -52,7 +52,7 @@ public class TransactionReaderForBudget {
     private Map<String, List< CashTransaction>> readFrom(File file) {
 
         if (!file.exists()) {
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
 
         try {
@@ -129,6 +129,7 @@ public class TransactionReaderForBudget {
         return transaction;
     }
 
+    @SuppressWarnings("unchecked")
     private static boolean setCellToTransactionByColumn(Cell cell, CashTransaction transaction, String column) {
         try {
             Field field = CashTransaction.class.getField(column);
@@ -142,7 +143,8 @@ public class TransactionReaderForBudget {
                     if (type.equals(Boolean.class)) {
                         value = Boolean.valueOf((String) value);
                     } else if (((Class<?>) type).isEnum()) {
-                        value = Enum.valueOf((Class<Enum>) field.getType(), (String) value);
+                        value = Enum.valueOf((Class<Enum>) field.getType(), (String) value);  // if not surpressed, causes warning "Some input files use unverified or unsafe processes."
+
                     } else if (value.equals("")) {
                         value = null;
                     } else if (type.equals(Double.class)) {

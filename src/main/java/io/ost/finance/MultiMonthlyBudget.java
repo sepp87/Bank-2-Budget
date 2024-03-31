@@ -156,7 +156,7 @@ public class MultiMonthlyBudget {
     private Map<String, Double> getRemainderLastMonth() {
         MultiMonthlyBudget previous = getPreviousMonthlyBudget();
         if (previous == null) {
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
         Map<String, Double> result = new TreeMap<>();
         for (Entry<String, Double> previousRemainderForCategory : previous.remainderForCategories.entrySet()) {
