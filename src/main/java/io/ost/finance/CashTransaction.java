@@ -27,7 +27,7 @@ public class CashTransaction {
     public double amount;
     /**
      * The transaction number is a unique number bound to this transaction.
-     * Everytime this cash transaction is parsed this number should remain the
+     * Every time this cash transaction is parsed this number should remain the
      * same. Then together with account number it can be used as primary key.
      */
     public int transactionNumber;
@@ -40,6 +40,9 @@ public class CashTransaction {
     public String contraAccountNumber;
     public String contraAccountName;
     public Boolean internal;
+    
+    public Boolean lastOnDay;
+    public int positionOnDay;
 
     private Collection<String> originalRecord;
     public TransactionType transactionType;
@@ -222,10 +225,10 @@ public class CashTransaction {
     @Override
     public String toString() {
         if (transactionType == TransactionType.DEBIT) {
-            return "on " + date + "\t€" + Math.abs(amount) + "\t from " + accountName + "\tto " + contraAccountName;
+            return "on " + date + "\t€" + Math.abs(amount) + "\t from " + accountName + "\tto " + contraAccountName + "\tlabeled " + label;
         }
 
-        return "on " + date + "\t€" + Math.abs(amount) + "\t from " + contraAccountName + "\tto " + accountName;
+        return "on " + date + "\t€" + Math.abs(amount) + "\t from " + contraAccountName + "\tto " + accountName+ "\tlabeled " + label;
     }
 
     public static String[] getHeader() {

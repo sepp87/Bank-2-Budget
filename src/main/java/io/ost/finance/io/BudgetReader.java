@@ -67,9 +67,9 @@ public class BudgetReader {
         String firstOfMonth = sheet.getSheetName();
         int rowCount = sheet.getLastRowNum() - 1; // remove last row and empty row before it
         Map<String, Double> budgetedForCategory = new TreeMap<>();
-
 //        for (int i = 1; i < rowCount; i++) {
         for (int i = 2; i < rowCount; i++) {
+
             Row row = sheet.getRow(i);
             String category = row.getCell(0).getStringCellValue();
             double budgeted = row.getCell(1).getNumericCellValue();

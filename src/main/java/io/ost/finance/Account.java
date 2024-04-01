@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -58,24 +60,26 @@ public class Account {
         // these transactions might change the ordering. Meaning, newer transactions from
         // newer bank statements get prejudice.
         // 
-        // different transactions, but with duplicate ids should not replace already registered transactions
-        // because we assume, the first batch of transactions are new and are most complete
-        // the second batch of transactions are older and can have missing entries
+        // different transactions, but with duplicate ids should ONLY replace already registered transactions
+        // when they are the same and have a label. Because when they are the same the order of the older transaction
+        // was correct and the label of this transaction should remain and not be removed or replaced, since
+        // it is assumed that this label was double checked and intentional.
 
         if (allTransactionsIndex.containsKey(transaction.transactionNumber)) {
             CashTransaction indexed = allTransactionsIndex.get(transaction.transactionNumber);
             boolean isSame = areValuesSameBetween(transaction, indexed);
-            if (isSame) {
+            if (isSame && transaction.getLabel() != null) {
+                allTransactionsIndex.put(transaction.transactionNumber, transaction);
 //                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});
-                return;
             }
+            return;
         }
         allTransactionsIndex.put(transaction.transactionNumber, transaction);
     }
 
     private boolean areValuesSameBetween(CashTransaction a, CashTransaction b) {
-        String accountNameNumberAndDescriptionA = a.accountName + " " + a.accountNumber + " " + a.description ;
-        String accountNameNumberAndDescriptionB = b.accountName + " " + b.accountNumber + " " + b.description ;
+        String accountNameNumberAndDescriptionA = a.accountName + " " + a.accountNumber + " " + a.description;
+        String accountNameNumberAndDescriptionB = b.accountName + " " + b.accountNumber + " " + b.description;
         return accountNameNumberAndDescriptionA.equals(accountNameNumberAndDescriptionB);
     }
 

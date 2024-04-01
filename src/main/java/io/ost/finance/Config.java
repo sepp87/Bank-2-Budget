@@ -33,6 +33,9 @@ public class Config implements Runnable {
     @Override
     public void run() {
     }
+    
+    @Option(names = {"-h", "--help"}, usageHelp = true, description = "Print help")
+    private boolean help;
 
     @Option(names = {"-c", "--clear-todo"}, description = "Clear the todo folder after processing it.")
     private boolean clearTodo = false;

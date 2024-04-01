@@ -82,7 +82,7 @@ public abstract class TransactionParser {
                 }
                 postProcess(transaction);
                 transactions.add(transaction);
-                System.out.println(Arrays.toString(transaction.toRecord()));   // just a debug string that can be deleted   
+//                System.out.println(Arrays.toString(transaction.toRecord()));   // just a debug string that can be deleted   
 //                Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();   // just a debug string that can be deleted   
 //                System.out.println(gson.toJson(transaction));   // just a debug string that can be deleted   
             } catch (ParseException ex) {
