@@ -46,15 +46,14 @@ public abstract class TransactionParser {
 
     protected final ParserConfig config;
 
-
     public TransactionParser(ParserConfig config) {
         this.config = config;
     }
 
     public List<CashTransaction> parse() {
         //ANSI files are  read correctly, but now UTF-8 files are not
-          try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), config.getCharset()), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
-        
+        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), config.getCharset()), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
+
 //        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), "Cp1252"), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
             List<CashTransaction> transactions = parseRecordsWith(parser);
             return transactions;
@@ -153,7 +152,6 @@ public abstract class TransactionParser {
         transaction.setDateUnix(Util.getDateUnixFormattedFrom(isoDate));
     }
 
-
     // https://www.sparkonto.org/manuelles-berechnen-der-iban-pruefziffer-sepa/
     protected String getGermanIban(String bankleitzahl, String kontonummer) {
         kontonummer = String.format("%010d", new BigInteger(kontonummer));
@@ -188,6 +186,40 @@ public abstract class TransactionParser {
             }
             int number = yyMMdd * 1000 + count;
             transaction.setTransactionNumber(number);
+        } catch (ParseException ex) {
+            Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private final Map<String, CashTransaction> lastTransactionOfDateMap = new TreeMap<>();
+
+    /**
+     * Transaction number is based on transaction date and in conjunction its
+     * corresponding position of the day. Meaning the 2nd transaction on January
+     * 18th 2021 will always yield the number 210118002.
+     *
+     * @param transaction
+     */
+    protected void generateTransactionNumberAndDeriveLastOfDay(CashTransaction transaction) {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            Date date = format.parse(transaction.getDate());
+            SimpleDateFormat newFormat = new SimpleDateFormat("yyMMdd");
+            int yyMMdd = Integer.parseInt(newFormat.format(date));
+            int positionOfDay = 1;
+            String key = transaction.getAccountNumber() + transaction.getAccountName() + yyMMdd;
+            if (lastTransactionOfDateMap.containsKey(key)) {
+                CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
+                lastTransaction.setLastOfDay(false);
+                positionOfDay = lastTransaction.getPositionOfDay() + 1;
+                lastTransactionOfDateMap.put(key, transaction);
+            } else {
+                lastTransactionOfDateMap.put(key, transaction);
+            }
+            int number = yyMMdd * 1000 + positionOfDay;
+            transaction.setTransactionNumber(number);
+            transaction.setPositionOfDay(positionOfDay);
+            transaction.setLastOfDay(true);
         } catch (ParseException ex) {
             Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
         }

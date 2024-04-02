@@ -41,8 +41,8 @@ public class CashTransaction {
     public String contraAccountName;
     public Boolean internal;
     
-    public Boolean lastOnDay;
-    public int positionOnDay;
+    private Boolean lastOfDay;
+    private int positionOfDay;
 
     private Collection<String> originalRecord;
     public TransactionType transactionType;
@@ -220,6 +220,22 @@ public class CashTransaction {
 
     public void setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
+    }
+    
+    public Boolean isLastOfDay() {
+        return lastOfDay;
+    }
+
+    public void setLastOfDay(Boolean lastOfDay) {
+        this.lastOfDay = lastOfDay;
+    }
+
+    public int getPositionOfDay() {
+        return positionOfDay;
+    }
+
+    public void setPositionOfDay(int positionOfDay) {
+        this.positionOfDay = positionOfDay;
     }
 
     @Override
