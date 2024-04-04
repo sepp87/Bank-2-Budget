@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static io.ost.finance.App.get;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,7 +42,7 @@ public class CashTransaction {
     public String contraAccountNumber;
     public String contraAccountName;
     public Boolean internal;
-    
+
     private Boolean lastOfDay;
     private int positionOfDay;
 
@@ -153,10 +155,18 @@ public class CashTransaction {
         this.amount = amount;
     }
 
+    /**
+     *
+     * @return the date ISO format yyyy-MM-dd
+     */
     public String getDate() {
         return date;
     }
 
+    /**
+     *
+     * @param date the date ISO format yyyy-MM-dd
+     */
     public void setDate(String date) {
         if (date == null || date.equals("")) {
             return;
@@ -221,7 +231,7 @@ public class CashTransaction {
     public void setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
     }
-    
+
     public Boolean isLastOfDay() {
         return lastOfDay;
     }
@@ -244,7 +254,7 @@ public class CashTransaction {
             return "on " + date + "\t€" + Math.abs(amount) + "\t from " + accountName + "\tto " + contraAccountName + "\tlabeled " + label;
         }
 
-        return "on " + date + "\t€" + Math.abs(amount) + "\t from " + contraAccountName + "\tto " + accountName+ "\tlabeled " + label;
+        return "on " + date + "\t€" + Math.abs(amount) + "\t from " + contraAccountName + "\tto " + accountName + "\tlabeled " + label;
     }
 
     public static String[] getHeader() {
@@ -322,6 +332,47 @@ public class CashTransaction {
             }
         }
         return transactions;
+    }
+
+    /**
+     *
+     * @param transactions
+     * @param from
+     * @param to
+     * @return
+     */
+    public static List<CashTransaction> filterByTimespan(List<CashTransaction> transactions, LocalDate from, LocalDate to) {
+        List<CashTransaction> result = new ArrayList<>();
+        from = from.minusDays(1);
+        to = to.plusDays(1);
+        for (CashTransaction transaction : transactions) {
+            LocalDate date = LocalDate.parse(transaction.getDate());
+            if (date.isAfter(from) && date.isBefore(to)) {
+                result.add(transaction);
+            }
+        }
+        return result;
+    }
+
+    /**
+     *
+     * @param list1 sorted list in ascending order by date
+     * @param list2 sorted list in ascending order by date
+     * @return
+     */
+    public static LocalDate[] calculateOverlappingTimespan(List<CashTransaction> list1, List<CashTransaction> list2) {
+        List<LocalDate> dates1 = getDatesFrom(list1);
+        List<LocalDate> dates2 = getDatesFrom(list2);
+        return Util.findOverlap(dates1, dates2);
+    }
+
+    private static List<LocalDate> getDatesFrom(List<CashTransaction> list) {
+        List<LocalDate> result = new ArrayList<>();
+        for (CashTransaction transaction : list) {
+            LocalDate date = LocalDate.parse(transaction.getDate());
+            result.add(date);
+        }
+        return result;
     }
 
 }

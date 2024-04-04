@@ -13,8 +13,10 @@ import java.net.URISyntaxException;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -159,6 +161,44 @@ public class Util {
 
     public static double round(double value) {
         return (double) Math.round(value * 100) / 100;
+    }
+    
+      public static LocalDate[] findOverlap(List<LocalDate> list1, List<LocalDate> list2) {
+        LocalDate oldest1 = findBoundaryDate(list1, false);
+        LocalDate oldest2 = findBoundaryDate(list2, false);
+        LocalDate newest1 = findBoundaryDate(list1, true);
+        LocalDate newest2 = findBoundaryDate(list2, true);
+
+        LocalDate oldestOverlap = oldest1.isAfter(oldest2) ? oldest1 : oldest2;
+        LocalDate newestOverlap = newest1.isBefore(newest2) ? newest1 : newest2;
+
+        // Find overlap
+        if (newestOverlap.compareTo(oldestOverlap) >= 0) {
+            // There is an overlap
+            LocalDate[] result = {oldestOverlap, newestOverlap};
+            return result;
+        }
+        // There is no overlap
+        return null;
+    }
+
+    /**
+     *
+     * @param list unsorted list of dates
+     * @param newest if set to false the method looks for the oldest date in the
+     * list
+     * @return
+     */
+    public static LocalDate findBoundaryDate(List<LocalDate> list, boolean newest) {
+        LocalDate result = list.getFirst();
+        for (LocalDate date : list) {
+            if (newest) {
+                result = date.isAfter(result) ? date : result;
+            } else {
+                result = date.isBefore(result) ? date : result;
+            }
+        }
+        return result;
     }
 
 }

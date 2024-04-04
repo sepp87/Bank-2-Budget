@@ -24,7 +24,7 @@ public class TransactionReaderForTodo {
 
     public static final String TODO_DIRECTORY = "todo";
     private final List<CashTransaction> todoTransactions;
-    private final Map<String, List<CashTransaction>> todoTransactionsPerFile;
+    protected final Map<String, List<CashTransaction>> todoTransactionsPerFile;
 
     public TransactionReaderForTodo() {
         todoTransactions = new ArrayList<>();
@@ -75,45 +75,56 @@ public class TransactionReaderForTodo {
         // newer bank statements get prejudice.
         // 
         // edge case - a bank statement can contain less transactions for a given day than in another statement
-        // we need to figure out which day from which bank statement contains the highest transaction count. 
+        // we need to figure out which bank statement contains the highest transaction count for which day.
         // we assume the day with the highest count contains all the transactions that were made that day.
         // the day with the heighest count is added to the total transactions list
+        // 
+        // TODO we need to make sure that this retrieval is treated on a seperate basis for each accounts
+        // since one statement can have multiple accounts (e.g. Rabobank)
         List<CashTransaction> transactions = getUniqueTransactionsOnly();
         CashTransaction.sortAscending(transactions);
         todoTransactions.addAll(transactions);
     }
 
-    private List<CashTransaction> getUniqueTransactionsOnly() {
+    private final Map<String, List<CashTransaction>> todoTransactionsPerFileAndAccount = new TreeMap<>();
+
+    // TODO set this method out of order
+    protected List<CashTransaction> getUniqueTransactionsOnly() {
         List<CashTransaction> result = new ArrayList<>();
         Map<String, Object[]> dateToFileCount = new TreeMap<>();
 
         for (Entry<String, List<CashTransaction>> entry : todoTransactionsPerFile.entrySet()) {
-            int candidateHighScore = 0;
+            int score = 0;
+            String previousDate = "";
+
             for (CashTransaction transaction : entry.getValue()) {
+                if (previousDate.equals(transaction.getDate())) {
+                    score++;
+                } else {
+                    score = 1;
+                }
 
                 if (!dateToFileCount.containsKey(transaction.date)) {
-                    candidateHighScore = 0;
-                    Object[] fileCount = {entry.getKey(), candidateHighScore};
+                    Object[] fileCount = {entry.getKey(), score};
                     dateToFileCount.put(transaction.date, fileCount);
                 } else {
 
                     Object[] fileCount = dateToFileCount.get(transaction.date);
                     String currentFile = entry.getKey();
-                    String highScoreFile = (String) fileCount[0];
-                    if (currentFile.equals(highScoreFile)) {
-                        candidateHighScore = 0;
-                        int highScore = (int) fileCount[1];
-                        fileCount[1] = highScore + 1;
+                    String highscoreFile = (String) fileCount[0];
+                    if (currentFile.equals(highscoreFile)) {
+                        int highscore = (int) fileCount[1];
+                        fileCount[1] = highscore + 1;
 
                     } else {
-                        candidateHighScore++;
-                        int currentHighScore = (int) fileCount[1];
-                        if (candidateHighScore > currentHighScore) {
-                            Object[] newFileHighScore = {currentFile, currentHighScore};
+                        int highscore = (int) fileCount[1];
+                        if (score > highscore) {
+                            Object[] newFileHighScore = {currentFile, score};
                             dateToFileCount.put(transaction.date, newFileHighScore);
                         }
                     }
                 }
+                previousDate = transaction.getDate();
             }
         }
 
@@ -124,13 +135,12 @@ public class TransactionReaderForTodo {
                 String file = entry.getKey();
                 if (file.equals(fileWithMaxCountForDate)) {
                     result.add(transaction);
-//                    System.out.println(transaction.date + "\t" + file);
+                    System.out.println(transaction.date + "\t" + file);
                 }
             }
         }
         return result;
     }
-
     private List<CashTransaction> getTransactionsFromCsv(File csvFile) {
         try {
             TransactionParser parser = SimpleParserFactory.createTransactionParser(csvFile);

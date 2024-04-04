@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -83,6 +84,40 @@ public class Account {
         return accountNameNumberAndDescriptionA.equals(accountNameNumberAndDescriptionB);
     }
 
+    // TODO replaces old method
+//    public static void addTransactionsToAccounts(List<CashTransaction> transactions) {
+//        // Split up the transactions by account
+//        Map<String, List<CashTransaction>> transactionsByAccountNumber = new TreeMap<>();
+//        for (CashTransaction transaction : transactions) {
+//            String accountNumber = transaction.getAccountNumber();
+//            if (transactionsByAccountNumber.containsKey(accountNumber)) {
+//                transactionsByAccountNumber.get(accountNumber).add(transaction);
+//            } else {
+//                List<CashTransaction> list = new ArrayList<>();
+//                list.add(transaction);
+//                transactionsByAccountNumber.put(accountNumber, list);
+//            }
+//        }
+//
+//        // Check if the accounts exist, if yes, compare, remove old incomplete daily records and add new non-existent transactions 
+//        for (String accountNumber : transactionsByAccountNumber.keySet()) {
+//            if (accounts.containsKey(accountNumber)) {
+////                getOverlappingTimespan()
+//            } else {
+//                Account account = new Account(accountNumber);
+//                account.addTransactions(transactions);
+//                accounts.put(accountNumber, account);
+//            }
+//        }
+//    }
+//
+//    private void addTransactions(List<CashTransaction> transactions) {
+//        for (CashTransaction transaction : transactions) {
+//            allTransactionsIndex.put(transaction.getTransactionNumber(), transaction);
+//        }
+//    }
+
+    
     public static Collection<Account> addTransactionsToAccounts(List<CashTransaction> transactions) {
         for (CashTransaction transaction : transactions) {
             if (accounts.containsKey(transaction.accountNumber)) {
@@ -97,7 +132,6 @@ public class Account {
         // TBD maybe want to bubble sort all transactions per account by age ascending here
         return accounts.values();
     }
-
     public static Collection<Account> getAccounts() {
         return accounts.values();
     }

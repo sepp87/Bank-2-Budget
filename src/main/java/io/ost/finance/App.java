@@ -10,7 +10,9 @@ import io.ost.finance.io.TransactionWriterForDone;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -43,6 +45,8 @@ public class App {
     public Properties myAccounts;
     public Properties otherAccounts;
     public Collection<Rule> rules;
+
+  
 
     public static void main(String[] args) throws Exception {
 
