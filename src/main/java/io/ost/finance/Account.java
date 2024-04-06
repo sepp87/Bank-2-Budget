@@ -27,16 +27,9 @@ public class Account {
         this.accountNumber = accountNumber;
     }
 
-    // including from-date and excluding to-date
-    public List<CashTransaction> getTransactionsBetween(LocalDate start, LocalDate end) {
-        List<CashTransaction> result = new ArrayList<>();
-        start = ChronoUnit.DAYS.addTo(start, -1);
-        for (CashTransaction transaction : allTransactionsIndex.values()) {
-            LocalDate date = LocalDate.parse(transaction.date);
-            if (date.isAfter(start) && date.isBefore(end)) {
-                result.add(transaction);
-            }
-        }
+    public List<CashTransaction> getTransactions(LocalDate from, LocalDate to) {
+        List<CashTransaction> transactions = getAllTransactions();
+        List<CashTransaction> result = CashTransaction.filterByTimespan(transactions, from, to);
         return result;
     }
 
@@ -55,27 +48,92 @@ public class Account {
         return last.getDate();
     }
 
-    private void addTransaction(CashTransaction transaction) {
-        // as we near the retrieval date of a bank statement, some transactions might still be missing, 
-        // because the bank did not yet process them. As soon as these transactions get processed
-        // these transactions might change the ordering. Meaning, newer transactions from
-        // newer bank statements get prejudice.
-        // 
-        // different transactions, but with duplicate ids should ONLY replace already registered transactions
-        // when they are the same and have a label. Because when they are the same the order of the older transaction
-        // was correct and the label of this transaction should remain and not be removed or replaced, since
-        // it is assumed that this label was double checked and intentional.
+    public static void addTransactionsToAccounts(List<CashTransaction> transactions) {
+        addTransactionsToAccounts(transactions, false);
+    }
 
-        if (allTransactionsIndex.containsKey(transaction.transactionNumber)) {
-            CashTransaction indexed = allTransactionsIndex.get(transaction.transactionNumber);
-            boolean isSame = areValuesSameBetween(transaction, indexed);
-            if (isSame && transaction.getLabel() != null) {
-                allTransactionsIndex.put(transaction.transactionNumber, transaction);
-//                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});
+    public static void addTransactionsToAccounts(List<CashTransaction> transactions, boolean overwriteExistingLabels) {
+        // Split up the transactions by account
+        Map<String, List<CashTransaction>> transactionsByAccountNumber = new TreeMap<>();
+        for (CashTransaction transaction : transactions) {
+            String accountNumber = transaction.getAccountNumber();
+            if (transactionsByAccountNumber.containsKey(accountNumber)) {
+                transactionsByAccountNumber.get(accountNumber).add(transaction);
+            } else {
+                List<CashTransaction> list = new ArrayList<>();
+                list.add(transaction);
+                transactionsByAccountNumber.put(accountNumber, list);
             }
-            return;
         }
-        allTransactionsIndex.put(transaction.transactionNumber, transaction);
+
+        // Add the transactions to the corresponding accounts
+        for (String accountNumber : transactionsByAccountNumber.keySet()) {
+            // If the accounts exist, evaluate the transactions before adding them
+            if (accounts.containsKey(accountNumber)) {
+                Account account = accounts.get(accountNumber);
+                account.evaluateAndAddTransactions(transactions, overwriteExistingLabels);
+            } else {
+                Account account = new Account(accountNumber);
+                accounts.put(accountNumber, account);
+                account.addTransactions(transactions);
+            }
+        }
+    }
+
+    private void addTransactions(List<CashTransaction> transactions) {
+        for (CashTransaction transaction : transactions) {
+            allTransactionsIndex.put(transaction.getTransactionNumber(), transaction);
+        }
+    }
+
+    private void evaluateAndAddTransactions(List<CashTransaction> transactions, boolean overwriteExistingLabels) {
+        // Evaluate which transactions to add, discard and add labels to
+        LocalDate[] overlap = CashTransaction.findOverlap(transactions, getAllTransactions());
+
+        if (overlap == null) {
+            addTransactions(transactions);
+        } else {
+            List<CashTransaction> existingOverlappingTransactions = getTransactions(overlap[0], overlap[1]);
+            List<CashTransaction> newOverlappingTransactions = CashTransaction.filterByTimespan(transactions, overlap[0], overlap[1]);
+
+            // if the newly imported list of transactions contains more entries (during the overlapping timespan), the existing ones should be replaced
+            // TODO Bonus - evaluate when the overlap starts producing uneven lists and re-adjust the timespan
+            if (newOverlappingTransactions.size() > existingOverlappingTransactions.size()) {
+                removeTransactions(existingOverlappingTransactions);
+                addTransactions(transactions);
+
+            } else {
+                // if the newly imported list of transactions contains the same or less entries, the labels can be used to enrich the existing ones as long as they are actually the same transaction
+                addLabelsToExistingTransactionsFrom(newOverlappingTransactions, overwriteExistingLabels);
+
+                List<CashTransaction> otherNewTransactions = CashTransaction.filterByTimespan(transactions, overlap[0], overlap[1], true);
+                addTransactions(otherNewTransactions);
+
+            }
+        }
+    }
+
+    private void removeTransactions(List<CashTransaction> transactions) {
+        for (CashTransaction transaction : transactions) {
+            int number = transaction.getTransactionNumber();
+            allTransactionsIndex.remove(number);
+        }
+    }
+
+    private void addLabelsToExistingTransactionsFrom(List<CashTransaction> transactions, boolean overwriteExistingLabels) {
+        for (CashTransaction transaction : transactions) {
+            int number = transaction.getTransactionNumber();
+            if (allTransactionsIndex.containsKey(number)) {
+                CashTransaction existing = allTransactionsIndex.get(number);
+                boolean isSame = areValuesSameBetween(transaction, existing);
+                if (isSame && transaction.getLabel() != null && (existing.getLabel() == null || overwriteExistingLabels)) {
+                    allTransactionsIndex.put(transaction.transactionNumber, transaction);
+//                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});
+                }
+            } else {
+                System.out.println("trying to enrich existing transactions with re-imported transactions, but transaction does not exist, should not be a case to right?");
+            }
+        }
     }
 
     private boolean areValuesSameBetween(CashTransaction a, CashTransaction b) {
@@ -84,54 +142,6 @@ public class Account {
         return accountNameNumberAndDescriptionA.equals(accountNameNumberAndDescriptionB);
     }
 
-    // TODO replaces old method
-//    public static void addTransactionsToAccounts(List<CashTransaction> transactions) {
-//        // Split up the transactions by account
-//        Map<String, List<CashTransaction>> transactionsByAccountNumber = new TreeMap<>();
-//        for (CashTransaction transaction : transactions) {
-//            String accountNumber = transaction.getAccountNumber();
-//            if (transactionsByAccountNumber.containsKey(accountNumber)) {
-//                transactionsByAccountNumber.get(accountNumber).add(transaction);
-//            } else {
-//                List<CashTransaction> list = new ArrayList<>();
-//                list.add(transaction);
-//                transactionsByAccountNumber.put(accountNumber, list);
-//            }
-//        }
-//
-//        // Check if the accounts exist, if yes, compare, remove old incomplete daily records and add new non-existent transactions 
-//        for (String accountNumber : transactionsByAccountNumber.keySet()) {
-//            if (accounts.containsKey(accountNumber)) {
-////                getOverlappingTimespan()
-//            } else {
-//                Account account = new Account(accountNumber);
-//                account.addTransactions(transactions);
-//                accounts.put(accountNumber, account);
-//            }
-//        }
-//    }
-//
-//    private void addTransactions(List<CashTransaction> transactions) {
-//        for (CashTransaction transaction : transactions) {
-//            allTransactionsIndex.put(transaction.getTransactionNumber(), transaction);
-//        }
-//    }
-
-    
-    public static Collection<Account> addTransactionsToAccounts(List<CashTransaction> transactions) {
-        for (CashTransaction transaction : transactions) {
-            if (accounts.containsKey(transaction.accountNumber)) {
-                Account account = accounts.get(transaction.accountNumber);
-                account.addTransaction(transaction);
-            } else {
-                Account account = new Account(transaction.accountNumber);
-                account.addTransaction(transaction);
-                accounts.put(transaction.accountNumber, account);
-            }
-        }
-        // TBD maybe want to bubble sort all transactions per account by age ascending here
-        return accounts.values();
-    }
     public static Collection<Account> getAccounts() {
         return accounts.values();
     }

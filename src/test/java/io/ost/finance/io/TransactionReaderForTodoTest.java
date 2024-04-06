@@ -97,50 +97,50 @@ public class TransactionReaderForTodoTest {
     /**
      * Test of read method, of class TransactionReaderForTodo.
      */
-    @org.junit.jupiter.api.Test
-    public void testGetUniqueTransactionsOnly() {
-        System.out.println("getUniqueTransactionsOnly");
-        TransactionReaderForTodo instance = new TransactionReaderForTodo();
-
-        // Create test data        
-        List<CashTransaction> accountXyzAll = generateTransactionsForAccountWithinTimespan("xyz", LocalDate.now().minusDays(15), LocalDate.now());
-        List<CashTransaction> accountAbcOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.now().minusDays(15), LocalDate.now().minusDays(5));
-        List<CashTransaction> accountAbcNew = generateTransactionsForAccountWithinTimespan("abc", LocalDate.now().minusDays(10), LocalDate.now());
-        List<CashTransaction> accountAbcDuplicates = filterTransactionsWithinTimespan(accountAbcOld, LocalDate.now().minusDays(10), LocalDate.now());
-        accountAbcNew.addAll(accountAbcDuplicates);
-        sortTransactionsByAscendingDate(accountAbcNew);
-
-        for (CashTransaction transaction : accountAbcOld) {
-            System.out.println(transaction.toString());
-        }
-
-        System.out.println();
-
-        for (CashTransaction transaction : accountAbcNew) {
-            System.out.println(transaction.toString());
-        }
-
-        instance.todoTransactionsPerFile.put("accountXyzAll.csv", accountXyzAll);
-        instance.todoTransactionsPerFile.put("accountAbcOld.csv", accountAbcOld);
-        instance.todoTransactionsPerFile.put("accountAbcNew.csv", accountAbcNew);
-
-        // Perform test
-//        int expectedResult = accountAbcOld.size() + accountAbcNew.size() - accountAbcDuplicates.size();
-        int expectedResult = accountXyzAll.size() + accountAbcOld.size() + accountAbcNew.size() - accountAbcDuplicates.size();
-        List<CashTransaction> uniqueTransactions = instance.getUniqueTransactionsOnly();
-        int result = uniqueTransactions.size();
-        System.out.println("accountXyzAll " + accountXyzAll.size());
-        System.out.println("accountAbcOld " + accountAbcOld.size());
-        System.out.println("accountAbcNew " + accountAbcNew.size());
-        System.out.println("Duplicates    " + accountAbcDuplicates.size());
-        System.out.println(expectedResult + " " + result);
-
-        // Evaluate result
-        assertEquals(expectedResult, result);
-
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+//    @org.junit.jupiter.api.Test
+//    public void testGetUniqueTransactionsOnly() {
+//        System.out.println("getUniqueTransactionsOnly");
+//        TransactionReaderForTodo instance = new TransactionReaderForTodo();
+//
+//        // Create test data        
+//        List<CashTransaction> accountXyzAll = generateTransactionsForAccountWithinTimespan("xyz", LocalDate.now().minusDays(15), LocalDate.now());
+//        List<CashTransaction> accountAbcOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.now().minusDays(15), LocalDate.now().minusDays(5));
+//        List<CashTransaction> accountAbcNew = generateTransactionsForAccountWithinTimespan("abc", LocalDate.now().minusDays(10), LocalDate.now());
+//        List<CashTransaction> accountAbcDuplicates = filterTransactionsWithinTimespan(accountAbcOld, LocalDate.now().minusDays(10), LocalDate.now());
+//        accountAbcNew.addAll(accountAbcDuplicates);
+//        sortTransactionsByAscendingDate(accountAbcNew);
+//
+//        for (CashTransaction transaction : accountAbcOld) {
+//            System.out.println(transaction.toString());
+//        }
+//
+//        System.out.println();
+//
+//        for (CashTransaction transaction : accountAbcNew) {
+//            System.out.println(transaction.toString());
+//        }
+//
+//        instance.todoTransactionsPerFile.put("accountXyzAll.csv", accountXyzAll);
+//        instance.todoTransactionsPerFile.put("accountAbcOld.csv", accountAbcOld);
+//        instance.todoTransactionsPerFile.put("accountAbcNew.csv", accountAbcNew);
+//
+//        // Perform test
+////        int expectedResult = accountAbcOld.size() + accountAbcNew.size() - accountAbcDuplicates.size();
+//        int expectedResult = accountXyzAll.size() + accountAbcOld.size() + accountAbcNew.size() - accountAbcDuplicates.size();
+//        List<CashTransaction> uniqueTransactions = instance.getUniqueTransactionsOnly();
+//        int result = uniqueTransactions.size();
+//        System.out.println("accountXyzAll " + accountXyzAll.size());
+//        System.out.println("accountAbcOld " + accountAbcOld.size());
+//        System.out.println("accountAbcNew " + accountAbcNew.size());
+//        System.out.println("Duplicates    " + accountAbcDuplicates.size());
+//        System.out.println(expectedResult + " " + result);
+//
+//        // Evaluate result
+//        assertEquals(expectedResult, result);
+//
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
 
     private List<CashTransaction> generateTransactionsForAccountWithinTimespan(String account, LocalDate from, LocalDate to) {
         List<LocalDate> dates = generateDatesForTimespan(from, to);

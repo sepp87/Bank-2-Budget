@@ -113,7 +113,7 @@ public class MultiAccountBudget {
         List<CashTransaction> transactions = new ArrayList<>();
         for (Account account : accounts) {
             LocalDate nextFirst = ChronoUnit.MONTHS.addTo(firstOfMonth, 1);
-            transactions.addAll(account.getTransactionsBetween(firstOfMonth, nextFirst));
+            transactions.addAll(account.getTransactions(firstOfMonth, nextFirst));
         }
         return transactions;
     }

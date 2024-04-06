@@ -94,7 +94,7 @@ public class SingleAccountBudget {
 
     private List<CashTransaction> getTransactionsFromAccountFor(LocalDate firstOfMonth) {
         LocalDate nextFirst = ChronoUnit.MONTHS.addTo(firstOfMonth, 1);
-        return account.getTransactionsBetween(firstOfMonth, nextFirst);
+        return account.getTransactions(firstOfMonth, nextFirst);
     }
 
 }

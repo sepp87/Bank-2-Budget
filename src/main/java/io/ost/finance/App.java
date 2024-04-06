@@ -46,14 +46,14 @@ public class App {
     public Properties otherAccounts;
     public Collection<Rule> rules;
 
-  
-
     public static void main(String[] args) throws Exception {
 
         int exitCode = new CommandLine(Config.get()).execute(args);
 
         TransactionReaderForTodo todoTransactions = new TransactionReaderForTodo().read();
-        Account.addTransactionsToAccounts(todoTransactions.getAsList());
+        for (List<CashTransaction> transactions : todoTransactions.getPerFile().values()) {
+            Account.addTransactionsToAccounts(transactions);
+        }
 
         Config.Mode mode = Config.getMode();
         switch (mode) {
@@ -64,7 +64,7 @@ public class App {
             case XLSX:
             case BUDGET:
                 TransactionReaderForBudget oldBudgetTransactions = new TransactionReaderForBudget().read();
-                Account.addTransactionsToAccounts(oldBudgetTransactions.getAsList());
+                Account.addTransactionsToAccounts(oldBudgetTransactions.getAsList(), true);
 
                 TransactionWriterForBudget newBudgetTransactions = new TransactionWriterForBudget();
                 newBudgetTransactions.write(Account.getAccounts());

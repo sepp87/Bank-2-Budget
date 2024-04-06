@@ -35,10 +35,6 @@ public class TransactionReaderForTodo {
         return todoTransactionsPerFile;
     }
 
-    public List<CashTransaction> getAsList() {
-        return todoTransactions;
-    }
-
     public TransactionReaderForTodo read() {
         File todoDirectory = new File(App.getRootDirectory() + TODO_DIRECTORY);
         if (todoDirectory.exists() && todoDirectory.isDirectory()) {
@@ -67,80 +63,8 @@ public class TransactionReaderForTodo {
             todoTransactionsPerFile.put(csv.getName(), transactions);
             System.out.println(transactions.size() + " Transactions parsed \n\n");
         }
-
-        // Transactions can contain duplicates, because of the below statement we need a cleanup routine here
-        // as we near the retrieval date of a bank statement, some transactions might still be missing, 
-        // because the bank did not yet process them. As soon as these transactions get processed
-        // these transactions might change the ordering. Meaning, newer transactions from
-        // newer bank statements get prejudice.
-        // 
-        // edge case - a bank statement can contain less transactions for a given day than in another statement
-        // we need to figure out which bank statement contains the highest transaction count for which day.
-        // we assume the day with the highest count contains all the transactions that were made that day.
-        // the day with the heighest count is added to the total transactions list
-        // 
-        // TODO we need to make sure that this retrieval is treated on a seperate basis for each accounts
-        // since one statement can have multiple accounts (e.g. Rabobank)
-        List<CashTransaction> transactions = getUniqueTransactionsOnly();
-        CashTransaction.sortAscending(transactions);
-        todoTransactions.addAll(transactions);
     }
 
-    private final Map<String, List<CashTransaction>> todoTransactionsPerFileAndAccount = new TreeMap<>();
-
-    // TODO set this method out of order
-    protected List<CashTransaction> getUniqueTransactionsOnly() {
-        List<CashTransaction> result = new ArrayList<>();
-        Map<String, Object[]> dateToFileCount = new TreeMap<>();
-
-        for (Entry<String, List<CashTransaction>> entry : todoTransactionsPerFile.entrySet()) {
-            int score = 0;
-            String previousDate = "";
-
-            for (CashTransaction transaction : entry.getValue()) {
-                if (previousDate.equals(transaction.getDate())) {
-                    score++;
-                } else {
-                    score = 1;
-                }
-
-                if (!dateToFileCount.containsKey(transaction.date)) {
-                    Object[] fileCount = {entry.getKey(), score};
-                    dateToFileCount.put(transaction.date, fileCount);
-                } else {
-
-                    Object[] fileCount = dateToFileCount.get(transaction.date);
-                    String currentFile = entry.getKey();
-                    String highscoreFile = (String) fileCount[0];
-                    if (currentFile.equals(highscoreFile)) {
-                        int highscore = (int) fileCount[1];
-                        fileCount[1] = highscore + 1;
-
-                    } else {
-                        int highscore = (int) fileCount[1];
-                        if (score > highscore) {
-                            Object[] newFileHighScore = {currentFile, score};
-                            dateToFileCount.put(transaction.date, newFileHighScore);
-                        }
-                    }
-                }
-                previousDate = transaction.getDate();
-            }
-        }
-
-        for (Entry<String, List<CashTransaction>> entry : todoTransactionsPerFile.entrySet()) {
-
-            for (CashTransaction transaction : entry.getValue()) {
-                String fileWithMaxCountForDate = (String) dateToFileCount.get(transaction.date)[0];
-                String file = entry.getKey();
-                if (file.equals(fileWithMaxCountForDate)) {
-                    result.add(transaction);
-                    System.out.println(transaction.date + "\t" + file);
-                }
-            }
-        }
-        return result;
-    }
     private List<CashTransaction> getTransactionsFromCsv(File csvFile) {
         try {
             TransactionParser parser = SimpleParserFactory.createTransactionParser(csvFile);

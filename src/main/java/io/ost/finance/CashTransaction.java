@@ -24,7 +24,7 @@ import java.util.List;
 public class CashTransaction {
 
     private static int count = 0;
-    private final int number;
+//    private final int number;
     public String label;
     public double amount;
     /**
@@ -53,13 +53,12 @@ public class CashTransaction {
     public CashTransaction() {
         originalRecord = new HashSet<>();
         internal = false;
-        number = ++count;
+//        number = ++count;
     }
 
-    public int getNumber() {
-        return number;
-    }
-
+//    public int getNumber() {
+//        return number;
+//    }
     public String getAccountNumber() {
         return accountNumber;
     }
@@ -342,12 +341,26 @@ public class CashTransaction {
      * @return
      */
     public static List<CashTransaction> filterByTimespan(List<CashTransaction> transactions, LocalDate from, LocalDate to) {
+        return filterByTimespan(transactions, from, to, false);
+    }
+
+    /**
+     *
+     * @param transactions
+     * @param from
+     * @param to
+     * @param inverted
+     * @return
+     */
+    public static List<CashTransaction> filterByTimespan(List<CashTransaction> transactions, LocalDate from, LocalDate to, boolean inverted) {
         List<CashTransaction> result = new ArrayList<>();
         from = from.minusDays(1);
         to = to.plusDays(1);
         for (CashTransaction transaction : transactions) {
             LocalDate date = LocalDate.parse(transaction.getDate());
-            if (date.isAfter(from) && date.isBefore(to)) {
+            boolean withinTimespan = date.isAfter(from) && date.isBefore(to);
+            // Adding or excluding transactions based on 'inverted' flag and whether they are within the time span
+            if ((withinTimespan && !inverted) || (!withinTimespan && inverted)) {
                 result.add(transaction);
             }
         }
@@ -360,7 +373,7 @@ public class CashTransaction {
      * @param list2 sorted list in ascending order by date
      * @return
      */
-    public static LocalDate[] calculateOverlappingTimespan(List<CashTransaction> list1, List<CashTransaction> list2) {
+    public static LocalDate[] findOverlap(List<CashTransaction> list1, List<CashTransaction> list2) {
         List<LocalDate> dates1 = getDatesFrom(list1);
         List<LocalDate> dates2 = getDatesFrom(list2);
         return Util.findOverlap(dates1, dates2);
