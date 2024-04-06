@@ -76,7 +76,6 @@ public class DkbParser extends TransactionParser {
         transaction.setOriginalRecord(record.toMap().values());
         parseDateFrom(record.get("Buchungstag"), transaction);
         calculateBalanceAfter(transaction);
-        generateTransactionNumber(transaction);
         return transaction;
     }
 

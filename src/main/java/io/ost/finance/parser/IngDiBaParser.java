@@ -41,7 +41,6 @@ public class IngDiBaParser extends TransactionParser {
         transaction.setOriginalRecord(record.toMap().values());
         parseDateFrom(record.get("DATE"), transaction);
         parseContraAccountNumberFrom(record, transaction);
-        generateTransactionNumber(transaction);
         return transaction;
     }
 

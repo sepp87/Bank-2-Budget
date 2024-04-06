@@ -47,7 +47,6 @@ public class IngParser extends TransactionParser {
         }
         transaction.setDescription(record.get("Mededelingen"));
         transaction.setOriginalRecord(record.toMap().values());
-        generateTransactionNumber(transaction);
         return transaction;
     }
 

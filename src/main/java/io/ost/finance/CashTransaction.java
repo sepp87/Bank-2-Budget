@@ -5,9 +5,15 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static io.ost.finance.App.get;
+import io.ost.finance.parser.TransactionParser;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * CashTransaction is parsed from one single Record in a CSV file. It checks
@@ -24,7 +30,6 @@ import java.util.List;
 public class CashTransaction {
 
     private static int count = 0;
-//    private final int number;
     public String label;
     public double amount;
     /**
@@ -53,12 +58,8 @@ public class CashTransaction {
     public CashTransaction() {
         originalRecord = new HashSet<>();
         internal = false;
-//        number = ++count;
     }
 
-//    public int getNumber() {
-//        return number;
-//    }
     public String getAccountNumber() {
         return accountNumber;
     }
@@ -386,6 +387,41 @@ public class CashTransaction {
             result.add(date);
         }
         return result;
+    }
+
+    /**
+     * Transaction number is based on transaction date and in conjunction its
+     * corresponding sequential number. Meaning the 2nd transaction on January
+     * 18th 2021 will always yield the number 210118002.
+     *
+     * @param transactions
+     */
+    public static void generateTransactionNumberAndDeriveLastOfDay(List<CashTransaction> transactions) {
+        Map<String, CashTransaction> lastTransactionOfDateMap = new TreeMap<>();
+        for (CashTransaction transaction : transactions) {
+            try {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                Date date = format.parse(transaction.getDate());
+                SimpleDateFormat newFormat = new SimpleDateFormat("yyMMdd");
+                int yyMMdd = Integer.parseInt(newFormat.format(date));
+                int positionOfDay = 1;
+                String key = transaction.getAccountNumber() + transaction.getAccountName() + yyMMdd;
+                if (lastTransactionOfDateMap.containsKey(key)) {
+                    CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
+                    lastTransaction.setLastOfDay(false);
+                    positionOfDay = lastTransaction.getPositionOfDay() + 1;
+                    lastTransactionOfDateMap.put(key, transaction);
+                } else {
+                    lastTransactionOfDateMap.put(key, transaction);
+                }
+                int number = yyMMdd * 1000 + positionOfDay;
+                transaction.setTransactionNumber(number);
+                transaction.setPositionOfDay(positionOfDay);
+                transaction.setLastOfDay(true);
+            } catch (ParseException ex) {
+                Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
 }

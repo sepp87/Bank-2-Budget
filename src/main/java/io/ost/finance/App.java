@@ -66,6 +66,10 @@ public class App {
                 TransactionReaderForBudget oldBudgetTransactions = new TransactionReaderForBudget().read();
                 Account.addTransactionsToAccounts(oldBudgetTransactions.getAsList(), true);
 
+                if(true){
+                    return;
+                }
+                
                 TransactionWriterForBudget newBudgetTransactions = new TransactionWriterForBudget();
                 newBudgetTransactions.write(Account.getAccounts());
 

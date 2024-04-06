@@ -58,7 +58,6 @@ public class GlsParser2022 extends TransactionParser {
         transaction.setDescription(record.get("Verwendungszweck"));
         transaction.setOriginalRecord(record.toMap().values());
         parseDateFrom(record.get("Buchungstag"), transaction);
-        generateTransactionNumber(transaction);
         return transaction;
     }
 }

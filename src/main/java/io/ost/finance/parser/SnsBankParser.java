@@ -42,7 +42,6 @@ public class SnsBankParser extends TransactionParser {
         transaction.setDescription(record.get("Omschrijving"));
         transaction.setOriginalRecord(record.toMap().values());
         parseDateFrom(record.get("Datum"), transaction);
-        generateTransactionNumber(transaction);
         return transaction;
     }
 

@@ -39,7 +39,6 @@ public class RabobankParser extends TransactionParser {
         transaction.setContraAccountNumber(record.get("Tegenrekening IBAN/BBAN"));
         transaction.setAmount(getDoubleFrom(record.get("Bedrag")));
         transaction.setAccountBalance(getDoubleFrom(record.get("Saldo na trn")));
-        transaction.setTransactionNumber(Integer.parseInt(record.get("Volgnr")));
         transaction.setDescription(record.get("Omschrijving-1"));
         transaction.setOriginalRecord(record.toMap().values());
         parseDateFrom(record.get("Datum"), transaction);

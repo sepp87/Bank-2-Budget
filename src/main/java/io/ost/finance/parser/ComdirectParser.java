@@ -128,7 +128,6 @@ public class ComdirectParser extends TransactionParser {
             }
             parseDateFrom(record.get("Buchungstag"), transaction);
             calculateBalanceAfter(transaction);
-            generateTransactionNumber(transaction);
             filterContraAccountNameFromDescription(transaction);
             filterContraAccountNumberFromDescription(transaction);
             return transaction;

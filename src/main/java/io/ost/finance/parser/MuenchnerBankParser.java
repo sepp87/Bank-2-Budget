@@ -61,7 +61,6 @@ public class MuenchnerBankParser extends TransactionParser {
         parseDescriptionFrom(record, transaction);
         parseAmountFrom(record, transaction);
         calculateBalanceAfter(transaction);
-        generateTransactionNumber(transaction);
         filterContraAccountNumberFromDescription(transaction);
         return transaction;
     }

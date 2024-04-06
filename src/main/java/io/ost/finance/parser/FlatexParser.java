@@ -65,7 +65,6 @@ public class FlatexParser extends TransactionParser {
         transaction.setOriginalRecord(record.toMap().values());
         parseDateFrom(record.get("Buchtag"), transaction);
         calculateBalanceAfter(transaction);
-        generateTransactionNumber(transaction);
         return transaction;
     }
 

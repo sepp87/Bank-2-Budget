@@ -38,7 +38,6 @@ public class GrenkeBankParser extends MuenchnerBankParser {
         parseDescriptionFrom(record, transaction);
         parseAmountFrom(record, transaction);
         calculateBalanceAfter(transaction);
-        generateTransactionNumber(transaction);
         return transaction;
     }
 

@@ -56,6 +56,7 @@ public abstract class TransactionParser {
 
 //        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), "Cp1252"), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
             List<CashTransaction> transactions = parseRecordsWith(parser);
+            CashTransaction.generateTransactionNumberAndDeriveLastOfDay(transactions);
             return transactions;
         } catch (IOException ex) {
             Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
@@ -159,70 +160,6 @@ public abstract class TransactionParser {
         BigInteger remainder = numericIban.divideAndRemainder(new BigInteger("97"))[1];
         int checksum = 98 - Integer.parseInt(remainder.toString());
         return "DE" + checksum + bankleitzahl + kontonummer;
-    }
-
-    private final Map<String, Integer> dateTransactionCount = new TreeMap<>();
-
-    /**
-     * Transaction number is based on transaction date and in conjunction its
-     * corresponding sequential number. Meaning the 2nd transaction on January
-     * 18th 2021 will always yield the number 210118002.
-     *
-     * @param transaction
-     */
-    protected void generateTransactionNumber(CashTransaction transaction) {
-        try {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Date date = format.parse(transaction.getDate());
-            SimpleDateFormat newFormat = new SimpleDateFormat("yyMMdd");
-            int yyMMdd = Integer.parseInt(newFormat.format(date));
-            int count = 1;
-            String key = transaction.getAccountNumber() + transaction.getAccountName() + yyMMdd;
-            if (dateTransactionCount.containsKey(key)) {
-                count = dateTransactionCount.get(key) + 1;
-                dateTransactionCount.put(key, count);
-            } else {
-                dateTransactionCount.put(key, 1);
-            }
-            int number = yyMMdd * 1000 + count;
-            transaction.setTransactionNumber(number);
-        } catch (ParseException ex) {
-            Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private final Map<String, CashTransaction> lastTransactionOfDateMap = new TreeMap<>();
-
-    /**
-     * Transaction number is based on transaction date and in conjunction its
-     * corresponding position of the day. Meaning the 2nd transaction on January
-     * 18th 2021 will always yield the number 210118002.
-     *
-     * @param transaction
-     */
-    protected void generateTransactionNumberAndDeriveLastOfDay(CashTransaction transaction) {
-        try {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Date date = format.parse(transaction.getDate());
-            SimpleDateFormat newFormat = new SimpleDateFormat("yyMMdd");
-            int yyMMdd = Integer.parseInt(newFormat.format(date));
-            int positionOfDay = 1;
-            String key = transaction.getAccountNumber() + transaction.getAccountName() + yyMMdd;
-            if (lastTransactionOfDateMap.containsKey(key)) {
-                CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
-                lastTransaction.setLastOfDay(false);
-                positionOfDay = lastTransaction.getPositionOfDay() + 1;
-                lastTransactionOfDateMap.put(key, transaction);
-            } else {
-                lastTransactionOfDateMap.put(key, transaction);
-            }
-            int number = yyMMdd * 1000 + positionOfDay;
-            transaction.setTransactionNumber(number);
-            transaction.setPositionOfDay(positionOfDay);
-            transaction.setLastOfDay(true);
-        } catch (ParseException ex) {
-            Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     public ParserConfig getConfig() {
