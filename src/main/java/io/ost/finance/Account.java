@@ -33,6 +33,10 @@ public class Account {
         return result;
     }
 
+    public CashTransaction getTransactionBy(int transactionNumber){
+        return allTransactionsIndex.get(transactionNumber);
+    }
+
     public String getOldestTransactionDate() {
         // TBD maybe want to sort here
         return allTransactionsIndex.values().iterator().next().getDate();
@@ -125,7 +129,7 @@ public class Account {
             int number = transaction.getTransactionNumber();
             if (allTransactionsIndex.containsKey(number)) {
                 CashTransaction existing = allTransactionsIndex.get(number);
-                boolean isSame = areValuesSameBetween(transaction, existing);
+                boolean isSame = transaction.equals(existing);
                 if (isSame && transaction.getLabel() != null && (existing.getLabel() == null || overwriteExistingLabels)) {
                     existing.setLabel(transaction.getLabel());
 //                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});
@@ -136,14 +140,16 @@ public class Account {
         }
     }
 
-    private boolean areValuesSameBetween(CashTransaction a, CashTransaction b) {
-        String accountNameNumberAndDescriptionA = a.accountName + " " + a.accountNumber + " " + a.description;
-        String accountNameNumberAndDescriptionB = b.accountName + " " + b.accountNumber + " " + b.description;
-        return accountNameNumberAndDescriptionA.equals(accountNameNumberAndDescriptionB);
-    }
-
     public static Collection<Account> getAccounts() {
         return accounts.values();
+    }
+
+    public static Account getAccountBy(String accountNumber) {
+        return accounts.get(accountNumber);
+    }
+    
+    public static void removeAllAccounts() {
+        Account.accounts.clear();
     }
 
     public List<CashTransaction> getAllTransactions() {

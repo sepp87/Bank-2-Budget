@@ -104,7 +104,6 @@ public class TransactionReaderForBudget {
                 continue;
             }
             CashTransaction transaction = getCashTransactionFrom(row);
-            transaction.setDateUnix(Util.getDateUnixFormattedFrom(transaction.date));
             transactions.add(transaction);
 
         }

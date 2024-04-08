@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -39,7 +41,6 @@ public class CashTransaction {
      */
     public int transactionNumber;
     public String date;
-    public long dateUnix;
     public Double accountBalance;
     public String accountNumber;
     public String accountName;
@@ -54,6 +55,26 @@ public class CashTransaction {
     private Collection<String> originalRecord;
     public TransactionType transactionType;
     public String description;
+
+    public CashTransaction(CashTransaction transaction) {
+        this();
+        this.label = transaction.label;
+        this.amount = transaction.amount;
+        this.transactionNumber = transaction.transactionNumber;
+        this.date = transaction.date;
+        this.accountBalance = transaction.accountBalance;
+        this.accountNumber = transaction.accountNumber;
+        this.accountName = transaction.accountName;
+        this.accountInstitution = transaction.accountInstitution;
+        this.contraAccountNumber = transaction.contraAccountNumber;
+        this.contraAccountName = transaction.contraAccountName;
+        this.internal = transaction.internal;
+        this.lastOfDay = transaction.lastOfDay;
+        this.positionOfDay = transaction.positionOfDay;
+        this.originalRecord.addAll(transaction.originalRecord);
+        this.transactionType = transaction.transactionType;
+        this.description = transaction.description;
+    }
 
     public CashTransaction() {
         originalRecord = new HashSet<>();
@@ -72,8 +93,6 @@ public class CashTransaction {
         if (Util.isMyAccountNumber(accountNumber)) {
             if (!Util.isMyAccountName(accountName)) {
                 accountName = getAccountNameFrom(accountNumber);
-//                String name = getAccountNameFrom(accountNumber);
-//                setAccountName(name);
             }
         }
         this.internal = Util.isMyAccountNumber(accountNumber) && Util.isMyAccountNumber(contraAccountNumber);
@@ -172,14 +191,6 @@ public class CashTransaction {
             return;
         }
         this.date = date;
-    }
-
-    public long getDateUnix() {
-        return dateUnix;
-    }
-
-    public void setDateUnix(long dateUnix) {
-        this.dateUnix = dateUnix;
     }
 
     public Boolean isInternal() {
@@ -422,6 +433,25 @@ public class CashTransaction {
                 Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    public boolean equals(CashTransaction transaction) {
+        Set<Boolean> result = new HashSet<>();
+        result.add(this.amount == transaction.amount);
+        result.add(this.transactionNumber == transaction.transactionNumber);
+        result.add((this.date == null ? transaction.date == null : this.date.equals(transaction.date)));
+        result.add(Objects.equals(this.accountBalance, transaction.accountBalance));
+        result.add((this.accountNumber == null ? transaction.accountNumber == null : this.accountNumber.equals(transaction.accountNumber)));
+        result.add((this.accountName == null ? transaction.accountName == null : this.accountName.equals(transaction.accountName)));
+        result.add(this.accountInstitution == transaction.accountInstitution);
+        result.add((this.contraAccountNumber == null ? transaction.contraAccountNumber == null : this.contraAccountNumber.equals(transaction.contraAccountNumber)));
+        result.add((this.contraAccountName == null ? transaction.contraAccountName == null : this.contraAccountName.equals(transaction.contraAccountName)));
+        result.add(Objects.equals(this.internal, transaction.internal));
+        result.add(Objects.equals(this.lastOfDay, transaction.lastOfDay));
+        result.add(this.positionOfDay == transaction.positionOfDay);
+        result.add(this.transactionType == transaction.transactionType);
+        result.add((this.description == null ? transaction.description == null : this.description.equals(transaction.description)));
+        return !result.contains(false);
     }
 
 }

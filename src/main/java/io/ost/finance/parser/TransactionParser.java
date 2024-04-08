@@ -150,7 +150,6 @@ public abstract class TransactionParser {
     protected void parseDateFrom(String date, CashTransaction transaction) throws ParseException {
         String isoDate = Util.getDateIsoFormattedFrom(date);
         transaction.setDate(isoDate);
-        transaction.setDateUnix(Util.getDateUnixFormattedFrom(isoDate));
     }
 
     // https://www.sparkonto.org/manuelles-berechnen-der-iban-pruefziffer-sepa/
