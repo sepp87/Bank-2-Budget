@@ -4,30 +4,12 @@
  */
 package io.ost.finance;
 
-import com.sun.source.doctree.SystemPropertyTree;
-import io.ost.finance.CashTransaction;
 import io.ost.finance.parser.TransactionParser;
-import io.ost.finance.parser.UnifiedCsvParser;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.RepeatedTest;
 
 /**
  *
@@ -55,7 +37,7 @@ public class AccountTest {
         List<CashTransaction> accountAbcNewDuplicates = copyTransactions(accountAbcOldDuplicates);
         accountAbcNew.addAll(accountAbcNewDuplicates);
         sortTransactionsByAscendingDate(accountAbcNew);
-        CashTransaction.generateTransactionNumberAndDeriveLastOfDay(accountAbcNew);
+        TransactionParser.generateTransactionNumberAndDeriveLastOfDay(accountAbcNew);
 
         Account.addTransactionsToAccounts(accountXyzAll);
         Account.addTransactionsToAccounts(accountAbcOld);
@@ -109,7 +91,7 @@ public class AccountTest {
                 transactions.add(transaction);
             }
         }
-        CashTransaction.generateTransactionNumberAndDeriveLastOfDay(transactions);
+        TransactionParser.generateTransactionNumberAndDeriveLastOfDay(transactions);
         return transactions;
     }
 
