@@ -182,9 +182,9 @@ public class MonthlyBudget {
 
     private void calculateExpenses() {
         for (CashTransaction transaction : transactions) {
-            double expense = transaction.amount;
-            if (transaction.label != null) {
-                addExpenseToCategory(expense, transaction.label);
+            double expense = transaction.getAmount();
+            if (transaction.getLabel() != null) {
+                addExpenseToCategory(expense, transaction.getLabel());
             } else {
                 if (expense < 0) {
                     unassignedExpenses += expense;

@@ -19,7 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *
  * @author joost
  */
-public class TransactionWriterForBudget {
+public class TransactionWriterForBudget extends TransactionWriter {
 
     public static final String BUDGET_TRANSACTIONS = "transactions.xlsx";
 
@@ -48,10 +48,9 @@ public class TransactionWriterForBudget {
                 Row headerRow = sheet.createRow(0);
 
                 // Create cells
-                String[] columns = CashTransaction.getHeader();
-                for (int i = 0; i < columns.length; i++) {
+                for (int i = 0; i < HEADER.length; i++) {
                     Cell cell = headerRow.createCell(i);
-                    cell.setCellValue(columns[i]);
+                    cell.setCellValue(HEADER[i]);
                     cell.setCellStyle(headerCellStyle);
                 }
 
@@ -72,7 +71,7 @@ public class TransactionWriterForBudget {
                     Row row = sheet.createRow(rowNum++);
 
                     int i = 0;
-                    for (Object value : transaction.toObjectRecord()) {
+                    for (Object value : getObjectArrayFrom(transaction)) {
                         if (value == null) {
                             row.createCell(i).setCellValue("");
                         } else if (Double.class.isAssignableFrom(value.getClass())) {
@@ -87,7 +86,7 @@ public class TransactionWriterForBudget {
                 }
 
                 // Resize all columns to fit the content size
-                for (int i = 0; i < columns.length; i++) {
+                for (int i = 0; i < HEADER.length; i++) {
                     sheet.autoSizeColumn(i);
                 }
             }

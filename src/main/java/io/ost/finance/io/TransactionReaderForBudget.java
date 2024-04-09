@@ -2,7 +2,6 @@ package io.ost.finance.io;
 
 import io.ost.finance.App;
 import io.ost.finance.CashTransaction;
-import io.ost.finance.Util;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -131,7 +130,8 @@ public class TransactionReaderForBudget {
     @SuppressWarnings("unchecked")
     private static boolean setCellToTransactionByColumn(Cell cell, CashTransaction transaction, String column) {
         try {
-            Field field = CashTransaction.class.getField(column);
+            Field field = CashTransaction.class.getDeclaredField(column);
+            field.setAccessible(true);
             Type type = field.getType();
             Object value = null;
 

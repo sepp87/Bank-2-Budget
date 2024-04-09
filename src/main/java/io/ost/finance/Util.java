@@ -10,17 +10,19 @@ import java.io.FileFilter;
 import static io.ost.finance.App.get;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ *
+ * @author joost
+ */
 public class Util {
 
     public static String readFileAsString(File file) throws IOException {
@@ -96,21 +98,6 @@ public class Util {
         return filter;
     }
 
-    public static Date getDateFrom(String dateString) {
-        try {
-            String dateStringFormat = getDateFormatFrom(dateString);
-            SimpleDateFormat format = new SimpleDateFormat(dateStringFormat);
-            return format.parse(dateString);
-        } catch (ParseException ex) {
-            Logger.getLogger(Util.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return new Date();
-    }
-
-    public static String getDateIsoFormattedFrom(Date date) {
-        return new SimpleDateFormat("yyyy-MM-dd").format(date);
-    }
-
     public static String getDateIsoFormattedFrom(String dateString) {
         try {
             String dateStringFormat = getDateFormatFrom(dateString);
@@ -121,17 +108,6 @@ public class Util {
             Logger.getLogger(Util.class.getName()).log(Level.SEVERE, null, ex);
         }
         return "1970-01-01";
-    }
-
-    public static long getDateUnixFormattedFrom(String isoDate) {
-        try {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Date date = format.parse(isoDate);
-            return date.getTime() / 1000;
-        } catch (ParseException ex) {
-            Logger.getLogger(Util.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return 0;
     }
 
     public static boolean isDateIsoFormatted(String dateString) {

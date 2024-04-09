@@ -2,20 +2,12 @@ package io.ost.finance;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static io.ost.finance.App.get;
-import io.ost.finance.parser.TransactionParser;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * CashTransaction is parsed from one single Record in a CSV file. It checks
@@ -32,29 +24,29 @@ import java.util.TreeMap;
 public class CashTransaction {
 
     private static int count = 0;
-    public String label;
-    public double amount;
+    private String label;
+    private double amount;
     /**
      * The transaction number is a unique number bound to this transaction.
      * Every time this cash transaction is parsed this number should remain the
      * same. Then together with account number it can be used as primary key.
      */
-    public int transactionNumber;
-    public String date;
-    public Double accountBalance;
-    public String accountNumber;
-    public String accountName;
-    public CreditInstitution accountInstitution;
-    public String contraAccountNumber;
-    public String contraAccountName;
-    public Boolean internal;
+    private int transactionNumber;
+    private String date;
+    private Double accountBalance;
+    private String accountNumber;
+    private String accountName;
+    private CreditInstitution accountInstitution;
+    private String contraAccountNumber;
+    private String contraAccountName;
+    private Boolean internal;
 
     private Boolean lastOfDay;
     private int positionOfDay;
 
     private Collection<String> originalRecord;
-    public TransactionType transactionType;
-    public String description;
+    private TransactionType transactionType;
+    private String description;
 
     public CashTransaction(CashTransaction transaction) {
         this();
@@ -259,6 +251,25 @@ public class CashTransaction {
         this.positionOfDay = positionOfDay;
     }
 
+    public boolean equals(CashTransaction transaction) {
+        Set<Boolean> result = new HashSet<>();
+        result.add(this.amount == transaction.amount);
+        result.add(this.transactionNumber == transaction.transactionNumber);
+        result.add((this.date == null ? transaction.date == null : this.date.equals(transaction.date)));
+        result.add(Objects.equals(this.accountBalance, transaction.accountBalance));
+        result.add((this.accountNumber == null ? transaction.accountNumber == null : this.accountNumber.equals(transaction.accountNumber)));
+        result.add((this.accountName == null ? transaction.accountName == null : this.accountName.equals(transaction.accountName)));
+        result.add(this.accountInstitution == transaction.accountInstitution);
+        result.add((this.contraAccountNumber == null ? transaction.contraAccountNumber == null : this.contraAccountNumber.equals(transaction.contraAccountNumber)));
+        result.add((this.contraAccountName == null ? transaction.contraAccountName == null : this.contraAccountName.equals(transaction.contraAccountName)));
+        result.add(Objects.equals(this.internal, transaction.internal));
+        result.add(Objects.equals(this.lastOfDay, transaction.lastOfDay));
+        result.add(this.positionOfDay == transaction.positionOfDay);
+        result.add(this.transactionType == transaction.transactionType);
+        result.add((this.description == null ? transaction.description == null : this.description.equals(transaction.description)));
+        return !result.contains(false);
+    }
+
     @Override
     public String toString() {
         if (transactionType == TransactionType.DEBIT) {
@@ -266,67 +277,6 @@ public class CashTransaction {
         }
 
         return "on " + date + "\t€" + Math.abs(amount) + "\t from " + contraAccountName + "\tto " + accountName + "\tlabeled " + label;
-    }
-
-    public static String[] getHeader() {
-        return new String[]{
-            "label",
-            "amount",
-            "transactionNumber",
-            "date",
-            "accountBalance",
-            "accountInstitution",
-            "accountNumber",
-            "accountName",
-            "contraAccountNumber",
-            "contraAccountName",
-            "internal",
-            "transactionType",
-            "description"
-        };
-    }
-
-    public String[] toRecord() {
-        Object[] values = toObjectRecord();
-        String[] stringValues = new String[values.length];
-        int i = 0;
-        for (Object value : values) {
-            stringValues[i] = valueToString(value);
-            i++;
-        }
-        return stringValues;
-    }
-
-    public Object[] toObjectRecord() {
-        String[] header = getHeader();
-        Object[] values = new Object[header.length];
-        try {
-            int i = 0;
-            for (String column : header) {
-                Object value = CashTransaction.class.getField(column).get(this);
-                values[i] = value;
-                i++;
-            }
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-            Logger.getLogger(CashTransaction.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return values;
-    }
-
-    private String valueToString(Object value) {
-        if (value == null) {
-            return null;
-        } else if (value instanceof String) {
-            return value.toString();
-        } else if (value instanceof Number) {
-            return (value + "").replace('.', Config.getDecimalSeperator());
-        }
-        return value.toString();
-    }
-
-    public enum TransactionType {
-        DEBIT,
-        CREDIT,
     }
 
     public static List<CashTransaction> sortAscending(List<CashTransaction> transactions) {
@@ -345,25 +295,10 @@ public class CashTransaction {
         return transactions;
     }
 
-    /**
-     *
-     * @param transactions
-     * @param from
-     * @param to
-     * @return
-     */
     public static List<CashTransaction> filterByTimespan(List<CashTransaction> transactions, LocalDate from, LocalDate to) {
         return filterByTimespan(transactions, from, to, false);
     }
 
-    /**
-     *
-     * @param transactions
-     * @param from
-     * @param to
-     * @param inverted
-     * @return
-     */
     public static List<CashTransaction> filterByTimespan(List<CashTransaction> transactions, LocalDate from, LocalDate to, boolean inverted) {
         List<CashTransaction> result = new ArrayList<>();
         from = from.minusDays(1);
@@ -400,58 +335,8 @@ public class CashTransaction {
         return result;
     }
 
-    /**
-     * Transaction number is based on transaction date and in conjunction its
-     * corresponding sequential number. Meaning the 2nd transaction on January
-     * 18th 2021 will always yield the number 210118002.
-     *
-     * @param transactions
-     */
-    public static void generateTransactionNumberAndDeriveLastOfDay(List<CashTransaction> transactions) {
-        Map<String, CashTransaction> lastTransactionOfDateMap = new TreeMap<>();
-        for (CashTransaction transaction : transactions) {
-            try {
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                Date date = format.parse(transaction.getDate());
-                SimpleDateFormat newFormat = new SimpleDateFormat("yyMMdd");
-                int yyMMdd = Integer.parseInt(newFormat.format(date));
-                int positionOfDay = 1;
-                String key = transaction.getAccountNumber() + transaction.getAccountName() + yyMMdd;
-                if (lastTransactionOfDateMap.containsKey(key)) {
-                    CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
-                    lastTransaction.setLastOfDay(false);
-                    positionOfDay = lastTransaction.getPositionOfDay() + 1;
-                    lastTransactionOfDateMap.put(key, transaction);
-                } else {
-                    lastTransactionOfDateMap.put(key, transaction);
-                }
-                int number = yyMMdd * 1000 + positionOfDay;
-                transaction.setTransactionNumber(number);
-                transaction.setPositionOfDay(positionOfDay);
-                transaction.setLastOfDay(true);
-            } catch (ParseException ex) {
-                Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+    public enum TransactionType {
+        DEBIT,
+        CREDIT
     }
-
-    public boolean equals(CashTransaction transaction) {
-        Set<Boolean> result = new HashSet<>();
-        result.add(this.amount == transaction.amount);
-        result.add(this.transactionNumber == transaction.transactionNumber);
-        result.add((this.date == null ? transaction.date == null : this.date.equals(transaction.date)));
-        result.add(Objects.equals(this.accountBalance, transaction.accountBalance));
-        result.add((this.accountNumber == null ? transaction.accountNumber == null : this.accountNumber.equals(transaction.accountNumber)));
-        result.add((this.accountName == null ? transaction.accountName == null : this.accountName.equals(transaction.accountName)));
-        result.add(this.accountInstitution == transaction.accountInstitution);
-        result.add((this.contraAccountNumber == null ? transaction.contraAccountNumber == null : this.contraAccountNumber.equals(transaction.contraAccountNumber)));
-        result.add((this.contraAccountName == null ? transaction.contraAccountName == null : this.contraAccountName.equals(transaction.contraAccountName)));
-        result.add(Objects.equals(this.internal, transaction.internal));
-        result.add(Objects.equals(this.lastOfDay, transaction.lastOfDay));
-        result.add(this.positionOfDay == transaction.positionOfDay);
-        result.add(this.transactionType == transaction.transactionType);
-        result.add((this.description == null ? transaction.description == null : this.description.equals(transaction.description)));
-        return !result.contains(false);
-    }
-
 }

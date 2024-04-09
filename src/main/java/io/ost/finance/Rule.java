@@ -66,7 +66,8 @@ public class Rule {
             String operator = compareOperators.containsKey(property) ? compareOperators.get(property) : "==";
             boolean result = true;
             try {
-                Field propertyField = CashTransaction.class.getField(property);
+                Field propertyField = CashTransaction.class.getDeclaredField(property);
+                propertyField.setAccessible(true);
                 Type type = propertyField.getAnnotatedType().getType();
 
                 Object propertyValue = propertyField.get(cashTransaction);
@@ -149,7 +150,8 @@ public class Rule {
     private void setOutcomeTo(CashTransaction cashTransaction) {
         for (String property : outcomeStatements) {
             try {
-                Field propertyField = CashTransaction.class.getField(property);
+                Field propertyField = CashTransaction.class.getDeclaredField(property);
+                propertyField.setAccessible(true);
                 Object outcomeValue = propertyField.get(outcomeObject);
                 propertyField.set(cashTransaction, outcomeValue);
             } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {

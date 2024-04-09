@@ -10,25 +10,16 @@ import io.ost.finance.io.TransactionWriterForDone;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import picocli.CommandLine;
 
-// TODO evaluate if App as singleton makes sense
-// TODO set CashTransaction attributes to private
 // TODO evaluate if Util methods belong in corresponding class
-// TODO evaluate if Util methods can be deprecated
 // TODO write tests for addTransactionsToAccounts
-// TODO evaluate when to load config
-// TODO evaluate CashTransaction methods, move elsewhere
-
 
 /**
  * Bank-to-Budget app reads CSV files from the todo directory and command line.
@@ -40,14 +31,15 @@ import picocli.CommandLine;
 public class App {
 
     private static App app;
-
-    public final String appRootDirectory;
+    private static boolean compiling = true;
 
     private static final String CONFIG_DIRECTORY = "config";
     private static final String BUDGET_DIRECTORY = "done";
     private static final String BUILD_DIRECTORY = "build";
     private static final String MY_ACCOUNTS_PROPERTIES = "my-accounts.txt";
     private static final String OTHER_ACCOUNTS_PROPERTIES = "other-accounts.txt";
+
+    public final String appRootDirectory;
 
     public SingleAccountBudget budget;
     public boolean hasBudget;
@@ -56,6 +48,7 @@ public class App {
     public Collection<Rule> rules;
 
     public static void main(String[] args) throws Exception {
+        compiling = false;
 
         int exitCode = new CommandLine(Config.get()).execute(args);
 
@@ -74,8 +67,6 @@ public class App {
             case BUDGET:
                 TransactionReaderForBudget oldBudgetTransactions = new TransactionReaderForBudget().read();
                 Account.addTransactionsToAccounts(oldBudgetTransactions.getAsList(), true);
-
-
 
                 TransactionWriterForBudget newBudgetTransactions = new TransactionWriterForBudget();
                 newBudgetTransactions.write(Account.getAccounts());
@@ -104,7 +95,17 @@ public class App {
     private App() {
         app = this;
         appRootDirectory = Util.getAppRootDirectory(this, BUILD_DIRECTORY);
-        loadConfig();
+        if (compiling) {
+            initializeWithoutConfig();
+        } else {
+            loadConfig();
+        }
+    }
+    
+    private void initializeWithoutConfig() {
+        myAccounts = new Properties();
+        otherAccounts = new Properties();
+        rules = Collections.emptySet();
     }
 
     private void loadConfig() {

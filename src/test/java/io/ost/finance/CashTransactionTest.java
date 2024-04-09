@@ -81,12 +81,12 @@ public class CashTransactionTest {
 
     public static CashTransaction generateOneTransaction(String account, LocalDate date) {
         CashTransaction transaction = new CashTransaction();
-        transaction.accountNumber = account;
-        transaction.accountName = account;
+        transaction.setAccountNumber(account);
+        transaction.setAccountName(account);
         transaction.setDate(date.toString());
         transaction.setAmount(Math.floor(ThreadLocalRandom.current().nextDouble(-100, 100) * 100)/100);
         int expenditure = ThreadLocalRandom.current().nextInt(0, SAMPLE_EXPENDITURES.length - 1);
-        transaction.contraAccountName = SAMPLE_EXPENDITURES[expenditure];
+        transaction.setContraAccountName(SAMPLE_EXPENDITURES[expenditure]);
         return transaction;
     }
 

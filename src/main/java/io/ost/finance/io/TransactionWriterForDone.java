@@ -14,7 +14,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.csv.*;
 
-public class TransactionWriterForDone {
+/**
+ *
+ * @author joost
+ */
+public class TransactionWriterForDone extends TransactionWriter {
 
     public static final String DONE_DIRECTORY = "done";
 
@@ -40,9 +44,9 @@ public class TransactionWriterForDone {
 //        try (CSVPrinter printer = new CSVPrinter(new FileWriter(toCsvFile, StandardCharsets.UTF_8), CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL))) {
         CSVFormat csvFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL).withQuote('"');
         try (CSVPrinter printer = new CSVPrinter(new FileWriter(toCsvFile, StandardCharsets.UTF_8), csvFormat)) {
-            printer.printRecord((Object[]) CashTransaction.getHeader());
+            printer.printRecord((Object[]) HEADER);
             for (CashTransaction transaction : transactions) {
-                printer.printRecord((Object[]) transaction.toRecord());
+                printer.printRecord((Object[]) getStringArrayFrom(transaction));
             }
         } catch (IOException ex) {
             Logger.getLogger(TransactionWriterForDone.class.getName()).log(Level.SEVERE, null, ex);

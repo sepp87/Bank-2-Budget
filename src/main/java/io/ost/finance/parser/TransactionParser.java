@@ -56,7 +56,7 @@ public abstract class TransactionParser {
 
 //        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), "Cp1252"), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
             List<CashTransaction> transactions = parseRecordsWith(parser);
-            CashTransaction.generateTransactionNumberAndDeriveLastOfDay(transactions);
+            generateTransactionNumberAndDeriveLastOfDay(transactions);
             return transactions;
         } catch (IOException ex) {
             Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
@@ -138,6 +138,41 @@ public abstract class TransactionParser {
         }
     }
 
+    /**
+     * Transaction number is based on transaction date and in conjunction its
+     * corresponding sequential number. Meaning the 2nd transaction on January
+     * 18th 2021 will always yield the number 210118002.
+     *
+     * @param transactions
+     */
+    public static void generateTransactionNumberAndDeriveLastOfDay(List<CashTransaction> transactions) {
+        Map<String, CashTransaction> lastTransactionOfDateMap = new TreeMap<>();
+        for (CashTransaction transaction : transactions) {
+            try {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                Date date = format.parse(transaction.getDate());
+                SimpleDateFormat newFormat = new SimpleDateFormat("yyMMdd");
+                int yyMMdd = Integer.parseInt(newFormat.format(date));
+                int positionOfDay = 1;
+                String key = transaction.getAccountNumber() + transaction.getAccountName() + yyMMdd;
+                if (lastTransactionOfDateMap.containsKey(key)) {
+                    CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
+                    lastTransaction.setLastOfDay(false);
+                    positionOfDay = lastTransaction.getPositionOfDay() + 1;
+                    lastTransactionOfDateMap.put(key, transaction);
+                } else {
+                    lastTransactionOfDateMap.put(key, transaction);
+                }
+                int number = yyMMdd * 1000 + positionOfDay;
+                transaction.setTransactionNumber(number);
+                transaction.setPositionOfDay(positionOfDay);
+                transaction.setLastOfDay(true);
+            } catch (ParseException ex) {
+                Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
     protected double getDoubleFrom(String numberString) {
         String noEur = numberString.replace("EUR", "");
         String noPlus = noEur.replace("+", "");
@@ -164,4 +199,5 @@ public abstract class TransactionParser {
     public ParserConfig getConfig() {
         return config;
     }
+
 }
