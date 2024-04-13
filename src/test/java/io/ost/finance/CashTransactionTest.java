@@ -58,7 +58,7 @@ public class CashTransactionTest {
     @Test
     public void testEquals_WhenExactlyTheSame_ThenReturnTrue() {
         System.out.println("testEquals_WhenExactlyTheSame_ThenReturnTrue");
-        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now());
+        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label");
         CashTransaction duplicate = new CashTransaction(transaction);
         boolean expected = true;
         boolean result = transaction.equals(duplicate);
@@ -71,20 +71,22 @@ public class CashTransactionTest {
     @Test
     public void testEquals_WhenLabelsDiffer_ThenReturnTrue() {
         System.out.println("testEquals_WhenLabelsDiffer_ThenReturnTrue");
-        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now());
+        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label");
         CashTransaction duplicate = new CashTransaction(transaction);
-        duplicate.setLabel("something");
+        duplicate.setLabel("Other label");
         boolean expected = true;
         boolean result = transaction.equals(duplicate);
         assertEquals(expected, result);
     }
 
-    public static CashTransaction generateOneTransaction(String account, LocalDate date) {
+ 
+    public static CashTransaction generateOneTransaction(String account, LocalDate date, String label) {
         CashTransaction transaction = new CashTransaction();
         transaction.setAccountNumber(account);
         transaction.setAccountName(account);
         transaction.setDate(date.toString());
-        transaction.setAmount(Math.floor(ThreadLocalRandom.current().nextDouble(-100, 100) * 100)/100);
+        transaction.setLabel(label);
+        transaction.setAmount(Math.floor(ThreadLocalRandom.current().nextDouble(-100, 100) * 100) / 100);
         int expenditure = ThreadLocalRandom.current().nextInt(0, SAMPLE_EXPENDITURES.length - 1);
         transaction.setContraAccountName(SAMPLE_EXPENDITURES[expenditure]);
         return transaction;

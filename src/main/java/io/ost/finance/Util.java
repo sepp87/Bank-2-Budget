@@ -138,8 +138,8 @@ public class Util {
     public static double round(double value) {
         return (double) Math.round(value * 100) / 100;
     }
-    
-      public static LocalDate[] findOverlap(List<LocalDate> list1, List<LocalDate> list2) {
+
+    public static LocalDate[] findOverlap(List<LocalDate> list1, List<LocalDate> list2) {
         LocalDate oldest1 = findBoundaryDate(list1, false);
         LocalDate oldest2 = findBoundaryDate(list2, false);
         LocalDate newest1 = findBoundaryDate(list1, true);
@@ -173,6 +173,19 @@ public class Util {
             } else {
                 result = date.isBefore(result) ? date : result;
             }
+        }
+        return result;
+    }
+
+    public static String padWithTabs(String value, int tabs) {
+        String result = value == null ? "null" : value;
+        int lengthToPad = tabs * 8 - result.length();
+        int padding = (int) Math.floor(lengthToPad / 8);
+        padding = lengthToPad % 8 == 0 ? padding - 1 : padding;
+        int i = 0;
+        while (i < padding) {
+            result = result + "\t";
+            i++;
         }
         return result;
     }

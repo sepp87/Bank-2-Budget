@@ -3,6 +3,7 @@ package io.ost.finance;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -33,7 +34,7 @@ public class Account {
         return result;
     }
 
-    public CashTransaction getTransactionBy(int transactionNumber){
+    public CashTransaction getTransactionBy(int transactionNumber) {
         return allTransactionsIndex.get(transactionNumber);
     }
 
@@ -96,22 +97,30 @@ public class Account {
 
         if (overlap == null) {
             addTransactions(transactions);
+            
         } else {
             List<CashTransaction> existingOverlappingTransactions = getTransactions(overlap[0], overlap[1]);
             List<CashTransaction> newOverlappingTransactions = CashTransaction.filterByTimespan(transactions, overlap[0], overlap[1]);
 
             // if the newly imported list of transactions contains more entries (during the overlapping timespan), the existing ones should be replaced
-            // TODO Bonus - evaluate when the overlap starts producing uneven lists and re-adjust the timespan
             if (newOverlappingTransactions.size() > existingOverlappingTransactions.size()) {
                 removeTransactions(existingOverlappingTransactions);
                 addTransactions(transactions);
 
+                // the labels (of the existing list of transactions) can be used to enrich the new ones as long as they are actually the same transaction
+                addLabelsToExistingTransactionsFrom(existingOverlappingTransactions, overwriteExistingLabels);
+
             } else {
-                // if the newly imported list of transactions contains the same or less entries, the labels can be used to enrich the existing ones as long as they are actually the same transaction
+                // the labels (of the newly imported list of transactions) can be used to enrich the existing ones as long as they are actually the same transaction
                 addLabelsToExistingTransactionsFrom(newOverlappingTransactions, overwriteExistingLabels);
 
                 List<CashTransaction> otherNewTransactions = CashTransaction.filterByTimespan(transactions, overlap[0], overlap[1], true);
                 addTransactions(otherNewTransactions);
+
+//                System.out.println("WE HAVE AN OVERLAP");
+//                System.out.println(Arrays.toString(overlap));
+//                System.out.println("NEW " + newOverlappingTransactions.size() + "\t EXISTING " + existingOverlappingTransactions.size());
+//                System.out.println();
 
             }
         }
@@ -147,7 +156,7 @@ public class Account {
     public static Account getAccountBy(String accountNumber) {
         return accounts.get(accountNumber);
     }
-    
+
     public static void removeAllAccounts() {
         Account.accounts.clear();
     }
