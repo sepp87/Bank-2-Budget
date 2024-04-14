@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -177,8 +178,14 @@ public class Util {
         return result;
     }
 
-    public static String padWithTabs(String value, int tabs) {
-        String result = value == null ? "null" : value;
+
+    public static String padWithTabs(Object value, int tabs) {
+        // When value is an array, then convert to string
+        if (value != null && value.getClass().getComponentType() != null) {
+            value = Arrays.toString((Object[]) value);
+        }
+        // When value is null, set result to "null" otherwise convert value to string
+        String result = value == null ? "null" : value.toString();
         int lengthToPad = tabs * 8 - result.length();
         int padding = (int) Math.floor(lengthToPad / 8);
         padding = lengthToPad % 8 == 0 ? padding - 1 : padding;

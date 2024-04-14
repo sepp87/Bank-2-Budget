@@ -1,22 +1,24 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
- */
 package io.ost.finance;
 
 import io.ost.finance.parser.TransactionParser;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 /**
  *
- * @author joostmeulenkamp
+ * @author joost
  */
 public class AccountTest {
+
+    @org.junit.jupiter.api.BeforeAll
+    @org.junit.jupiter.api.AfterAll
+    public static void printLine() {
+        System.out.println();
+    }
 
     @org.junit.jupiter.api.AfterEach
     public void removeAllAccounts() {
@@ -26,7 +28,7 @@ public class AccountTest {
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @org.junit.jupiter.api.Test
+    @Test
     //    @RepeatedTest(100)
     public void testAddTransactionsToAccounts_WhenNewOfTwoAcccounts_ThenAddBoth() {
         System.out.println("testAddTransactionsToAccounts_WhenNewOfTwoAcccounts_ThenAddBoth");
@@ -46,7 +48,7 @@ public class AccountTest {
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
 
-        System.out.println("Expected: " + expected + "\tResult: " + result);
+        UtilTest.printResult(expected, result);
     }
 
     private List<CashTransaction> generateTransactionsForAccountWithinTimespan(String account, LocalDate from, LocalDate to, String label) {
@@ -71,11 +73,6 @@ public class AccountTest {
         for (LocalDate date : dates) {
             CashTransaction transaction = CashTransactionTest.generateOneTransaction(account, date, label);
             transactions.add(transaction);
-//            int count = ThreadLocalRandom.current().nextInt(1, 3);
-//            for (int i = 0; i < count; i++) {
-//                CashTransaction transaction = CashTransactionTest.generateOneTransaction(account, date);
-//                transactions.add(transaction);
-//            }
         }
         TransactionParser.generateTransactionNumberAndDeriveLastOfDay(transactions);
         return transactions;
@@ -84,7 +81,7 @@ public class AccountTest {
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @org.junit.jupiter.api.Test
+    @Test
     public void testAddTransactionsToAccounts_WhenOldAddNewWithUnorderedOverlap_ThenAddUniqueOnlyAndOldDoNotExistWithinNew() {
         System.out.println("testAddTransactionsToAccounts_WhenOldAddNewWithUnorderedOverlap_ThenAddUniqueOnlyAndOldNotExistWithinNew");
 
@@ -112,14 +109,13 @@ public class AccountTest {
 //        for (CashTransaction t : Account.getAccountBy("abc").getAllTransactions()) {
 //            System.out.println(t.toString());
 //        }
-
-        System.out.println("Expected: " + expected + "\tResult: " + result);
+        UtilTest.printResult(expected, result);
     }
 
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @org.junit.jupiter.api.Test
+    @Test
     public void testAddTransactionsToAccounts_WhenNewAddOldWithUnorderedOverlap_ThenAddUniqueOnlyAndOldDoNotExistWithinNew() {
         System.out.println("testAddTransactionsToAccounts_WhenNewAddOldWithUnorderedOverlap_ThenAddUniqueOnlyAndOldNotExistWithinNew");
 
@@ -144,17 +140,13 @@ public class AccountTest {
             assertFalse(sameTransaction, "Expected reimported transactions should NOT exist with given transaction number");
         }
 
-//        for (CashTransaction t : Account.getAccountBy("abc").getAllTransactions()) {
-//            System.out.println(t.toString());
-//        }
-
-        System.out.println("Expected: " + expected + "\tResult: " + result);
+        UtilTest.printResult(expected, result);
     }
 
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @org.junit.jupiter.api.Test
+    @Test
     public void testAddTransactionsToAccounts_WhenOldAddNewWithOrderedOverlap_ThenAddUniqueOnlyAndOldExistWithinNew() {
         System.out.println("testAddTransactionsToAccounts_WhenOldAddNewWithOrderedOverlap_ThenAddUniqueOnlyAndOldExistWithinNew");
 
@@ -179,18 +171,13 @@ public class AccountTest {
             assertTrue(sameTransaction, "Expected reimported transactions should exist with given transaction number");
         }
 
-//        for (CashTransaction t : Account.getAccountBy("abc").getAllTransactions()) {
-//            System.out.println(t.toString());
-//        }
-
-        
-        System.out.println("Expected: " + expected + "\tResult: " + result);
+        UtilTest.printResult(expected, result);
     }
 
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @org.junit.jupiter.api.Test
+    @Test
     public void testAddTransactionsToAccounts_WhenNewAddOldWithOrderedOverlap_ThenAddUniqueOnlyAndOldExistWithinNew() {
         System.out.println("testAddTransactionsToAccounts_WhenNewAddOldWithOrderedOverlap_ThenAddUniqueOnlyAndOldExistWithinNew");
 
@@ -215,11 +202,7 @@ public class AccountTest {
             assertTrue(sameTransaction, "Expected reimported transactions should exist with given transaction number");
         }
 
-//        for (CashTransaction t : Account.getAccountBy("abc").getAllTransactions()) {
-//            System.out.println(t.toString());
-//        }
-
-        System.out.println("Expected: " + expected + "\tResult: " + result);
+        UtilTest.printResult(expected, result);
     }
 
     private List<CashTransaction> generateTransactionsForAccountWithinTimespanWithOverlap(String account, LocalDate from, LocalDate to, String label, List<CashTransaction> transactions, boolean overlappingFirst) {
@@ -281,7 +264,7 @@ public class AccountTest {
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @org.junit.jupiter.api.Test
+    @Test
     public void testAddTransactionsToAccounts_WhenOldWithLabelsAddNewWithoutLabels_ThenPersistOldLabels() {
         /**
          * old with labels should not be overwritten by new without labels
@@ -307,7 +290,7 @@ public class AccountTest {
             assertEquals("Some label", transaction.getLabel());
         }
 
-        System.out.println("Expected: " + expected + "\tResult: " + result);
+        UtilTest.printResult(expected, result);
     }
 
     private List<CashTransaction> copyTransactionsAndSetLabels(List<CashTransaction> list, String label) {
@@ -319,7 +302,7 @@ public class AccountTest {
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @org.junit.jupiter.api.Test
+    @Test
     public void testAddTransactionsToAccounts_WhenOldWithLabelsAddNewWithLabels_ThenPersistOldLabels() {
         System.out.println("testAddTransactionsToAccounts_WhenOldWithLabelsAddNewWithLabels_ThenPersistOldLabels");
 
@@ -342,13 +325,13 @@ public class AccountTest {
             assertEquals("Some label", transaction.getLabel());
         }
 
-        System.out.println("Expected: " + expected + "\tResult: " + result);
+        UtilTest.printResult(expected, result);
     }
 
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @org.junit.jupiter.api.Test
+    @Test
     public void testAddTransactionsToAccounts_WhenOldWithoutLabelsAddNewWithLabels_ThenAddNewLabels() {
         System.out.println("testAddTransactionsToAccounts_WhenOldWithoutLabelsAddNewWithLabels_ThenAddNewLabels");
 
@@ -371,15 +354,15 @@ public class AccountTest {
             assertEquals("Other label", transaction.getLabel());
         }
 
-        System.out.println("Expected: " + expected + "\tResult: " + result);
+        UtilTest.printResult(expected, result);
     }
 
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @org.junit.jupiter.api.Test
-    public void testAddTransactionsToAccounts_WhenNewWithLabelsAddOldWithLabels_ThenPersistOldLabels() {
-        System.out.println("testAddTransactionsToAccounts_WhenNewWithLabelsAddOldWithLabels_ThenPersistOldLabels");
+    @Test
+    public void testAddTransactionsToAccounts_WhenNewWithLabelsOverwriteOldWithLabels_ThenPersistOldLabels() {
+        System.out.println("testAddTransactionsToAccounts_WhenNewWithLabelsOverwriteOldWithLabels_ThenPersistOldLabels");
 
         // Create test data        
         List<CashTransaction> transactionsOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
@@ -400,7 +383,36 @@ public class AccountTest {
             assertEquals("Some label", transaction.getLabel());
         }
 
-        System.out.println("Expected: " + expected + "\tResult: " + result);
+        UtilTest.printResult(expected, result);
+    }
+
+    /**
+     * Test of addTransactionsToAccounts method, of class Account.
+     */
+    @Test
+    public void testAddTransactionsToAccounts_WhenNewWithLabelsOverwriteOldWithoutLabels_ThenPersistNewLabels() {
+        System.out.println("testAddTransactionsToAccounts_WhenNewWithLabelsOverwriteOldWithoutLabels_ThenPersistNewLabels");
+
+        // Create test data        
+        List<CashTransaction> transactionsOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), null);
+        List<CashTransaction> transactionsNew = copyTransactionsAndSetLabels(transactionsOld, "Other label");
+
+        // Perform test
+        Account.addTransactionsToAccounts(transactionsNew);
+        Account.addTransactionsToAccounts(transactionsOld, true);
+
+        // Prepare results
+        List<CashTransaction> transactionsAll = Account.getAccountBy("abc").getAllTransactions();
+        int expected = transactionsOld.size();
+        int result = transactionsAll.size();
+
+        // Evaluate result
+        assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
+        for (CashTransaction transaction : transactionsAll) {
+            assertEquals("Other label", transaction.getLabel());
+        }
+
+        UtilTest.printResult(expected, result);
     }
 
 }

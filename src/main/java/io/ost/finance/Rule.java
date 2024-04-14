@@ -88,7 +88,6 @@ public class Rule {
                 }
 
 //                System.out.println(result + "\t" + property);
-
                 if (result == false) {
                     return false;
                 }

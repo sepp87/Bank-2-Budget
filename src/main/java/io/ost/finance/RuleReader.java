@@ -41,6 +41,22 @@ public class RuleReader {
         List<Rule> rules = new ArrayList<>();
         String jsString = readFileAsString(file);
         String jsonString = jsString.split("`")[1];
+        return readFrom(jsonString);
+    }
+
+    private String readFileAsString(File file) {
+        // Fallback string so the following methods don't break
+        String jsonString = "`[]";
+        try {
+            jsonString = Util.readFileAsString(file);
+        } catch (IOException ex) {
+            Logger.getLogger(RuleReader.class.getName()).log(Level.INFO, "Could NOT read file, proceeding without {0}", file.getPath());
+        }
+        return jsonString;
+    }
+
+    protected List<Rule> readFrom(String jsonString) {
+        List<Rule> rules = new ArrayList<>();
         JsonArray ruleArray = parser.parse(jsonString).getAsJsonArray();
         Iterator<JsonElement> iterator = ruleArray.iterator();
         while (iterator.hasNext()) {
@@ -49,16 +65,6 @@ public class RuleReader {
             rules.add(rule);
         }
         return rules;
-    }
-
-    private String readFileAsString(File file) {
-        String jsonString = "`[]";
-        try {
-            jsonString = Util.readFileAsString(file);
-        } catch (IOException ex) {
-            Logger.getLogger(RuleReader.class.getName()).log(Level.INFO, "Could NOT read file, proceeding without {0}", file.getPath());
-        }
-        return jsonString;
     }
 
     private Rule createRuleFrom(JsonObject ruleObject) {

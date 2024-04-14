@@ -1,26 +1,39 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
- */
 package io.ost.finance;
 
 import io.ost.finance.CashTransaction.TransactionType;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
- * @author joostmeulenkamp
+ * @author joost
  */
 public class CashTransactionTest {
+
+    @org.junit.jupiter.api.BeforeAll
+    @org.junit.jupiter.api.AfterAll
+    public static void printLine() {
+        System.out.println();
+    }
+
+//    /**
+//     * Test of setAccountNumber method, of class CashTransaction.
+//     */
+//    @Test
+//    public void testSetAccountNumber_WhenNumberIsOwn_ThenAddAccountName() {
+//        System.out.println("testSetAccountNumber_WhenNumberIsOwn_ThenAddAccountName");
+//
+//        App.get().myAccounts.put("123", "Savings account");
+//        CashTransaction transaction = generateOneTransaction("123", LocalDate.now(), null);
+//
+//        String expected = "Savings account";
+//        String result = transaction.getAccountName();
+//        assertEquals(expected, result);
+//
+//        UtilTest.printResult(expected, result);
+//    }
 
     /**
      * Test of setAmount method, of class CashTransaction.
@@ -35,6 +48,8 @@ public class CashTransactionTest {
         TransactionType expected = TransactionType.DEBIT;
         TransactionType result = transaction.getTransactionType();
         assertEquals(expected, result);
+
+        UtilTest.printResult(expected, result);
     }
 
     /**
@@ -47,9 +62,11 @@ public class CashTransactionTest {
         CashTransaction transaction = new CashTransaction();
         transaction.setAmount(10.);
 
-        TransactionType expResult = TransactionType.CREDIT;
+        TransactionType expected = TransactionType.CREDIT;
         TransactionType result = transaction.getTransactionType();
-        assertEquals(expResult, result);
+        assertEquals(expected, result);
+
+        UtilTest.printResult(expected, result);
     }
 
     /**
@@ -58,11 +75,15 @@ public class CashTransactionTest {
     @Test
     public void testEquals_WhenExactlyTheSame_ThenReturnTrue() {
         System.out.println("testEquals_WhenExactlyTheSame_ThenReturnTrue");
+
         CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label");
         CashTransaction duplicate = new CashTransaction(transaction);
+
         boolean expected = true;
         boolean result = transaction.equals(duplicate);
         assertEquals(expected, result);
+
+        UtilTest.printResult(expected, result);
     }
 
     /**
@@ -71,15 +92,37 @@ public class CashTransactionTest {
     @Test
     public void testEquals_WhenLabelsDiffer_ThenReturnTrue() {
         System.out.println("testEquals_WhenLabelsDiffer_ThenReturnTrue");
+
         CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label");
         CashTransaction duplicate = new CashTransaction(transaction);
         duplicate.setLabel("Other label");
+
         boolean expected = true;
         boolean result = transaction.equals(duplicate);
         assertEquals(expected, result);
+
+        UtilTest.printResult(expected, result);
     }
 
- 
+    /**
+     * Test of equals method, of class CashTransaction.
+     */
+    @Test
+    public void testEquals_WhenLastOfDaysDiffer_ThenReturnTrue() {
+        System.out.println("testEquals_WhenLastOfDaysDiffer_ThenReturnTrue");
+
+        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label");
+        transaction.setLastOfDay(true);
+        CashTransaction duplicate = new CashTransaction(transaction);
+        duplicate.setLastOfDay(false);
+
+        boolean expected = true;
+        boolean result = transaction.equals(duplicate);
+        assertEquals(expected, result);
+
+        UtilTest.printResult(expected, result);
+    }
+
     public static CashTransaction generateOneTransaction(String account, LocalDate date, String label) {
         CashTransaction transaction = new CashTransaction();
         transaction.setAccountNumber(account);
