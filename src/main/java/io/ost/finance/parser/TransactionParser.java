@@ -118,7 +118,15 @@ public abstract class TransactionParser {
         for (Rule rule : get().rules) {
             rule.process(transaction);
         }
+
+        // TODO Unsure if this method is needed, only Comdirect uses it
+        // it sets (and overwrites) my account number based on the account name, which makes sense when an account number is not given in the bank statement (which happens in case of Comdirect)
+        // BUT should it overwrite the account number
         deriveAccountNumberFrom(transaction);
+
+        // TODO Unsure if this method is needed, only INGDIBA might use it
+        // it sets (and overwrite) contra account number (only of transactions to my own bank accounts) based on the contra account name, which makes sense when the contra account number is not given in the bank statement (which happens in case of Comdirect)
+        // BUT should it overwrite the contra account number
         deriveContraAccountNumberFrom(transaction);
     }
 

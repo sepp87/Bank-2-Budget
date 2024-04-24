@@ -117,7 +117,6 @@ public class ComdirectParser extends TransactionParser {
             CashTransaction transaction = new CashTransaction();
             transaction.setOriginalRecord(record.toMap().values());
             transaction.setAccountName(accountName);
-            transaction.setAccountNumber(accountName);
             if (accountName.equals("Visa-Karte (Kreditkarte)")) {
                 transaction.setAmount(getDoubleFrom(record.get(5)));
                 transaction.setDescription(record.get(4));

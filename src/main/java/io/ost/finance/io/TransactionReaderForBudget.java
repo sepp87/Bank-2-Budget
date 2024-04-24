@@ -2,6 +2,7 @@ package io.ost.finance.io;
 
 import io.ost.finance.App;
 import io.ost.finance.CashTransaction;
+import io.ost.finance.CreditInstitution;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -103,6 +104,8 @@ public class TransactionReaderForBudget {
                 continue;
             }
             CashTransaction transaction = getCashTransactionFrom(row);
+            getCashTransactionFromRow(row);
+            // Derive last of day
             transactions.add(transaction);
 
         }
@@ -135,6 +138,7 @@ public class TransactionReaderForBudget {
             Type type = field.getType();
             Object value = null;
 
+//            System.out.println(column + " + " + cell.getCellType());
             switch (cell.getCellType()) {
 
                 case STRING:
@@ -169,5 +173,87 @@ public class TransactionReaderForBudget {
         }
         return false;
     }
+
+    private static CashTransaction getCashTransactionFromRow(Row row) {
+        CashTransaction transaction = new CashTransaction();
+
+        int i = 0;
+        for (String column : header) {
+            Cell cell = row.getCell(i);
+            if (cell != null) {
+                switch (column) {
+                    case "label": // String
+                        transaction.setLabel(cell.getStringCellValue());
+                        break;
+                    case "amount": // Numeric
+                        transaction.setAmount(cell.getNumericCellValue());
+                        break;
+                    case "transactionNumber": // Numeric
+                        int transactionNumber = (int) cell.getNumericCellValue();
+                        transaction.setTransactionNumber(transactionNumber);
+                        int positionOfDay = Integer.parseInt(String.valueOf(transactionNumber).substring(6)); // YYMMDDXXX
+                        transaction.setPositionOfDay(positionOfDay);
+                        break;
+                    case "lastOfDay": // String to Boolean
+                        transaction.setLastOfDay(Boolean.valueOf(cell.getStringCellValue()));
+                        break;
+                    case "date": // String
+                        transaction.setLabel(cell.getStringCellValue());
+                        break;
+                    case "accountBalance": // Numeric
+                        transaction.setAccountBalance(cell.getNumericCellValue());
+                        break;
+                    case "accountInstitution": // String to Enum
+                        transaction.setAccountInstitution(CreditInstitution.valueOf(cell.getStringCellValue()));
+                        break;
+                    case "accountNumber": // String
+                        transaction.setAccountNumber(cell.getStringCellValue());
+                        break;
+                    case "accountName": // String
+                        transaction.setAccountName(cell.getStringCellValue());
+                        break;
+                    case "contraAccountNumber": // String
+                        transaction.setContraAccountNumber(cell.getStringCellValue());
+                        break;
+                    case "contraAccountName": // String
+                        transaction.setContraAccountName(cell.getStringCellValue());
+                        break;
+                    case "description": // String
+                        transaction.setDescription(cell.getStringCellValue());
+                        break;
+                }
+            }
+            i++;
+        }
+        return transaction;
+    }
+
+//    public static void deriveLastOfDay(List<CashTransaction> transactions) {
+//        Map<String, CashTransaction> lastTransactionOfDateMap = new TreeMap<>();
+//        for (CashTransaction transaction : transactions) {
+//            try {
+//                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+//                Date date = format.parse(transaction.getDate());
+//                SimpleDateFormat newFormat = new SimpleDateFormat("yyMMdd");
+//                int yyMMdd = Integer.parseInt(newFormat.format(date));
+//                int positionOfDay = 1;
+//                String key = transaction.getAccountNumber() + transaction.getAccountName() + yyMMdd;
+//                if (lastTransactionOfDateMap.containsKey(key)) {
+//                    CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
+//                    lastTransaction.setLastOfDay(false);
+//                    positionOfDay = lastTransaction.getPositionOfDay() + 1;
+//                    lastTransactionOfDateMap.put(key, transaction);
+//                } else {
+//                    lastTransactionOfDateMap.put(key, transaction);
+//                }
+//                int number = yyMMdd * 1000 + positionOfDay;
+//                transaction.setTransactionNumber(number);
+//                transaction.setPositionOfDay(positionOfDay);
+//                transaction.setLastOfDay(true);
+//            } catch (ParseException ex) {
+//                Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
+//    }
 
 }

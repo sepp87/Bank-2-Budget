@@ -98,6 +98,9 @@ public class CashTransaction {
     }
 
     public void setAccountName(String accountName) {
+        if (Util.isMyAccountName(this.accountName)) {
+            return;
+        }
         if (accountName != null && accountName.equals("")) {
             this.accountName = null;
         }

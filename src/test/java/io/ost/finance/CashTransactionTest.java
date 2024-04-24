@@ -18,22 +18,42 @@ public class CashTransactionTest {
         System.out.println();
     }
 
-//    /**
-//     * Test of setAccountNumber method, of class CashTransaction.
-//     */
-//    @Test
-//    public void testSetAccountNumber_WhenNumberIsOwn_ThenAddAccountName() {
-//        System.out.println("testSetAccountNumber_WhenNumberIsOwn_ThenAddAccountName");
-//
-//        App.get().myAccounts.put("123", "Savings account");
-//        CashTransaction transaction = generateOneTransaction("123", LocalDate.now(), null);
-//
-//        String expected = "Savings account";
-//        String result = transaction.getAccountName();
-//        assertEquals(expected, result);
-//
-//        UtilTest.printResult(expected, result);
-//    }
+    /**
+     * Test of setAccountNumber method, of class CashTransaction.
+     */
+    @Test
+    public void testSetAccountNumber_WhenNumberIsOwn_ThenAddAccountName() {
+        System.out.println("testSetAccountNumber_WhenNumberIsOwn_ThenAddAccountName");
+
+        App.get().myAccounts.put("123", "Savings account");
+        CashTransaction transaction = new CashTransaction();
+        transaction.setAccountNumber("123");
+
+        String expected = "Savings account";
+        String result = transaction.getAccountName();
+        assertEquals(expected, result);
+
+        UtilTest.printResult(expected, result);
+    }
+
+    /**
+     * Test of setAccountName method, of class CashTransaction.
+     */
+    @Test
+    public void testSetAccountName_WhenCorrectAccountNameAlreadySet_ThenKeepExisting() {
+        System.out.println("testSetAccountName_WhenCorrectAccountNameAlreadySet_ThenKeepExisting");
+
+        App.get().myAccounts.put("123", "Savings account");
+        CashTransaction transaction = new CashTransaction();
+        transaction.setAccountNumber("123");
+        transaction.setAccountName("Some name");
+
+        String expected = "Savings account";
+        String result = transaction.getAccountName();
+        assertEquals(expected, result);
+
+        UtilTest.printResult(expected, result);
+    }
 
     /**
      * Test of setAmount method, of class CashTransaction.

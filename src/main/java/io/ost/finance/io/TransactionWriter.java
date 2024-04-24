@@ -16,6 +16,8 @@ public abstract class TransactionWriter {
         "label",
         "amount",
         "transactionNumber",
+        "positionOfDay",
+        "lastOfDay",
         "date",
         "accountBalance",
         "accountInstitution",
