@@ -3,10 +3,13 @@ package io.ost.finance.io;
 import io.ost.finance.App;
 import io.ost.finance.CashTransaction;
 import io.ost.finance.CreditInstitution;
+import io.ost.finance.parser.TransactionParser;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -74,7 +77,7 @@ public class TransactionReaderForBudget {
             Logger.getLogger(TransactionReaderForBudget.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        return Collections.EMPTY_MAP;
+        return Collections.emptyMap();
     }
 
     private static List<String> getHeaderFrom(Sheet sheet) {
@@ -104,11 +107,9 @@ public class TransactionReaderForBudget {
                 continue;
             }
             CashTransaction transaction = getCashTransactionFrom(row);
-            getCashTransactionFromRow(row);
-            // Derive last of day
             transactions.add(transaction);
-
         }
+        deriveLastOfDay(transactions);
         return transactions;
     }
 
@@ -118,63 +119,6 @@ public class TransactionReaderForBudget {
     }
 
     private static CashTransaction getCashTransactionFrom(Row row) {
-        CashTransaction transaction = new CashTransaction();
-        int i = 0;
-        for (String column : header) {
-            Cell cell = row.getCell(i);
-            if (cell != null) {
-                setCellToTransactionByColumn(cell, transaction, column);
-            }
-            i++;
-        }
-        return transaction;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static boolean setCellToTransactionByColumn(Cell cell, CashTransaction transaction, String column) {
-        try {
-            Field field = CashTransaction.class.getDeclaredField(column);
-            field.setAccessible(true);
-            Type type = field.getType();
-            Object value = null;
-
-//            System.out.println(column + " + " + cell.getCellType());
-            switch (cell.getCellType()) {
-
-                case STRING:
-                    value = cell.getStringCellValue();
-                    if (type.equals(Boolean.class)) {
-                        value = Boolean.valueOf((String) value);
-                    } else if (field.getType().isEnum()) {
-                        value = Enum.valueOf((Class<Enum>) field.getType(), (String) value);  // if not surpressed, causes warning "Some input files use unverified or unsafe processes."                      
-                    } else if (value.equals("")) {
-                        value = null;
-                    } else if (type.equals(Double.class)) {
-                        value = Double.parseDouble((String) value);
-                    }
-                    break;
-
-                case NUMERIC:
-                    value = cell.getNumericCellValue();
-                    if (type.equals(int.class)) {
-                        value = (int) ((double) value);
-                    }
-
-                    break;
-            }
-
-            if (value != null) {
-                field.set(transaction, value);
-            }
-
-            return true;
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-            Logger.getLogger(TransactionReaderForBudget.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return false;
-    }
-
-    private static CashTransaction getCashTransactionFromRow(Row row) {
         CashTransaction transaction = new CashTransaction();
 
         int i = 0;
@@ -194,11 +138,8 @@ public class TransactionReaderForBudget {
                         int positionOfDay = Integer.parseInt(String.valueOf(transactionNumber).substring(6)); // YYMMDDXXX
                         transaction.setPositionOfDay(positionOfDay);
                         break;
-                    case "lastOfDay": // String to Boolean
-                        transaction.setLastOfDay(Boolean.valueOf(cell.getStringCellValue()));
-                        break;
                     case "date": // String
-                        transaction.setLabel(cell.getStringCellValue());
+                        transaction.setDate(cell.getStringCellValue());
                         break;
                     case "accountBalance": // Numeric
                         transaction.setAccountBalance(cell.getNumericCellValue());
@@ -228,32 +169,23 @@ public class TransactionReaderForBudget {
         return transaction;
     }
 
-//    public static void deriveLastOfDay(List<CashTransaction> transactions) {
-//        Map<String, CashTransaction> lastTransactionOfDateMap = new TreeMap<>();
-//        for (CashTransaction transaction : transactions) {
-//            try {
-//                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-//                Date date = format.parse(transaction.getDate());
-//                SimpleDateFormat newFormat = new SimpleDateFormat("yyMMdd");
-//                int yyMMdd = Integer.parseInt(newFormat.format(date));
-//                int positionOfDay = 1;
-//                String key = transaction.getAccountNumber() + transaction.getAccountName() + yyMMdd;
-//                if (lastTransactionOfDateMap.containsKey(key)) {
-//                    CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
-//                    lastTransaction.setLastOfDay(false);
-//                    positionOfDay = lastTransaction.getPositionOfDay() + 1;
-//                    lastTransactionOfDateMap.put(key, transaction);
-//                } else {
-//                    lastTransactionOfDateMap.put(key, transaction);
-//                }
-//                int number = yyMMdd * 1000 + positionOfDay;
-//                transaction.setTransactionNumber(number);
-//                transaction.setPositionOfDay(positionOfDay);
-//                transaction.setLastOfDay(true);
-//            } catch (ParseException ex) {
-//                Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
-//    }
+    public static void deriveLastOfDay(List<CashTransaction> transactions) {
+        Map<String, CashTransaction> lastTransactionOfDateMap = new TreeMap<>();
+        for (CashTransaction transaction : transactions) {
+            int uuMMdd = Integer.parseInt(LocalDate.parse(transaction.getDate()).format(DateTimeFormatter.ofPattern("uuMMdd")));
+            String key = transaction.getAccountNumber() + transaction.getAccountName() + uuMMdd;
+            if (lastTransactionOfDateMap.containsKey(key)) {
+                CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
+                if (transaction.getPositionOfDay() > lastTransaction.getPositionOfDay()) {
+                    lastTransactionOfDateMap.put(key, transaction);
+                }
+            } else {
+                lastTransactionOfDateMap.put(key, transaction);
+            }
+        }
+        for (CashTransaction transaction : lastTransactionOfDateMap.values()) {
+            transaction.setLastOfDay(true);
+        }
+    }
 
 }

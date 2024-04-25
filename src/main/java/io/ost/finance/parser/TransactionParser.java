@@ -24,6 +24,8 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import static io.ost.finance.App.get;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  * The abstract class TransactionParser parses the CashTranasactions inside the
@@ -56,7 +58,9 @@ public abstract class TransactionParser {
 
 //        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), "Cp1252"), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
             List<CashTransaction> transactions = parseRecordsWith(parser);
-            generateTransactionNumberAndDeriveLastOfDay(transactions);
+//            for (CashTransaction t : transactions) {
+//                System.out.println(t.toString());
+//            }
             return transactions;
         } catch (IOException ex) {
             Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
@@ -82,13 +86,11 @@ public abstract class TransactionParser {
                 }
                 postProcess(transaction);
                 transactions.add(transaction);
-//                System.out.println(Arrays.toString(transaction.toRecord()));   // just a debug string that can be deleted   
-//                Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();   // just a debug string that can be deleted   
-//                System.out.println(gson.toJson(transaction));   // just a debug string that can be deleted   
             } catch (ParseException ex) {
                 Logger.getLogger(TransactionParser.class.getName()).log(Level.WARNING, "Record skipped due to inccorrect values. {0}", ex.getMessage());
             }
         }
+        generateTransactionNumberAndDeriveLastOfDay(transactions);
         return transactions;
     }
 
@@ -155,29 +157,25 @@ public abstract class TransactionParser {
      */
     public static void generateTransactionNumberAndDeriveLastOfDay(List<CashTransaction> transactions) {
         Map<String, CashTransaction> lastTransactionOfDateMap = new TreeMap<>();
+
         for (CashTransaction transaction : transactions) {
-            try {
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                Date date = format.parse(transaction.getDate());
-                SimpleDateFormat newFormat = new SimpleDateFormat("yyMMdd");
-                int yyMMdd = Integer.parseInt(newFormat.format(date));
-                int positionOfDay = 1;
-                String key = transaction.getAccountNumber() + transaction.getAccountName() + yyMMdd;
-                if (lastTransactionOfDateMap.containsKey(key)) {
-                    CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
-                    lastTransaction.setLastOfDay(false);
-                    positionOfDay = lastTransaction.getPositionOfDay() + 1;
-                    lastTransactionOfDateMap.put(key, transaction);
-                } else {
-                    lastTransactionOfDateMap.put(key, transaction);
-                }
-                int number = yyMMdd * 1000 + positionOfDay;
-                transaction.setTransactionNumber(number);
-                transaction.setPositionOfDay(positionOfDay);
-                transaction.setLastOfDay(true);
-            } catch (ParseException ex) {
-                Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
+            int uuMMdd = Integer.parseInt(LocalDate.parse(transaction.getDate()).format(DateTimeFormatter.ofPattern("uuMMdd")));
+            String key = transaction.getAccountNumber() + transaction.getAccountName() + uuMMdd;
+            int positionOfDay = 1;
+            if (lastTransactionOfDateMap.containsKey(key)) {
+                CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
+                positionOfDay = lastTransaction.getPositionOfDay() + 1;
+                lastTransactionOfDateMap.put(key, transaction);
+            } else {
+                lastTransactionOfDateMap.put(key, transaction);
             }
+
+            int number = uuMMdd * 1000 + positionOfDay;
+            transaction.setTransactionNumber(number);
+            transaction.setPositionOfDay(positionOfDay);
+        }
+        for (CashTransaction transaction : lastTransactionOfDateMap.values()) {
+            transaction.setLastOfDay(true);
         }
     }
 

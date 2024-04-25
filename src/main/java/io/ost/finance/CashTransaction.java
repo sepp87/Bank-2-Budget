@@ -39,9 +39,9 @@ public class CashTransaction {
     private CreditInstitution accountInstitution;
     private String contraAccountNumber;
     private String contraAccountName;
-    private Boolean internal;
+    private boolean internal;
 
-    private Boolean lastOfDay;
+    private boolean lastOfDay;
     private int positionOfDay;
 
     private Collection<String> originalRecord;
@@ -301,7 +301,8 @@ public class CashTransaction {
 
     @Override
     public String toString() {
-        String result = date + "\t€" + amount + "\t\t" + Util.padWithTabs(accountName, 4) + Util.padWithTabs(contraAccountName, 5) + Util.padWithTabs(label, 4);
+        String result = transactionNumber + "\t" + lastOfDay + "\t" + date + "\t" + Util.padWithTabs("€" + amount, 3) + Util.padWithTabs(accountName, 4) + Util.padWithTabs(contraAccountName, 5) + Util.padWithTabs(label, 4);
+//        String result = date + "\t" + Util.padWithTabs("€" + amount, 3) + Util.padWithTabs(accountName, 4) + Util.padWithTabs(contraAccountName, 5) + Util.padWithTabs(label, 4);
         return result;
     }
 
