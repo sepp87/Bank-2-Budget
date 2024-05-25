@@ -18,7 +18,7 @@ public class UtilTest {
     }
 
     public static void printResult(Object expected, Object result) {
-        System.out.println("Expected:\t" + Util.padWithTabs(expected, 4) + "\tResult: " +  Util.padWithTabs(result, 2));
+        System.out.println(" Expected:\t" + Util.padWithTabs(expected, 4) + "\tResult: " +  Util.padWithTabs(result, 2));
     }
 
     @org.junit.jupiter.api.Test

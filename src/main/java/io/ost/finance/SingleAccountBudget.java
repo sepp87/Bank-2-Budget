@@ -32,7 +32,7 @@ public class SingleAccountBudget {
     }
 
     // you can only add an account once
-    public boolean addAccount(Account account) {
+    public boolean setAccount(Account account) {
         if (this.account == null) {
             this.account = account;
             calculateAllMonthlyBudgets();
@@ -69,11 +69,11 @@ public class SingleAccountBudget {
     private List<LocalDate> calculateAllFirstOfMonth() {
         LocalDate newest = LocalDate.parse(account.getNewestTransactionDate());
         LocalDate oldest = LocalDate.parse(account.getOldestTransactionDate());
+        
         // if the first of month comes after oldest transaction date, the month of year should be one earlier
-        int month = (firstOfMonth > oldest.getDayOfMonth()) ? oldest.getMonthValue() - 1 : oldest.getMonthValue();
-        LocalDate first = LocalDate.of(oldest.getYear(), month, firstOfMonth);
+        LocalDate first = (firstOfMonth > oldest.getDayOfMonth()) ? oldest.minusMonths(1).withDayOfMonth(firstOfMonth): oldest.withDayOfMonth(firstOfMonth);
         List<LocalDate> allFirst = new ArrayList<>();
-        while (first.isBefore(newest)) {
+        while (first.isBefore(newest) || first.equals(newest)) { 
             allFirst.add(first);
             first = ChronoUnit.MONTHS.addTo(first, 1);
         }
@@ -93,8 +93,8 @@ public class SingleAccountBudget {
     }
 
     private List<CashTransaction> getTransactionsFromAccountFor(LocalDate firstOfMonth) {
-        LocalDate nextFirst = ChronoUnit.MONTHS.addTo(firstOfMonth, 1);
-        return account.getTransactions(firstOfMonth, nextFirst);
+        LocalDate lastOfMonth = firstOfMonth.plusMonths(1).minusDays(1);
+        return account.getTransactions(firstOfMonth, lastOfMonth);
     }
 
 }

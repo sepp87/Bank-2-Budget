@@ -9,11 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -23,7 +20,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import static io.ost.finance.App.get;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -70,7 +66,7 @@ public abstract class TransactionParser {
 
     /**
      *
-     * @return the CSVFormat with its title row and delimiter (value seperator)
+     * @return the CSVFormat with its title row and delimiter (value separator)
      */
     protected abstract CSVFormat getCsvFormat();
 
@@ -153,9 +149,22 @@ public abstract class TransactionParser {
      * corresponding sequential number. Meaning the 2nd transaction on January
      * 18th 2021 will always yield the number 210118002.
      *
-     * @param transactions
+     * @param transactions list sorted by date ascending
      */
     public static void generateTransactionNumberAndDeriveLastOfDay(List<CashTransaction> transactions) {
+        generateTransactionNumberAndDeriveLastOfDay(transactions, false);
+    }
+
+    /**
+     * Transaction number is based on transaction date and in conjunction its
+     * corresponding sequential number. Meaning the 2nd transaction on January
+     * 18th 2021 will always yield the number 210118002.
+     *
+     * @param transactions list sorted by
+     * @param deriveLastOfDayOnly should be set to false if transactionNumber
+     * and positionOfDay are not yet generated
+     */
+    private static void generateTransactionNumberAndDeriveLastOfDay(List<CashTransaction> transactions, boolean deriveLastOfDayOnly) {
         Map<String, CashTransaction> lastTransactionOfDateMap = new TreeMap<>();
 
         for (CashTransaction transaction : transactions) {
@@ -164,19 +173,40 @@ public abstract class TransactionParser {
             int positionOfDay = 1;
             if (lastTransactionOfDateMap.containsKey(key)) {
                 CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
-                positionOfDay = lastTransaction.getPositionOfDay() + 1;
-                lastTransactionOfDateMap.put(key, transaction);
+                if (deriveLastOfDayOnly) {
+                    // in case the list is not sorted by date e.g. the transactions spreadsheet was resorted
+                    if (transaction.getPositionOfDay() > lastTransaction.getPositionOfDay()) {
+                        lastTransactionOfDateMap.put(key, transaction);
+                    }
+                } else {
+                    positionOfDay = lastTransaction.getPositionOfDay() + 1;
+                    lastTransactionOfDateMap.put(key, transaction);
+                }
+
             } else {
                 lastTransactionOfDateMap.put(key, transaction);
             }
 
-            int number = uuMMdd * 1000 + positionOfDay;
-            transaction.setTransactionNumber(number);
-            transaction.setPositionOfDay(positionOfDay);
+            if (!deriveLastOfDayOnly) {
+                int number = uuMMdd * 1000 + positionOfDay;
+                transaction.setTransactionNumber(number);
+                transaction.setPositionOfDay(positionOfDay);
+            }
+
         }
         for (CashTransaction transaction : lastTransactionOfDateMap.values()) {
             transaction.setLastOfDay(true);
         }
+    }
+
+    /**
+     * transactions with the highest position of day are get flagged as last of
+     * day
+     *
+     * @param transactions unsorted list of transactions
+     */
+    public static void deriveLastOfDay(List<CashTransaction> transactions) {
+        generateTransactionNumberAndDeriveLastOfDay(transactions, true);
     }
 
     protected double getDoubleFrom(String numberString) {

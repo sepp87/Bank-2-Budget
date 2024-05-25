@@ -6,8 +6,6 @@ import io.ost.finance.CreditInstitution;
 import io.ost.finance.parser.TransactionParser;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -109,7 +107,7 @@ public class TransactionReaderForBudget {
             CashTransaction transaction = getCashTransactionFrom(row);
             transactions.add(transaction);
         }
-        deriveLastOfDay(transactions);
+        TransactionParser.deriveLastOfDay(transactions);
         return transactions;
     }
 
@@ -167,25 +165,6 @@ public class TransactionReaderForBudget {
             i++;
         }
         return transaction;
-    }
-
-    public static void deriveLastOfDay(List<CashTransaction> transactions) {
-        Map<String, CashTransaction> lastTransactionOfDateMap = new TreeMap<>();
-        for (CashTransaction transaction : transactions) {
-            int uuMMdd = Integer.parseInt(LocalDate.parse(transaction.getDate()).format(DateTimeFormatter.ofPattern("uuMMdd")));
-            String key = transaction.getAccountNumber() + transaction.getAccountName() + uuMMdd;
-            if (lastTransactionOfDateMap.containsKey(key)) {
-                CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
-                if (transaction.getPositionOfDay() > lastTransaction.getPositionOfDay()) {
-                    lastTransactionOfDateMap.put(key, transaction);
-                }
-            } else {
-                lastTransactionOfDateMap.put(key, transaction);
-            }
-        }
-        for (CashTransaction transaction : lastTransactionOfDateMap.values()) {
-            transaction.setLastOfDay(true);
-        }
     }
 
 }

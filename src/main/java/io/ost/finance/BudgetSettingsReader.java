@@ -26,14 +26,12 @@ public class BudgetSettingsReader {
         parser = new JsonParser();
     }
 
-    public BudgetSettingsReader read() {
+    public void read() {
         File file = new File(App.getConfigDirectory()+ BUDGET_SETTINGS);
         readFrom(file);
-        return this;
     }
 
-    private Map<String, Double> readFrom(File file) {
-        Map<String, Double> budgetTemplate = new TreeMap<>();
+    private void readFrom(File file) {
         String jsString = readFileAsString(file);
         String jsonString = jsString.split("`")[1];
         JsonArray settingsArray = parser.parse(jsonString).getAsJsonArray();
@@ -43,7 +41,6 @@ public class BudgetSettingsReader {
             SingleAccountBudget.firstOfMonth = getFirstOfMonthFrom(settingsObject);
             SingleAccountBudget.budgetedForCategory = getBudgetTemplateFrom(settingsObject);
         }
-        return budgetTemplate;
     }
 
     private String readFileAsString(File file) {

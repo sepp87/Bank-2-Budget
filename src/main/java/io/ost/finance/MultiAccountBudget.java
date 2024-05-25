@@ -12,11 +12,11 @@ import java.util.TreeMap;
  *
  * @author joost
  */
-public class MultiAccountBudget {
+public class MultiAccountBudget extends SingleAccountBudget {
 
     static int firstOfMonth = 25;
     static Map<String, Double> budgetedForCategory = new TreeMap<>();
-    Map<String, MultiMonthlyBudget> monthlyBudgets;
+    Map<String, MonthlyBudget> monthlyBudgets;
 
     private Collection<Account> accounts;
 
@@ -32,11 +32,16 @@ public class MultiAccountBudget {
         calculateAllMonthlyBudgets();
     }
 
-    public void addMonthlyBudget(MultiMonthlyBudget month) {
+    public void setAccounts(Collection<Account> accounts) {
+        this.accounts = accounts;
+        calculateAllMonthlyBudgets();
+    }
+
+    public void addMonthlyBudget(MonthlyBudget month) {
         monthlyBudgets.putIfAbsent(month.getFirstOfMonth(), month);
     }
 
-    public Map<String, MultiMonthlyBudget> getMonthlyBudgets() {
+    public Map<String, MonthlyBudget> getMonthlyBudgets() {
         return monthlyBudgets;
     }
 
@@ -58,8 +63,8 @@ public class MultiAccountBudget {
     }
 
     private List<LocalDate> calculateAllFirstOfMonth() {
-        LocalDate newest = getNewestTransactionDateFromAccounts();
-        LocalDate oldest = getOldestTransactionDateFromAccounts();
+        LocalDate newest = getBoundaryTransactionDate(true);
+        LocalDate oldest = getBoundaryTransactionDate(false);
         // if the first of month comes after oldest transaction date, the month of year should be one earlier
         int month = (firstOfMonth > oldest.getDayOfMonth()) ? oldest.getMonthValue() - 1 : oldest.getMonthValue();
         LocalDate first = LocalDate.of(oldest.getYear(), month, firstOfMonth);
@@ -71,49 +76,32 @@ public class MultiAccountBudget {
         return allFirst;
     }
 
-    private LocalDate getNewestTransactionDateFromAccounts() {
-        LocalDate newest = null;
+    private LocalDate getBoundaryTransactionDate(boolean newest) {
+        List<LocalDate> dates = new ArrayList<>();
         for (Account account : accounts) {
-            LocalDate candidate = LocalDate.parse(account.getNewestTransactionDate());
-            if (newest == null) {
-                newest = candidate;
-            } else if (candidate.isAfter(newest)) {
-                newest = candidate;
-            }
+            String date = newest ? account.getNewestTransactionDate() : account.getOldestTransactionDate();
+            dates.add(LocalDate.parse(date));
         }
-        return newest;
-    }
-
-    private LocalDate getOldestTransactionDateFromAccounts() {
-        LocalDate oldest = null;
-        for (Account account : accounts) {
-            LocalDate candidate = LocalDate.parse(account.getNewestTransactionDate());
-            if (oldest == null) {
-                oldest = candidate;
-            } else if (candidate.isBefore(oldest)) {
-                oldest = candidate;
-            }
-        }
-        return oldest;
+        return Util.findBoundaryDate(dates, newest);
     }
 
     private void calculateMonthlyBudgetFor(LocalDate firstOfMonth) {
         List<CashTransaction> transactions = getTransactionsFromAccountsFor(firstOfMonth);
         // check for existing months before creating a new one
         if (monthlyBudgets.containsKey(firstOfMonth.toString())) {
-            MultiMonthlyBudget month = monthlyBudgets.get(firstOfMonth.toString());
+            MonthlyBudget month = monthlyBudgets.get(firstOfMonth.toString());
             month.addTransactions(transactions);
         } else {
-            MultiMonthlyBudget month = new MultiMonthlyBudget(this, firstOfMonth.toString(), transactions);
+            MonthlyBudget month = new MonthlyBudget(this, firstOfMonth.toString(), transactions);
             monthlyBudgets.put(firstOfMonth.toString(), month);
         }
     }
 
     private List<CashTransaction> getTransactionsFromAccountsFor(LocalDate firstOfMonth) {
         List<CashTransaction> transactions = new ArrayList<>();
+        LocalDate lastOfMonth = firstOfMonth.plusMonths(1).minusDays(1);
         for (Account account : accounts) {
-            LocalDate nextFirst = ChronoUnit.MONTHS.addTo(firstOfMonth, 1);
-            transactions.addAll(account.getTransactions(firstOfMonth, nextFirst));
+            transactions.addAll(account.getTransactions(firstOfMonth, lastOfMonth));
         }
         return transactions;
     }

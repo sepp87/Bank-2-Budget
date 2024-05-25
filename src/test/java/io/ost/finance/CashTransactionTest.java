@@ -1,7 +1,10 @@
 package io.ost.finance;
 
 import io.ost.finance.CashTransaction.TransactionType;
+import io.ost.finance.parser.TransactionParser;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -96,7 +99,7 @@ public class CashTransactionTest {
     public void testEquals_WhenExactlyTheSame_ThenReturnTrue() {
         System.out.println("testEquals_WhenExactlyTheSame_ThenReturnTrue");
 
-        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label");
+        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label", null);
         CashTransaction duplicate = new CashTransaction(transaction);
 
         boolean expected = true;
@@ -113,7 +116,7 @@ public class CashTransactionTest {
     public void testEquals_WhenLabelsDiffer_ThenReturnTrue() {
         System.out.println("testEquals_WhenLabelsDiffer_ThenReturnTrue");
 
-        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label");
+        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label", null);
         CashTransaction duplicate = new CashTransaction(transaction);
         duplicate.setLabel("Other label");
 
@@ -131,7 +134,7 @@ public class CashTransactionTest {
     public void testEquals_WhenLastOfDaysDiffer_ThenReturnTrue() {
         System.out.println("testEquals_WhenLastOfDaysDiffer_ThenReturnTrue");
 
-        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label");
+        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label", null);
         transaction.setLastOfDay(true);
         CashTransaction duplicate = new CashTransaction(transaction);
         duplicate.setLastOfDay(false);
@@ -143,13 +146,48 @@ public class CashTransactionTest {
         UtilTest.printResult(expected, result);
     }
 
-    public static CashTransaction generateOneTransaction(String account, LocalDate date, String label) {
+    public static List<CashTransaction> generateTransactionsForAccountWithinTimespan(String account, LocalDate from, LocalDate to, String label) {
+        return generateTransactionsForAccountWithinTimespan(account, from, to, label, null);
+    }
+
+    public static List<CashTransaction> generateTransactionsForAccountWithinTimespan(String account, LocalDate from, LocalDate to, String label, Double amount) {
+        List<LocalDate> dates = generateDatesForTimespan(from, to);
+        List<CashTransaction> transactions = generateTransactionforEachDate(account, dates, label, amount);
+        return transactions;
+    }
+
+    private static List<LocalDate> generateDatesForTimespan(LocalDate from, LocalDate to) {
+        List<LocalDate> dates = new ArrayList<>();
+        LocalDate nextDate = from;
+        while (nextDate.isBefore(to)) {
+            dates.add(nextDate);
+            nextDate = nextDate.plusDays(1);
+        }
+        dates.add(to);
+        return dates;
+    }
+
+    private static List<CashTransaction> generateTransactionforEachDate(String account, List<LocalDate> dates, String label, Double amount) {
+        List<CashTransaction> transactions = new ArrayList<>();
+        for (LocalDate date : dates) {
+            CashTransaction transaction = CashTransactionTest.generateOneTransaction(account, date, label, amount);
+            transactions.add(transaction);
+        }
+        TransactionParser.generateTransactionNumberAndDeriveLastOfDay(transactions);
+        return transactions;
+    }
+
+    public static CashTransaction generateOneTransaction(String account, LocalDate date, String label, Double amount) {
         CashTransaction transaction = new CashTransaction();
         transaction.setAccountNumber(account);
         transaction.setAccountName(account);
         transaction.setDate(date.toString());
         transaction.setLabel(label);
-        transaction.setAmount(Math.floor(ThreadLocalRandom.current().nextDouble(-100, 100) * 100) / 100);
+        if (amount == null) {
+            transaction.setAmount(Math.floor(ThreadLocalRandom.current().nextDouble(-100, 100) * 100) / 100);
+        } else {
+            transaction.setAmount(amount);
+        }
         int expenditure = ThreadLocalRandom.current().nextInt(0, SAMPLE_EXPENDITURES.length - 1);
         transaction.setContraAccountName(SAMPLE_EXPENDITURES[expenditure]);
         return transaction;

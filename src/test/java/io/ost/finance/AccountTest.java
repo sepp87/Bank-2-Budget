@@ -34,8 +34,8 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenNewOfTwoAcccounts_ThenAddBoth");
 
         // Create test data        
-        List<CashTransaction> accountXyzAll = generateTransactionsForAccountWithinTimespan("xyz", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-04-30"), null);
-        List<CashTransaction> accountAbcAll = generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), null);
+        List<CashTransaction> accountXyzAll = CashTransactionTest.generateTransactionsForAccountWithinTimespan("xyz", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-04-30"), null);
+        List<CashTransaction> accountAbcAll = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), null);
 
         // Perform test
         Account.addTransactionsToAccounts(accountXyzAll);
@@ -51,33 +51,6 @@ public class AccountTest {
         UtilTest.printResult(expected, result);
     }
 
-    private List<CashTransaction> generateTransactionsForAccountWithinTimespan(String account, LocalDate from, LocalDate to, String label) {
-        List<LocalDate> dates = generateDatesForTimespan(from, to);
-        List<CashTransaction> transactions = generateTransactionforEachDate(account, dates, label);
-        return transactions;
-    }
-
-    private List<LocalDate> generateDatesForTimespan(LocalDate from, LocalDate to) {
-        List<LocalDate> dates = new ArrayList<>();
-        LocalDate nextDate = from;
-        while (nextDate.isBefore(to)) {
-            dates.add(nextDate);
-            nextDate = nextDate.plusDays(1);
-        }
-        dates.add(to);
-        return dates;
-    }
-
-    private List<CashTransaction> generateTransactionforEachDate(String account, List<LocalDate> dates, String label) {
-        List<CashTransaction> transactions = new ArrayList<>();
-        for (LocalDate date : dates) {
-            CashTransaction transaction = CashTransactionTest.generateOneTransaction(account, date, label);
-            transactions.add(transaction);
-        }
-        TransactionParser.generateTransactionNumberAndDeriveLastOfDay(transactions);
-        return transactions;
-    }
-
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
@@ -86,7 +59,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenOldAddNewWithUnorderedOverlap_ThenAddUniqueOnlyAndOldNotExistWithinNew");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
         List<CashTransaction> transactionsNew = generateTransactionsForAccountWithinTimespanWithOverlap("abc", LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"), null, transactionsOld, false);
 
         // Perform test
@@ -120,7 +93,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenNewAddOldWithUnorderedOverlap_ThenAddUniqueOnlyAndOldNotExistWithinNew");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
         List<CashTransaction> transactionsNew = generateTransactionsForAccountWithinTimespanWithOverlap("abc", LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"), null, transactionsOld, false);
 
         // Perform test
@@ -151,7 +124,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenOldAddNewWithOrderedOverlap_ThenAddUniqueOnlyAndOldExistWithinNew");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
         List<CashTransaction> transactionsNew = generateTransactionsForAccountWithinTimespanWithOverlap("abc", LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"), null, transactionsOld, true);
 
         // Perform test
@@ -182,7 +155,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenNewAddOldWithOrderedOverlap_ThenAddUniqueOnlyAndOldExistWithinNew");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
         List<CashTransaction> transactionsNew = generateTransactionsForAccountWithinTimespanWithOverlap("abc", LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"), null, transactionsOld, true);
 
         // Perform test
@@ -206,7 +179,7 @@ public class AccountTest {
     }
 
     private List<CashTransaction> generateTransactionsForAccountWithinTimespanWithOverlap(String account, LocalDate from, LocalDate to, String label, List<CashTransaction> transactions, boolean overlappingFirst) {
-        List<CashTransaction> result = generateTransactionsForAccountWithinTimespan(account, from, to, label);
+        List<CashTransaction> result = CashTransactionTest.generateTransactionsForAccountWithinTimespan(account, from, to, label);
         List<CashTransaction> overlap = filterTransactionsWithinTimespan(transactions, from, to);
         List<CashTransaction> copies = copyTransactions(overlap);
         setLabels(copies, label);
@@ -272,7 +245,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenOldWithLabelsAddNewWithoutLabels_ThenPersistOldLabels");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
         List<CashTransaction> transactionsNew = copyTransactionsAndSetLabels(transactionsOld, null);
 
         // Perform test
@@ -307,7 +280,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenOldWithLabelsAddNewWithLabels_ThenPersistOldLabels");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
         List<CashTransaction> transactionsNew = copyTransactionsAndSetLabels(transactionsOld, "Other label");
 
         // Perform test
@@ -336,7 +309,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenOldWithoutLabelsAddNewWithLabels_ThenAddNewLabels");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), null);
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), null);
         List<CashTransaction> transactionsNew = copyTransactionsAndSetLabels(transactionsOld, "Other label");
 
         // Perform test
@@ -365,7 +338,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenNewWithLabelsOverwriteOldWithLabels_ThenPersistOldLabels");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
         List<CashTransaction> transactionsNew = copyTransactionsAndSetLabels(transactionsOld, "Other label");
 
         // Perform test
@@ -394,7 +367,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenNewWithLabelsOverwriteOldWithoutLabels_ThenPersistNewLabels");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), null);
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), null);
         List<CashTransaction> transactionsNew = copyTransactionsAndSetLabels(transactionsOld, "Other label");
 
         // Perform test

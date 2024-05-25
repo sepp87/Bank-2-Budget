@@ -71,7 +71,7 @@ public class RuleTest {
         // Create test data
         RuleReader reader = new RuleReader();
         Rule supermarketRule = reader.readFrom(THREE_RULES).get(0);
-        CashTransaction transaction = CashTransactionTest.generateOneTransaction("abc", LocalDate.now(), null);
+        CashTransaction transaction = CashTransactionTest.generateOneTransaction("abc", LocalDate.now(), null, null);
         transaction.setDescription("Best supermarket ever");
 
         // Perform test
@@ -98,7 +98,7 @@ public class RuleTest {
         // Create test data
         RuleReader reader = new RuleReader();
         Rule expensiveStuffRule = reader.readFrom(THREE_RULES).get(1);
-        CashTransaction transaction = CashTransactionTest.generateOneTransaction("abc", LocalDate.now(), null);
+        CashTransaction transaction = CashTransactionTest.generateOneTransaction("abc", LocalDate.now(), null, null);
         transaction.setAmount(-2000);
 
         // Perform test
@@ -125,7 +125,7 @@ public class RuleTest {
         // Create test data
         RuleReader reader = new RuleReader();
         Rule woohooRule = reader.readFrom(THREE_RULES).get(2);
-        CashTransaction transaction = CashTransactionTest.generateOneTransaction("abc", LocalDate.now(), null);
+        CashTransaction transaction = CashTransactionTest.generateOneTransaction("abc", LocalDate.now(), null, null);
         transaction.setAmount(200);
 
         // Perform test

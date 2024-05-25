@@ -65,6 +65,10 @@ public class MonthlyBudget {
         alignCategories();
         calculateRemainder();
     }
+    
+    List<CashTransaction> getTransactions() {
+        return transactions;
+    }
 
     public Map<String, Double> getBudgetedForCategories() {
         return budgetedForCategories;

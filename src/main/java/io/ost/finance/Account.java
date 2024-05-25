@@ -1,17 +1,12 @@
 package io.ost.finance;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -39,12 +34,12 @@ public class Account {
     }
 
     public String getOldestTransactionDate() {
-        // TBD maybe want to sort here
+        // By default, TreeMap sorts all its entries according to their natural ordering
         return allTransactionsIndex.values().iterator().next().getDate();
     }
 
     public String getNewestTransactionDate() {
-        // TBD maybe want to sort here
+        // By default, TreeMap sorts all its entries according to their natural ordering
         Iterator<CashTransaction> i = allTransactionsIndex.values().iterator();
         CashTransaction last = null;
         while (i.hasNext()) {
@@ -83,6 +78,7 @@ public class Account {
                 account.addTransactions(transactions);
             }
         }
+        
     }
 
     private void addTransactions(List<CashTransaction> transactions) {

@@ -19,7 +19,10 @@ import java.util.logging.Logger;
 import picocli.CommandLine;
 
 // TODO evaluate if Util methods belong in corresponding class
-// TODO write tests for addTransactionsToAccounts
+// TODO TEST myAccount
+// TODO implement derive contra account number with other accounts index
+// TODO rewrite read transactions from XLSX
+// TODO Fix bug with sorting transactions with account leading to false newest and oldest transaction dates
 
 /**
  * Bank-to-Budget app reads CSV files from the todo directory and command line.
@@ -68,6 +71,11 @@ public class App {
                 TransactionReaderForBudget oldBudgetTransactions = new TransactionReaderForBudget().read();
                 Account.addTransactionsToAccounts(oldBudgetTransactions.getAsList(), true);
 
+//                // TODO Remove
+                if (true) {
+                    return;
+                }
+
                 TransactionWriterForBudget newBudgetTransactions = new TransactionWriterForBudget();
                 newBudgetTransactions.write(Account.getAccounts());
 
@@ -78,7 +86,7 @@ public class App {
 
                 // for now, budgets can only be managed for a maximum of 1 
                 SingleAccountBudget budget = new BudgetReader().read();
-                budget.addAccount(Account.getAccounts().iterator().next());
+                budget.setAccount(Account.getAccounts().iterator().next());
                 new BudgetWriter().write(budget);
                 break;
         }
