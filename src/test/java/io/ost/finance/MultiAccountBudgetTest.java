@@ -1,6 +1,7 @@
 package io.ost.finance;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -10,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author joost
  */
-public class SingleAccountBudgetTest {
+public class MultiAccountBudgetTest {
 
     @org.junit.jupiter.api.BeforeAll
     @org.junit.jupiter.api.AfterAll
@@ -29,7 +30,7 @@ public class SingleAccountBudgetTest {
 
         // Create test data
         List<CashTransaction> transactions = CashTransactionTest.generateTransactionsForAccountWithinTimespan("ABC", LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-31"), "GROCERIES", -1.);
-        SingleAccountBudget budget = generateBudget(10, transactions);
+        MultiAccountBudget budget = generateBudget(10, transactions);
 
         // Perform test
         int result = budget.getMonthlyBudgets().size();
@@ -44,14 +45,13 @@ public class SingleAccountBudgetTest {
         UtilTest.printResult(expected, result);
     }
 
-    public static SingleAccountBudget generateBudget(int firstOfMonth, List<CashTransaction> transactions) {
-        SingleAccountBudget budget = new SingleAccountBudget();
-        SingleAccountBudget.firstOfMonth = firstOfMonth;
-        SingleAccountBudget.budgetedForCategory = generateBudgetedForCategory();
+    public static MultiAccountBudget generateBudget(int firstOfMonth, List<CashTransaction> transactions) {
+        MultiAccountBudget budget = new MultiAccountBudget();
+        MultiAccountBudget.firstOfMonth = firstOfMonth;
+        MultiAccountBudget.budgetedForCategory = generateBudgetedForCategory();
 
         Account.addTransactionsToAccounts(transactions);
-        Account account = Account.getAccounts().iterator().next();
-        budget.setAccount(account);
+        budget.setAccounts(Account.getAccounts());
 
         return budget;
     }

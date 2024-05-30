@@ -68,6 +68,8 @@ public class Account {
 
         // Add the transactions to the corresponding accounts
         for (String accountNumber : transactionsByAccountNumber.keySet()) {
+            transactions = transactionsByAccountNumber.get(accountNumber);
+
             // If the accounts exist, evaluate the transactions before adding them
             if (accounts.containsKey(accountNumber)) {
                 Account account = accounts.get(accountNumber);
@@ -78,7 +80,7 @@ public class Account {
                 account.addTransactions(transactions);
             }
         }
-        
+
     }
 
     private void addTransactions(List<CashTransaction> transactions) {
@@ -93,7 +95,7 @@ public class Account {
 
         if (overlap == null) {
             addTransactions(transactions);
-            
+
         } else {
             List<CashTransaction> existingOverlappingTransactions = getTransactions(overlap[0], overlap[1]);
             List<CashTransaction> newOverlappingTransactions = CashTransaction.filterByTimespan(transactions, overlap[0], overlap[1]);
@@ -117,7 +119,6 @@ public class Account {
 //                System.out.println(Arrays.toString(overlap));
 //                System.out.println("NEW " + newOverlappingTransactions.size() + "\t EXISTING " + existingOverlappingTransactions.size());
 //                System.out.println();
-
             }
         }
     }

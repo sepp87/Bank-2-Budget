@@ -25,6 +25,27 @@ public class AccountTest {
         Account.removeAllAccounts();
     }
 
+    @Test
+    public void testAddTransactionsToAccounts_WhenTwoTransactionsOfDifferentAccountsAddedSimultaneously_ThenReturnTwoAccountsWithOneTransaction () {
+        System.out.println("testAddTransactionsToAccounts_WhenTwoTransactionsOfDifferentAccountsAddedSimultaneously_ThenReturnTwoAccountsWithOneTransaction");
+
+        // Create test data        
+        List<CashTransaction> transactions = CashTransactionTest.generateTransactionsForAccountWithinTimespan("xyz", LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-01"), null);
+        transactions.addAll(CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-01-31"), LocalDate.parse("2024-01-31"), null));
+
+        // Perform test
+        Account.addTransactionsToAccounts(transactions);
+
+        // Prepare results
+        int expected = 2;
+        int result = Account.getAccountBy("xyz").getAllTransactions().size() + Account.getAccountBy("abc").getAllTransactions().size();
+
+        // Evaluate result
+        assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
+
+        UtilTest.printResult(expected, result);
+    }
+
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */

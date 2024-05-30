@@ -1,11 +1,8 @@
 package io.ost.finance;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -95,5 +92,53 @@ public class MonthlyBudgetTest {
         // Print result
         UtilTest.printResult(expected, result);
     }
+
+    @org.junit.jupiter.api.Test
+    public void testGetTransactions_WhenBudgeted100AndExpenseIs1PerDayFor2Accounts_ThenRemainderIs38() {
+        System.out.println("testGetTransactions_WhenBudgeted100AndExpenseIs1PerDayFor2Accounts_ThenRemainderIs38");
+
+        // Create test data
+        List<CashTransaction> transactions = CashTransactionTest.generateTransactionsForAccountWithinTimespan("ABC", LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-31"), "GROCERIES", -1.);
+        transactions.addAll(CashTransactionTest.generateTransactionsForAccountWithinTimespan("BCD", LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-31"), "GROCERIES", -1.));
+        MultiAccountBudget budget = MultiAccountBudgetTest.generateBudget(1, transactions);
+
+        // Perform test
+        MonthlyBudget monthlyBudget = budget.getMonthlyBudgets().values().iterator().next();
+        double result = monthlyBudget.remainderForCategories.get("GROCERIES");
+
+        // Prepare results
+        double expected = 38.;
+
+        // Evaluate result
+        assertEquals(expected, result);
+
+        // Print result
+        UtilTest.printResult(expected, result);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testGetTransactions_WhenBudgeted100AndExpenseIs1PerDayFor2Accounts_ThenNextMonthsRemainderIs138() {
+        System.out.println("testGetTransactions_WhenBudgeted100AndExpenseIs1PerDayFor2Accounts_ThenNextMonthsRemainderIs138");
+
+        // Create test data
+        List<CashTransaction> transactions = CashTransactionTest.generateTransactionsForAccountWithinTimespan("ABC", LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-31"), "GROCERIES", -1.);
+        transactions.addAll(CashTransactionTest.generateTransactionsForAccountWithinTimespan("BCD", LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-31"), "GROCERIES", -1.));
+        transactions.add(CashTransactionTest.generateTransactionsForAccountWithinTimespan("ABC", LocalDate.parse("2024-02-01"), LocalDate.parse("2024-02-01"), "GROCERIES", 0.).getFirst()); // Transaction without an expense, so a monthly budget for february is generated
+        MultiAccountBudget budget = MultiAccountBudgetTest.generateBudget(1, transactions);
+
+        // Perform test
+        MonthlyBudget monthlyBudget = budget.getMonthlyBudgets().get("2024-02-01");
+        double result = monthlyBudget.remainderForCategories.get("GROCERIES");
+
+        // Prepare results
+        double expected = 138.;
+
+        // Evaluate result
+        assertEquals(expected, result);
+
+        // Print result
+        UtilTest.printResult(expected, result);
+    }
+
 
 }
