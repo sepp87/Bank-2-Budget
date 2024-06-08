@@ -28,7 +28,7 @@ public class MonthlyBudgetTest {
 
         // Create test data
         List<CashTransaction> transactions = CashTransactionTest.generateTransactionsForAccountWithinTimespan("ABC", LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-31"), "GROCERIES", -1.);
-        SingleAccountBudget budget = SingleAccountBudgetTest.generateBudget(10, transactions);
+        MultiAccountBudget budget = MultiAccountBudgetTest.generateBudget(10, transactions);
 
         // Perform test
         Iterator<MonthlyBudget> iterator = budget.getMonthlyBudgets().values().iterator();
@@ -54,7 +54,7 @@ public class MonthlyBudgetTest {
 
         // Create test data
         List<CashTransaction> transactions = CashTransactionTest.generateTransactionsForAccountWithinTimespan("ABC", LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-31"), "GROCERIES", -1.);
-        SingleAccountBudget budget = SingleAccountBudgetTest.generateBudget(1, transactions);
+        MultiAccountBudget budget = MultiAccountBudgetTest.generateBudget(1, transactions);
 
         // Perform test
         MonthlyBudget monthlyBudget = budget.getMonthlyBudgets().values().iterator().next();
@@ -77,7 +77,7 @@ public class MonthlyBudgetTest {
         // Create test data
         List<CashTransaction> transactions = CashTransactionTest.generateTransactionsForAccountWithinTimespan("ABC", LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-31"), "GROCERIES", -1.);
         transactions.add(CashTransactionTest.generateTransactionsForAccountWithinTimespan("ABC", LocalDate.parse("2024-02-01"), LocalDate.parse("2024-02-01"), "GROCERIES", 0.).getFirst()); // Transaction without an expense, so a monthly budget for february is generated
-        SingleAccountBudget budget = SingleAccountBudgetTest.generateBudget(1, transactions);
+        MultiAccountBudget budget = MultiAccountBudgetTest.generateBudget(1, transactions);
 
         // Perform test
         MonthlyBudget monthlyBudget = budget.getMonthlyBudgets().get("2024-02-01");

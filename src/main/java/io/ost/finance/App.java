@@ -44,7 +44,6 @@ public class App {
 
     public final String appRootDirectory;
 
-    public SingleAccountBudget budget;
     public boolean hasBudget;
     public Properties myAccounts;
     public Properties otherAccounts;
@@ -73,7 +72,7 @@ public class App {
 
 //                // TODO Remove
                 if (true) {
-                    return;
+//                    return;
                 }
 
                 TransactionWriterForBudget newBudgetTransactions = new TransactionWriterForBudget();
@@ -84,9 +83,8 @@ public class App {
                     break;
                 }
 
-                // for now, budgets can only be managed for a maximum of 1 
-                SingleAccountBudget budget = new BudgetReader().read();
-                budget.setAccount(Account.getAccounts().iterator().next());
+                MultiAccountBudget budget = new BudgetReader().read();
+                budget.setAccounts(Account.getAccounts());
                 new BudgetWriter().write(budget);
                 break;
         }

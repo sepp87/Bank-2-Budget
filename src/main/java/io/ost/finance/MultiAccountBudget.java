@@ -12,12 +12,11 @@ import java.util.TreeMap;
  *
  * @author joost
  */
-public class MultiAccountBudget extends SingleAccountBudget {
+public class MultiAccountBudget {
 
-//    static int firstOfMonth = 25;
-//    static Map<String, Double> budgetedForCategory = new TreeMap<>();
-//    Map<String, MonthlyBudget> monthlyBudgets;
-//    private Collection<Account> accounts;
+    static int firstOfMonth = 25;
+    static Map<String, Double> budgetedForCategory = new TreeMap<>();
+    Map<String, MonthlyBudget> monthlyBudgets;
     
     private final Map<String, Account> accounts;
 
@@ -41,12 +40,10 @@ public class MultiAccountBudget extends SingleAccountBudget {
         calculateAllMonthlyBudgets();
     }
 
-    @Override
     public void addMonthlyBudget(MonthlyBudget month) {
         monthlyBudgets.putIfAbsent(month.getFirstOfMonth(), month);
     }
 
-    @Override
     public Map<String, MonthlyBudget> getMonthlyBudgets() {
         return monthlyBudgets;
     }

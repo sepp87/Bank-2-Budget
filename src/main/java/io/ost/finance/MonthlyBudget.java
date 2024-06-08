@@ -17,7 +17,7 @@ import java.util.TreeMap;
  */
 public class MonthlyBudget {
 
-    private final SingleAccountBudget budget;
+    private final MultiAccountBudget budget;
     private final String firstOfMonth;
     private final List<CashTransaction> transactions;
 
@@ -36,7 +36,7 @@ public class MonthlyBudget {
     final Map<String, Double> remainderForCategories = new TreeMap<>();
     final Map<String, Double> remainderForCategoriesLastMonth = new TreeMap<>();
 
-    public MonthlyBudget(SingleAccountBudget budget, String firstOfMonth, Map<String, Double> budgetedForCategories) {
+    public MonthlyBudget(MultiAccountBudget budget, String firstOfMonth, Map<String, Double> budgetedForCategories) {
         this.budget = budget;
         this.firstOfMonth = firstOfMonth;
         this.transactions = new ArrayList<>();
@@ -47,7 +47,7 @@ public class MonthlyBudget {
 //        calculateRemainder();
     }
 
-    public MonthlyBudget(SingleAccountBudget budget, String firstOfMonth, List<CashTransaction> transactions) {
+    public MonthlyBudget(MultiAccountBudget budget, String firstOfMonth, List<CashTransaction> transactions) {
         this.budget = budget;
         this.firstOfMonth = firstOfMonth;
         this.transactions = transactions;
@@ -131,14 +131,14 @@ public class MonthlyBudget {
     }
 
     private void alignBudgetedForCategories() {
-        for (Entry<String, Double> entry : SingleAccountBudget.budgetedForCategory.entrySet()) {
+        for (Entry<String, Double> entry : MultiAccountBudget.budgetedForCategory.entrySet()) {
             budgetedForCategories.putIfAbsent(entry.getKey(), entry.getValue());
         }
     }
 
     private void alignCategories() {
         Set<String> categories = new HashSet<>();
-        categories.addAll(SingleAccountBudget.budgetedForCategory.keySet());
+        categories.addAll(MultiAccountBudget.budgetedForCategory.keySet());
         categories.addAll(budgetedForCategories.keySet());
         categories.addAll(expensesForCategories.keySet());
         categories.addAll(remainderForCategories.keySet());

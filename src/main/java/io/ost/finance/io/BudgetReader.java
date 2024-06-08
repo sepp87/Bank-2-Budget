@@ -2,7 +2,7 @@ package io.ost.finance.io;
 
 import io.ost.finance.App;
 import io.ost.finance.MonthlyBudget;
-import io.ost.finance.SingleAccountBudget;
+import io.ost.finance.MultiAccountBudget;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -23,20 +23,20 @@ public class BudgetReader {
 
     public static final String BUDGET_MASTER = "budget.xlsx";
 
-    private final SingleAccountBudget budget;
+    private final MultiAccountBudget budget;
 
     public BudgetReader() {
         // at this point the account is still unknown
-        budget = new SingleAccountBudget();
+        budget = new MultiAccountBudget();
     }
 
-    public SingleAccountBudget read() {
+    public MultiAccountBudget read() {
         File file = new File(App.getBudgetDirectory() + BUDGET_MASTER);
         readFrom(file);
         return budget;
     }
 
-    private SingleAccountBudget readFrom(File file) {
+    private MultiAccountBudget readFrom(File file) {
 
         // goal is to retrieve the budget with all its months, categories and corresponding budgeted costs
         // expenses, remainder and last month's remainder are calculated from the transactions

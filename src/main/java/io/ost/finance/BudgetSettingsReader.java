@@ -38,8 +38,8 @@ public class BudgetSettingsReader {
         Iterator<JsonElement> iterator = settingsArray.iterator();
         while (iterator.hasNext()) {
             JsonObject settingsObject = iterator.next().getAsJsonObject();
-            SingleAccountBudget.firstOfMonth = getFirstOfMonthFrom(settingsObject);
-            SingleAccountBudget.budgetedForCategory = getBudgetTemplateFrom(settingsObject);
+            MultiAccountBudget.firstOfMonth = getFirstOfMonthFrom(settingsObject);
+            MultiAccountBudget.budgetedForCategory = getBudgetTemplateFrom(settingsObject);
         }
     }
 

@@ -2,7 +2,7 @@ package io.ost.finance.io;
 
 import io.ost.finance.App;
 import io.ost.finance.MonthlyBudget;
-import io.ost.finance.SingleAccountBudget;
+import io.ost.finance.MultiAccountBudget;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,7 +35,7 @@ public class BudgetWriter {
 
     private XSSFWorkbook workbook;
 
-    public void write(SingleAccountBudget budget) {
+    public void write(MultiAccountBudget budget) {
         File file = new File(App.getBudgetDirectory() + BUDGET_MASTER);
 
         // Create a Workbook
@@ -94,7 +94,7 @@ public class BudgetWriter {
 
                 // Create a header row
                 Row headerRow = sheet.createRow(1);
-                String[] columns = SingleAccountBudget.getHeader();
+                String[] columns = MultiAccountBudget.getHeader();
                 for (int i = 1; i < columns.length; i++) {
                     Cell cell = headerRow.createCell(i);
                     cell.setCellValue(columns[i]);
