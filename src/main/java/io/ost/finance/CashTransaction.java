@@ -281,7 +281,7 @@ public class CashTransaction {
 
     @Override
     public String toString() {
-        String result = transactionNumber + "\t" + lastOfDay + "\t" + date + "\t" + Util.padWithTabs("€" + amount, 3) + Util.padWithTabs(accountName, 4) + Util.padWithTabs(contraAccountName, 5) + Util.padWithTabs(label, 4);
+        String result = transactionNumber + "\t" + lastOfDay + "\t" + date + "\t" + Util.padWithTabs("€" + amount, 2) + Util.padWithTabs(accountName, 2) + Util.padWithTabs(contraAccountName, 4) + Util.padWithTabs(label, 4);
 //        String result = date + "\t" + Util.padWithTabs("€" + amount, 3) + Util.padWithTabs(accountName, 4) + Util.padWithTabs(contraAccountName, 5) + Util.padWithTabs(label, 4);
         return result;
     }

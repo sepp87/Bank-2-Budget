@@ -71,7 +71,7 @@ public class App {
 
 //                // TODO Remove
                 if (true) {
-//                    return;
+                    return;
                 }
 
                 TransactionWriterForBudget newBudgetTransactions = new TransactionWriterForBudget();

@@ -108,7 +108,7 @@ public class TransactionReaderForBudget {
         return transactions;
     }
 
-    private static boolean rowIsEmpty(Row row) {   
+    private static boolean rowIsEmpty(Row row) {
         // date column is never empty, test if there is a value
         int dateColumn = header.indexOf("date");
         return row.getCell(dateColumn) == null || row.getCell(dateColumn).getStringCellValue().equals("");

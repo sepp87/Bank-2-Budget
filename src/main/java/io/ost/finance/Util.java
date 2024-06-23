@@ -133,6 +133,7 @@ public class Util {
             put("^\\d{1,2}\\.\\d{1,2}\\.\\d{4}$", "dd.MM.yyyy");
             put("^\\d{4}-\\d{1,2}-\\d{1,2}$", "yyyy-MM-dd");
             put("^\\d{2}-\\d{2}-\\d{4}$", "dd-MM-yyyy");
+            put("^\\d{2}\\.\\d{2}\\.\\d{2}$", "dd.MM.yy");
         }
     };
 
@@ -178,7 +179,6 @@ public class Util {
         return result;
     }
 
-
     public static String padWithTabs(Object value, int tabs) {
         // When value is an array, then convert to string
         if (value != null && value.getClass().getComponentType() != null) {
@@ -186,11 +186,16 @@ public class Util {
         }
         // When value is null, set result to "null" otherwise convert value to string
         String result = value == null ? "null" : value.toString();
+
+        // When result is just as long or longer than available space, then shorten the result
+        if (result.length() >= tabs * 8) {
+            result = result.substring(0, (tabs - 1) * 8 + 7);
+        }
         int lengthToPad = tabs * 8 - result.length();
         int padding = (int) Math.floor(lengthToPad / 8);
         padding = lengthToPad % 8 == 0 ? padding - 1 : padding;
         int i = 0;
-        while (i < padding) {
+        while (i <= padding) {
             result = result + "\t";
             i++;
         }

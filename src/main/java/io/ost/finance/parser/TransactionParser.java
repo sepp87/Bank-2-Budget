@@ -54,9 +54,9 @@ public abstract class TransactionParser {
 
 //        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), "Cp1252"), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
             List<CashTransaction> transactions = parseRecordsWith(parser);
-//            for (CashTransaction t : transactions) {
-//                System.out.println(t.toString());
-//            }
+            for (CashTransaction t : transactions) {
+                System.out.println(t.toString());
+            }
             return transactions;
         } catch (IOException ex) {
             Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);

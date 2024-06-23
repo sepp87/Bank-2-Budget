@@ -13,6 +13,7 @@ import io.ost.finance.parser.IngDiBaParser;
 import io.ost.finance.parser.FlatexParser;
 import io.ost.finance.parser.SnsBankParser;
 import io.ost.finance.parser.ComdirectParser;
+import io.ost.finance.parser.DkbParser2024;
 import io.ost.finance.parser.GrenkeBankParser;
 import io.ost.finance.parser.IngParser;
 import java.io.BufferedReader;
@@ -43,7 +44,9 @@ public class SimpleParserFactory {
             parser = new ComdirectParser(new ParserConfig(CreditInstitution.COMDIRECT, csvFile, ';'));
         } else if (firstLine.startsWith("\"Kontonummer:\";\"DE")) {
             parser = new DkbParser(new ParserConfig(CreditInstitution.DKB, csvFile, ';'));
-        } else if (firstLine.startsWith("Buchtag;Valuta;BIC / BLZ;IBAN / Kontonummer;Buchungsinformationen;")) {
+        } else if (firstLine.startsWith("﻿\"Girokonto\";\"")) {
+            parser = new DkbParser2024(new ParserConfig(CreditInstitution.DKB, csvFile, ';', "UTF-8"));
+        } else if (firstLine.startsWith("Girokonto;Valuta;BIC / BLZ;IBAN / Kontonummer;Buchungsinformationen;")) {
             parser = new FlatexParser(new ParserConfig(CreditInstitution.FLATEX, csvFile, ';'));
         } else if (firstLine.startsWith("\"GLS Bank\"")) {
             parser = new GlsParser2019(new ParserConfig(CreditInstitution.GLS, csvFile, ';'));

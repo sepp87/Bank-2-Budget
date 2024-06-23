@@ -17,18 +17,18 @@ public class DkbParser2024 extends TransactionParser {
         super(config);
     }
 
-
     @Override
     public CSVFormat getCsvFormat() {
         String[] header = new String[]{
-            "Buchungstag",
+            "Buchungsdatum",
             "Wertstellung",
-            "Buchungstext",
-            "Auftraggeber / Begünstigter",
+            "Status",
+            "Zahlungspflichtige*r",
+            "Zahlungsempfänger*in",
             "Verwendungszweck",
-            "Kontonummer",
-            "BLZ",
-            "Betrag (EUR)",
+            "Umsatztyp",
+            "IBAN",
+            "Betrag (€)",
             "Gläubiger-ID",
             "Mandatsreferenz",
             "Kundenreferenz"
@@ -48,33 +48,33 @@ public class DkbParser2024 extends TransactionParser {
 
     private double getStartingBalanceFrom(List<CSVRecord> allRecords) {
         List<CSVRecord> transactionRecords = allRecords.subList(5, allRecords.size());
-        CSVRecord closingBalanceRecord = allRecords.get(3);
+        CSVRecord closingBalanceRecord = allRecords.get(2);
         double balance = getBalanceFrom(closingBalanceRecord);
         for (CSVRecord record : transactionRecords) {
-            balance = balance - getDoubleFrom(record.get("Betrag (EUR)"));
+            balance = balance - getDoubleFrom(record.get("Betrag (€)"));
         }
         return balance;
     }
 
     private double getBalanceFrom(CSVRecord closingBalanceRecord) {
-        String numberString = closingBalanceRecord.get(1).replace(" EUR", "");
+        String numberString = closingBalanceRecord.get(1).replace(" €", "");
         return getDoubleFrom(numberString);
     }
 
     private String getAccountNumberFrom(CSVRecord record) {
-        return record.get(1).split(" ")[0];
+        return record.get(1);
     }
 
     @Override
     public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
         CashTransaction transaction = new CashTransaction();
         transaction.setAccountNumber(accountNumber);
-        transaction.setContraAccountName(record.get("Auftraggeber / Begünstigter"));
-        transaction.setContraAccountNumber(record.get("Kontonummer"));
-        transaction.setAmount(getDoubleFrom(record.get("Betrag (EUR)")));
+        transaction.setContraAccountName(record.get("Zahlungsempfänger*in"));
+        transaction.setContraAccountNumber(record.get("IBAN"));
+        transaction.setAmount(getDoubleFrom(record.get("Betrag (€)")));
         transaction.setDescription(record.get("Verwendungszweck"));
         transaction.setOriginalRecord(record.toMap().values());
-        parseDateFrom(record.get("Buchungstag"), transaction);
+        parseDateFrom(record.get("Buchungsdatum"), transaction);
         calculateBalanceAfter(transaction);
         return transaction;
     }
