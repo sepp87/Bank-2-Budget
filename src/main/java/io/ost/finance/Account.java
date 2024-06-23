@@ -114,11 +114,6 @@ public class Account {
 
                 List<CashTransaction> otherNewTransactions = CashTransaction.filterByTimespan(transactions, overlap[0], overlap[1], true);
                 addTransactions(otherNewTransactions);
-
-//                System.out.println("WE HAVE AN OVERLAP");
-//                System.out.println(Arrays.toString(overlap));
-//                System.out.println("NEW " + newOverlappingTransactions.size() + "\t EXISTING " + existingOverlappingTransactions.size());
-//                System.out.println();
             }
         }
     }

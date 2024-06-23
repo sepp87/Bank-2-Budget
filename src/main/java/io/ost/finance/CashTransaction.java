@@ -78,12 +78,10 @@ public class CashTransaction {
     }
 
     public void setAccountNumber(String accountNumber) {
-        if (accountNumber != null && accountNumber.equals("")) {
-            this.accountNumber = null;
+        if (accountNumber == null || accountNumber.equals("")) {
+            return;
         }
-//        if (accountNumber == null || accountNumber.equals("")) {
-//            return;
-//        }
+
         this.accountNumber = accountNumber;
         if (Util.isMyAccountNumber(accountNumber)) {
             if (!Util.isMyAccountName(accountName)) {
@@ -101,12 +99,9 @@ public class CashTransaction {
         if (Util.isMyAccountName(this.accountName)) {
             return;
         }
-        if (accountName != null && accountName.equals("")) {
-            this.accountName = null;
+        if (accountName == null || accountName.equals("")) {
+            return;
         }
-//        if (accountName.equals("")) {
-//            return;
-//        }
         this.accountName = accountName;
     }
 
@@ -131,12 +126,9 @@ public class CashTransaction {
     }
 
     public void setContraAccountNumber(String contraAccountNumber) {
-        if (contraAccountNumber != null && contraAccountNumber.equals("")) {
-            this.contraAccountNumber = null;
+        if (contraAccountNumber == null || contraAccountNumber.equals("")) {
+            return;
         }
-//        if (contraAccountNumber == null || contraAccountNumber.equals("")) {
-//            return;
-//        }
         this.contraAccountNumber = contraAccountNumber;
         this.internal = Util.isMyAccountNumber(accountNumber) && Util.isMyAccountNumber(contraAccountNumber);
         if (Util.isMyAccountNumber(contraAccountNumber)) {
@@ -160,12 +152,9 @@ public class CashTransaction {
     }
 
     public void setContraAccountName(String contraAccountName) {
-        if (contraAccountName != null && contraAccountName.equals("")) {
-            this.contraAccountName = null;
+        if (contraAccountName == null || contraAccountName.equals("")) {
+            return;
         }
-//        if (contraAccountName == null || contraAccountName.equals("")) {
-//            return;
-//        }
         this.contraAccountName = contraAccountName;
         if (Util.isMyAccountName(contraAccountName)) {
             this.contraAccountNumber = Util.getMyAccountNumberFrom(contraAccountName);
@@ -194,12 +183,9 @@ public class CashTransaction {
      * @param date the date ISO format yyyy-MM-dd
      */
     public void setDate(String date) {
-        if (date != null && date.equals("")) {
-            this.date = null;
+        if (date == null || date.equals("")) {
+            return;
         }
-//        if (date == null || date.equals("")) {
-//            return;
-//        }
         this.date = date;
     }
 
@@ -212,12 +198,9 @@ public class CashTransaction {
     }
 
     public void setLabel(String label) {
-        if (label != null && label.equals("")) {
-            this.label = null;
+        if (label == null || label.equals("")) {
+            return;
         }
-//        if (label == null || label.equals("")) {
-//            return;
-//        }
         this.label = label;
     }
 
@@ -242,12 +225,9 @@ public class CashTransaction {
     }
 
     public void setDescription(String description) {
-        if (description != null && description.equals("")) {
-            this.description = null;
+        if (description == null || description.equals("")) {
+            return;
         }
-//        if (description == null || description.equals("")) {
-//            return;
-//        }
         this.description = description;
     }
 

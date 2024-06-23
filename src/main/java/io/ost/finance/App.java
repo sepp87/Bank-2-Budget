@@ -21,8 +21,7 @@ import picocli.CommandLine;
 // TODO evaluate if Util methods belong in corresponding class
 // TODO TEST myAccount
 // TODO implement derive contra account number with other accounts index
-// TODO rewrite read transactions from XLSX
-// TODO Fix bug with sorting transactions with account leading to false newest and oldest transaction dates
+// TODO find out why more rows are written for budget transactions, even though there are none
 
 /**
  * Bank-to-Budget app reads CSV files from the todo directory and command line.

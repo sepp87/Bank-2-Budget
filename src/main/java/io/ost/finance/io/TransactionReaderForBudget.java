@@ -6,8 +6,6 @@ import io.ost.finance.CreditInstitution;
 import io.ost.finance.parser.TransactionParser;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -92,9 +90,7 @@ public class TransactionReaderForBudget {
     private static List<CashTransaction> getAllCashTransactionsFrom(Sheet sheet) {
         List<CashTransaction> transactions = new ArrayList<>();
         int last = sheet.getLastRowNum();
-
         header = getHeaderFrom(sheet);
-        int columnCount = header.size();
 
         for (int i = last; i > 0; i--) {
             Row row = sheet.getRow(i);
@@ -104,6 +100,7 @@ public class TransactionReaderForBudget {
             if (rowIsEmpty(row)) {
                 continue;
             }
+
             CashTransaction transaction = getCashTransactionFrom(row);
             transactions.add(transaction);
         }
@@ -111,9 +108,10 @@ public class TransactionReaderForBudget {
         return transactions;
     }
 
-    private static boolean rowIsEmpty(Row row) {
+    private static boolean rowIsEmpty(Row row) {   
         // date column is never empty, test if there is a value
-        return row.getCell(3) == null;
+        int dateColumn = header.indexOf("date");
+        return row.getCell(dateColumn) == null || row.getCell(dateColumn).getStringCellValue().equals("");
     }
 
     private static CashTransaction getCashTransactionFrom(Row row) {
