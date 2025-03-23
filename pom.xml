@@ -5,8 +5,10 @@
     <artifactId>Bank-2-Budget</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
-    <properties>
+    <properties>   
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>15</maven.compiler.source>
+        <maven.compiler.target>15</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -26,29 +28,13 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.1.0</version>
+            <version>5.2.3</version>  <!-- Update to the latest version -->
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
             <version>4.6.3</version>
         </dependency>
-        <!-- test library (not the newest) 
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.4.2</version>
-            <scope>test</scope>
-        </dependency>
-        -->
-        <!-- test engine (not the newest)
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.4.2</version>
-            <scope>test</scope>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -67,29 +53,28 @@
             <version>5.6.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-to-slf4j</artifactId>
+            <version>2.24.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.13</version>
+        </dependency>
+
     </dependencies>
 
     <build>
         <finalName>Bank-2-Budget</finalName>
         <plugins>   
             
-            <!-- See https://maven.apache.org/plugins/ for more plugins -->    
+               
+            <!-- https://stackoverflow.com/questions/574594/how-can-i-create-an-executable-runnable-jar-with-dependencies-using-maven -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                    <source>15</source>
-                    <target>15</target>
-                    <fork>true</fork>
-                </configuration>
-            </plugin>
-                 
-            <!-- Set main class and add classplath -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.7.1</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -98,61 +83,42 @@
                             <mainClass>io.ost.finance.App</mainClass>
                         </manifest>
                     </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             
-            <!-- Copy project dependencies-->
+            <!-- https://stackoverflow.com/questions/3998596/renaming-resources-in-maven -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.5.1</version>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0.1</version>
                 <executions>
                     <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <!-- exclude junit, we need runtime dependency only -->
-                            <includeScope>runtime</includeScope>
-                            <!--<outputDirectory>${project.build.directory}/lib/</outputDirectory>-->
-                            <outputDirectory>${basedir}/build/lib/</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin> 
-            <!-- https://stackoverflow.com/questions/586202/best-practices-for-copying-files-with-maven -->
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-resource-one</id>
+                        <id>rename-file</id>
                         <phase>install</phase>
                         <goals>
-                            <goal>copy-resources</goal>
+                            <goal>copy</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/build</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}/target</directory>
-                                    <includes>
-                                        <include>Bank-2-Budget.jar</include>
-                                    </includes>
-                                </resource>
-                                <resource>
-                                    <directory>${basedir}/</directory>
-                                    <includes>
-                                        <include>Rule-Builder.html</include>
-                                    </includes>
-                                </resource>
-                            </resources>
+                            <sourceFile>${basedir}/target/Bank-2-Budget-jar-with-dependencies.jar</sourceFile>
+                            <destinationFile>${basedir}/build/Bank-2-Budget.jar</destinationFile>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>    
+            </plugin>      
+            
+             
         </plugins>        
     </build>
 </project>

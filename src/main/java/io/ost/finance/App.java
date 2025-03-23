@@ -70,9 +70,9 @@ public class App {
                 Account.addTransactionsToAccounts(oldBudgetTransactions.getAsList(), true);
 
 //                // TODO Remove
-                if (true) {
-                    return;
-                }
+//                if (true) {
+//                    return;
+//                }
 
                 TransactionWriterForBudget newBudgetTransactions = new TransactionWriterForBudget();
                 newBudgetTransactions.write(Account.getAccounts());
