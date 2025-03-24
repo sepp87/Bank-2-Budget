@@ -20,14 +20,14 @@ import org.apache.poi.ss.usermodel.*;
  *
  * @author joost
  */
-public class TransactionReaderForBudget {
+public class TransactionReaderForXlsxDone {
 
     public static final String BUDGET_TRANSACTIONS = "transactions.xlsx";
 
     private final List<CashTransaction> budgetTransactions;
     private final Map<String, List< CashTransaction>> budgetTransactionsPerSheet;
 
-    public TransactionReaderForBudget() {
+    public TransactionReaderForXlsxDone() {
         budgetTransactions = new ArrayList<>();
         budgetTransactionsPerSheet = new TreeMap<>();
     }
@@ -42,8 +42,8 @@ public class TransactionReaderForBudget {
         return budgetTransactions;
     }
 
-    public TransactionReaderForBudget read() {
-        File file = new File(App.getBudgetDirectory() + BUDGET_TRANSACTIONS);
+    public TransactionReaderForXlsxDone read() {
+        File file = new File(App.getDoneDirectory() + BUDGET_TRANSACTIONS);
         readFrom(file);
         return this;
     }
@@ -70,7 +70,7 @@ public class TransactionReaderForBudget {
 
             return accountMap;
         } catch (IOException | EncryptedDocumentException ex) {
-            Logger.getLogger(TransactionReaderForBudget.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TransactionReaderForXlsxDone.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return Collections.emptyMap();

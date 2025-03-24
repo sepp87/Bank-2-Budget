@@ -36,7 +36,7 @@ public class BudgetWriter {
     private XSSFWorkbook workbook;
 
     public void write(MultiAccountBudget budget) {
-        File file = new File(App.getBudgetDirectory() + BUDGET_MASTER);
+        File file = new File(App.getDoneDirectory() + BUDGET_MASTER);
 
         // Create a Workbook
         workbook = new XSSFWorkbook(); // new HSSFWorkbook() for generating `.xls` file
@@ -214,7 +214,7 @@ public class BudgetWriter {
             // Closing the workbook
             workbook.close();
         } catch (IOException ex) {
-            Logger.getLogger(TransactionWriterForBudget.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TransactionWriterForXlsx.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

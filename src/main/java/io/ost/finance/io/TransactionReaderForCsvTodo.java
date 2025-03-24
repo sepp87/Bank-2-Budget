@@ -20,13 +20,13 @@ import java.util.logging.Logger;
  *
  * @author joost
  */
-public class TransactionReaderForTodo {
+public class TransactionReaderForCsvTodo {
 
     public static final String TODO_DIRECTORY = "todo";
     private final List<CashTransaction> todoTransactions;
     protected final Map<String, List<CashTransaction>> todoTransactionsPerFile;
 
-    public TransactionReaderForTodo() {
+    public TransactionReaderForCsvTodo() {
         todoTransactions = new ArrayList<>();
         todoTransactionsPerFile = new TreeMap<>();
     }
@@ -35,13 +35,13 @@ public class TransactionReaderForTodo {
         return todoTransactionsPerFile;
     }
 
-    public TransactionReaderForTodo read() {
+    public TransactionReaderForCsvTodo read() {
         File todoDirectory = new File(App.getRootDirectory() + TODO_DIRECTORY);
         if (todoDirectory.exists() && todoDirectory.isDirectory()) {
             File[] files = getFilesFromCommandLineAnd(todoDirectory);
             processCsv(files);
         } else {
-            Logger.getLogger(TransactionReaderForTodo.class.getName()).log(Level.INFO, "Could NOT find \"todo\" directory, creating {0}", todoDirectory.getPath());
+            Logger.getLogger(TransactionReaderForCsvTodo.class.getName()).log(Level.INFO, "Could NOT find \"todo\" directory, creating {0}", todoDirectory.getPath());
             todoDirectory.mkdir();
             read();
         }

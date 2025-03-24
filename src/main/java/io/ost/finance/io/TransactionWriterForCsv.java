@@ -18,25 +18,16 @@ import org.apache.commons.csv.*;
  *
  * @author joost
  */
-public class TransactionWriterForDone extends TransactionWriter {
-
-    public static final String DONE_DIRECTORY = "done";
+public class TransactionWriterForCsv extends TransactionWriter {
 
     public void write(Map<String, List<CashTransaction>> transactionsPerFile) {
-        File doneDirectory = new File(App.getRootDirectory() + DONE_DIRECTORY);
-
-        if (doneDirectory.exists() && doneDirectory.isDirectory()) {
-            for (Entry<String, List<CashTransaction>> entry : transactionsPerFile.entrySet()) {
-                String filename = entry.getKey();
-                List<CashTransaction> transactions = entry.getValue();
-                String filenameWithoutExtension = filename.substring(0, filename.length() - 4);
-                File file = new File(doneDirectory.getPath() + File.separatorChar + filenameWithoutExtension + " cleaned.csv");
-                saveTransactionsToDoneDirectory(transactions, file);
-            }
-        } else {
-            Logger.getLogger(App.class.getName()).log(Level.INFO, "Could NOT find \"done\" directory, creating {0}", doneDirectory.getPath());
-            doneDirectory.mkdir();
-            write(transactionsPerFile);
+        File doneDirectory = new File(App.getDoneDirectory());
+        for (Entry<String, List<CashTransaction>> entry : transactionsPerFile.entrySet()) {
+            String filename = entry.getKey();
+            List<CashTransaction> transactions = entry.getValue();
+            String filenameWithoutExtension = filename.substring(0, filename.length() - 4);
+            File file = new File(doneDirectory.getPath() + File.separatorChar + filenameWithoutExtension + " cleaned.csv");
+            saveTransactionsToDoneDirectory(transactions, file);
         }
     }
 
@@ -49,7 +40,7 @@ public class TransactionWriterForDone extends TransactionWriter {
                 printer.printRecord((Object[]) getStringArrayFrom(transaction));
             }
         } catch (IOException ex) {
-            Logger.getLogger(TransactionWriterForDone.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TransactionWriterForCsv.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

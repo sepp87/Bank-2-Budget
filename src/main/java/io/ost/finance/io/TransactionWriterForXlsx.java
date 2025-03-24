@@ -19,13 +19,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *
  * @author joost
  */
-public class TransactionWriterForBudget extends TransactionWriter {
+public class TransactionWriterForXlsx extends TransactionWriter {
 
     public static final String BUDGET_TRANSACTIONS = "transactions.xlsx";
 
     // TODO when there is no label yet, add the label to the transaction
     public void write(Collection<Account> accounts) {
-        File file = new File(App.getBudgetDirectory() + BUDGET_TRANSACTIONS);
+        File file = new File(App.getDoneDirectory() + BUDGET_TRANSACTIONS);
 
         // Create a Workbook
         Workbook workbook = new XSSFWorkbook(); // new HSSFWorkbook() for generating `.xls` file
@@ -99,7 +99,7 @@ public class TransactionWriterForBudget extends TransactionWriter {
             // Closing the workbook
             workbook.close();
         } catch (IOException ex) {
-            Logger.getLogger(TransactionWriterForBudget.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TransactionWriterForXlsx.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

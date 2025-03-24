@@ -3,10 +3,10 @@ package io.ost.finance;
 import static io.ost.finance.Config.Mode.BUDGET;
 import io.ost.finance.io.BudgetReader;
 import io.ost.finance.io.BudgetWriter;
-import io.ost.finance.io.TransactionWriterForBudget;
-import io.ost.finance.io.TransactionReaderForBudget;
-import io.ost.finance.io.TransactionReaderForTodo;
-import io.ost.finance.io.TransactionWriterForDone;
+import io.ost.finance.io.TransactionWriterForXlsx;
+import io.ost.finance.io.TransactionReaderForXlsxDone;
+import io.ost.finance.io.TransactionReaderForCsvTodo;
+import io.ost.finance.io.TransactionWriterForCsv;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -22,7 +22,6 @@ import picocli.CommandLine;
 // TODO TEST myAccount
 // TODO implement derive contra account number with other accounts index
 // TODO find out why more rows are written for budget transactions, even though there are none
-
 /**
  * Bank-to-Budget app reads CSV files from the todo directory and command line.
  * It saves the cash transactions - parsed from the CSV files - to the done
@@ -36,7 +35,8 @@ public class App {
     private static boolean compiling = true;
 
     private static final String CONFIG_DIRECTORY = "config";
-    private static final String BUDGET_DIRECTORY = "done";
+    private static final String DONE_DIRECTORY = "done";
+    private static final String DATABASE_DIRECTORY = "db";
     private static final String BUILD_DIRECTORY = "build";
     private static final String MY_ACCOUNTS_PROPERTIES = "my-accounts.txt";
     private static final String OTHER_ACCOUNTS_PROPERTIES = "other-accounts.txt";
@@ -53,7 +53,7 @@ public class App {
 
         int exitCode = new CommandLine(Config.get()).execute(args);
 
-        TransactionReaderForTodo todoTransactions = new TransactionReaderForTodo().read();
+        TransactionReaderForCsvTodo todoTransactions = new TransactionReaderForCsvTodo().read();
         for (List<CashTransaction> transactions : todoTransactions.getPerFile().values()) {
             Account.addTransactionsToAccounts(transactions);
         }
@@ -61,21 +61,20 @@ public class App {
         Config.Mode mode = Config.getMode();
         switch (mode) {
             case CSV:
-                TransactionWriterForDone doneTransactions = new TransactionWriterForDone();
+                TransactionWriterForCsv doneTransactions = new TransactionWriterForCsv();
                 doneTransactions.write(todoTransactions.getPerFile());
                 break;
             case XLSX:
             case BUDGET:
-                TransactionReaderForBudget oldBudgetTransactions = new TransactionReaderForBudget().read();
-                Account.addTransactionsToAccounts(oldBudgetTransactions.getAsList(), true);
+                TransactionReaderForXlsxDone oldXlsxTransactions = new TransactionReaderForXlsxDone().read();
+                Account.addTransactionsToAccounts(oldXlsxTransactions.getAsList(), true);
 
 //                // TODO Remove
 //                if (true) {
 //                    return;
 //                }
-
-                TransactionWriterForBudget newBudgetTransactions = new TransactionWriterForBudget();
-                newBudgetTransactions.write(Account.getAccounts());
+                TransactionWriterForXlsx newXlsxTransactions = new TransactionWriterForXlsx();
+                newXlsxTransactions.write(Account.getAccounts());
 
                 // stop here, if mode is only XLSX 
                 if (mode != BUDGET) {
@@ -86,10 +85,12 @@ public class App {
                 budget.setAccounts(Account.getAccounts());
                 new BudgetWriter().write(budget);
                 break;
+
+
         }
 
         if (Config.isClearTodo()) {
-            System.out.println("Clear \"todo\" folder not implemented.");
+            Logger.getLogger(App.class.getName()).log(Level.INFO, "Clear \"todo\" folder not implemented.");
 
         }
 
@@ -106,7 +107,7 @@ public class App {
             loadConfig();
         }
     }
-    
+
     private void initializeWithoutConfig() {
         myAccounts = new Properties();
         otherAccounts = new Properties();
@@ -114,18 +115,12 @@ public class App {
     }
 
     private void loadConfig() {
-        File configDirectory = new File(getConfigDirectory());
-        if (configDirectory.exists() && configDirectory.isDirectory()) {
-            myAccounts = readProperties(getConfigDirectory() + MY_ACCOUNTS_PROPERTIES);
-            otherAccounts = readProperties(getConfigDirectory() + OTHER_ACCOUNTS_PROPERTIES);
-            rules = new RuleReader().read();
-            File budgetSettingsFile = new File(getConfigDirectory() + BudgetSettingsReader.BUDGET_SETTINGS);
-            hasBudget = budgetSettingsFile.exists();
-        } else {
-            Logger.getLogger(App.class.getName()).log(Level.INFO, "Could NOT find \"config\" directory, creating {0}", configDirectory.getPath());
-            configDirectory.mkdir();
-            loadConfig();
-        }
+        myAccounts = readProperties(getConfigDirectory() + MY_ACCOUNTS_PROPERTIES);
+        otherAccounts = readProperties(getConfigDirectory() + OTHER_ACCOUNTS_PROPERTIES);
+        rules = new RuleReader().read();
+        File budgetSettingsFile = new File(getConfigDirectory() + BudgetSettingsReader.BUDGET_SETTINGS);
+        hasBudget = budgetSettingsFile.exists();
+
     }
 
     private Properties readProperties(String path) {
@@ -152,11 +147,31 @@ public class App {
     }
 
     public static String getConfigDirectory() {
-        return App.get().appRootDirectory + CONFIG_DIRECTORY + File.separatorChar;
+        String path = App.get().appRootDirectory + CONFIG_DIRECTORY + File.separatorChar;
+        getDirectory(path);
+        return path;
+
     }
 
-    public static String getBudgetDirectory() {
-        return App.get().appRootDirectory + BUDGET_DIRECTORY + File.separatorChar;
+    public static String getDoneDirectory() {
+        String path = App.get().appRootDirectory + DONE_DIRECTORY + File.separatorChar;
+        getDirectory(path);
+        return path;
+    }
+
+    public static String getDatabaseDirectory() {
+        String path = App.get().appRootDirectory + DATABASE_DIRECTORY + File.separatorChar;
+        getDirectory(path);
+        return path;
+    }
+
+    private static File getDirectory(String path) {
+        File directory = new File(path);
+        if (!directory.exists() || !directory.isDirectory()) {
+            Logger.getLogger(App.class.getName()).log(Level.INFO, "Could NOT find \"" + directory.getName() + "\" directory, creating {0}", directory.getPath());
+            directory.mkdir();
+        }
+        return directory;
     }
 
     public static boolean hasBudget() {

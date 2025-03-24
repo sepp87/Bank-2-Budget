@@ -31,7 +31,7 @@ public class BudgetReader {
     }
 
     public MultiAccountBudget read() {
-        File file = new File(App.getBudgetDirectory() + BUDGET_MASTER);
+        File file = new File(App.getDoneDirectory() + BUDGET_MASTER);
         readFrom(file);
         return budget;
     }
@@ -56,7 +56,7 @@ public class BudgetReader {
             }
 
         } catch (IOException | EncryptedDocumentException ex) {
-            Logger.getLogger(TransactionReaderForBudget.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TransactionReaderForXlsxDone.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return budget;

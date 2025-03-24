@@ -14,7 +14,7 @@ import picocli.CommandLine.Parameters;
  *
  * @author joost
  */
-@Command(name = "Bank-to-Budget", mixinStandardHelpOptions = true, version = "Bank-to-Budget 1.0",
+@Command(name = "Bank-2-Budget", mixinStandardHelpOptions = true, version = "Bank-2-Budget 1.0",
         description = "Cleans up your bank statements and optionally adds them to your budget")
 public class Config implements Runnable {
 
@@ -43,7 +43,7 @@ public class Config implements Runnable {
     @Option(names = {"-d", "--decimal-separator"}, description = "Decimal separator options: DOT or COMMA. If not specified the system's locale default is used.")
     private final DecimalSeparator decimalSepator = DecimalSeparator.LOCALE;
 
-    @Option(names = {"-m", "--mode"}, description = "Processing mode options: CSV, XLSX and BUDGET. The app is run in CSV mode by default, which writes all bank statements to a comma separated files. XLSX mode writes all bank statements to one Excel file, with each sheet representing a single account. Budget mode summarizes all transactions into categories defined by which you labeled it.")
+    @Option(names = {"-m", "--mode"}, description = "Processing mode options: CSV, XLSX, BUDGET and SQLITE. The app is run in CSV mode by default, which writes all bank statements to a comma separated files. XLSX mode writes all bank statements to one Excel file, with each sheet representing a single account. Budget mode summarizes all transactions into categories defined by which you labeled it.")
     private final Mode mode = Mode.CSV;
 
     @Parameters
