@@ -1,12 +1,14 @@
 package io.ost.finance;
 
 import static io.ost.finance.Config.Mode.BUDGET;
+import static io.ost.finance.Config.Mode.SQLITE;
 import io.ost.finance.io.BudgetReader;
 import io.ost.finance.io.BudgetWriter;
 import io.ost.finance.io.TransactionWriterForXlsx;
 import io.ost.finance.io.TransactionReaderForXlsxDone;
 import io.ost.finance.io.TransactionReaderForCsvTodo;
 import io.ost.finance.io.TransactionWriterForCsv;
+import io.ost.finance.io.TransactionWriterForSqlite;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -65,7 +67,9 @@ public class App {
                 doneTransactions.write(todoTransactions.getPerFile());
                 break;
             case XLSX:
+            case SQLITE:
             case BUDGET:
+
                 TransactionReaderForXlsxDone oldXlsxTransactions = new TransactionReaderForXlsxDone().read();
                 Account.addTransactionsToAccounts(oldXlsxTransactions.getAsList(), true);
 
@@ -76,16 +80,18 @@ public class App {
                 TransactionWriterForXlsx newXlsxTransactions = new TransactionWriterForXlsx();
                 newXlsxTransactions.write(Account.getAccounts());
 
-                // stop here, if mode is only XLSX 
-                if (mode != BUDGET) {
-                    break;
+                if (mode == SQLITE) {
+                    TransactionWriterForSqlite dbTransactions = new TransactionWriterForSqlite();
+                    dbTransactions.write(Account.getAccounts());
                 }
 
-                MultiAccountBudget budget = new BudgetReader().read();
-                budget.setAccounts(Account.getAccounts());
-                new BudgetWriter().write(budget);
-                break;
+                if (mode == BUDGET) {
+                    MultiAccountBudget budget = new BudgetReader().read();
+                    budget.setAccounts(Account.getAccounts());
+                    new BudgetWriter().write(budget);
+                }
 
+                break;
 
         }
 
