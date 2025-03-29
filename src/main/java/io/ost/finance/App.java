@@ -1,9 +1,9 @@
 package io.ost.finance;
 
 import static io.ost.finance.Config.Mode.BUDGET;
-import static io.ost.finance.Config.Mode.SQLITE;
-import io.ost.finance.io.BudgetReader;
-import io.ost.finance.io.BudgetWriter;
+import io.ost.finance.io.BudgetReaderForXlsx;
+import io.ost.finance.io.BudgetWriterForSqlite;
+import io.ost.finance.io.BudgetWriterForXlsx;
 import io.ost.finance.io.TransactionWriterForXlsx;
 import io.ost.finance.io.TransactionReaderForXlsxDone;
 import io.ost.finance.io.TransactionReaderForCsvTodo;
@@ -63,11 +63,9 @@ public class App {
         Config.Mode mode = Config.getMode();
         switch (mode) {
             case CSV:
-                TransactionWriterForCsv doneTransactions = new TransactionWriterForCsv();
-                doneTransactions.write(todoTransactions.getPerFile());
+                new TransactionWriterForCsv().write(todoTransactions.getPerFile());
                 break;
             case XLSX:
-            case SQLITE:
             case BUDGET:
 
                 TransactionReaderForXlsxDone oldXlsxTransactions = new TransactionReaderForXlsxDone().read();
@@ -77,18 +75,21 @@ public class App {
 //                if (true) {
 //                    return;
 //                }
-                TransactionWriterForXlsx newXlsxTransactions = new TransactionWriterForXlsx();
-                newXlsxTransactions.write(Account.getAccounts());
+                new TransactionWriterForXlsx().write(Account.getAccounts());
 
-                if (mode == SQLITE) {
-                    TransactionWriterForSqlite dbTransactions = new TransactionWriterForSqlite();
-                    dbTransactions.write(Account.getAccounts());
+                if (Config.hasSqlite()) {
+                    new TransactionWriterForSqlite().write(Account.getAccounts());
                 }
 
-                if (mode == BUDGET) {
-                    MultiAccountBudget budget = new BudgetReader().read();
-                    budget.setAccounts(Account.getAccounts());
-                    new BudgetWriter().write(budget);
+                if (mode != BUDGET) {
+                    break;
+                }
+                MultiAccountBudget budget = new BudgetReaderForXlsx().read();
+                budget.setAccounts(Account.getAccounts());
+                new BudgetWriterForXlsx().write(budget);
+
+                if (Config.hasSqlite()) {
+                    new BudgetWriterForSqlite().write(budget);
                 }
 
                 break;

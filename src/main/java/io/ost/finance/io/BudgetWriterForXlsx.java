@@ -29,7 +29,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *
  * @author joost
  */
-public class BudgetWriter {
+public class BudgetWriterForXlsx {
 
     public static final String BUDGET_MASTER = "budget.xlsx";
 
@@ -101,12 +101,12 @@ public class BudgetWriter {
 
                 }
 
+                Map<String, Double> budgetedForCategory = month.getBudgetedForCategories();
                 Map<String, Double> expensesForCategory = month.getExpensesForCategories();
                 Map<String, Double> remainderForCategoryLastMonth = month.getRemainderForCategoriesLastMonth();
-                Map<String, Double> remainderForCategory = month.getRemainderForCategories();
 
                 int i = 2;
-                for (Entry<String, Double> entry : month.getBudgetedForCategories().entrySet()) {
+                for (Entry<String, Double> entry : budgetedForCategory.entrySet()) {
                     Row row = sheet.createRow(i);
 
                     String category = entry.getKey();

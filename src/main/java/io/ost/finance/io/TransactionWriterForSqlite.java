@@ -5,13 +5,9 @@ import io.ost.finance.App;
 import io.ost.finance.CashTransaction;
 import java.lang.reflect.Field;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -24,22 +20,20 @@ import java.util.logging.Logger;
 public class TransactionWriterForSqlite extends TransactionWriter {
 
     private static final String DATABASE_PATH = App.getDatabaseDirectory() + "bank-2-budget.db";
+    private static final String TRANSACTIONS_TABLE = "transactions";
     private static final Map<String, Class<?>> COLUMN_TYPES = new TreeMap<>();
 
     private Connection connection;
 
-    public TransactionWriterForSqlite() {
-    }
-
     public void write(Collection<Account> accounts) {
-        connection = getConnection(DATABASE_PATH);
+        connection = SqliteUtil.getConnection(DATABASE_PATH);
         if (connection == null) {
             return;
         }
 
         boolean success = true; // Track transaction success
         success &= createTable(connection);
-        success &= clearTable(connection);
+        success &= SqliteUtil.clearTable(connection, TRANSACTIONS_TABLE);
 
         for (Account account : accounts) {
             success &= insertTransactions(connection, account.getAllTransactions());
@@ -69,26 +63,10 @@ public class TransactionWriterForSqlite extends TransactionWriter {
         }
     }
 
-    private static Connection getConnection(String path) {
-        String url = "jdbc:sqlite:" + path;
-        try {
-            Connection connection = DriverManager.getConnection(url);
-            connection.setAutoCommit(false);
-            return connection;
-        } catch (SQLException ex) {
-            Logger.getLogger(TransactionWriterForSqlite.class.getName()).log(Level.SEVERE, "Could NOT connect to {0}", url);
-        }
-        return null;
-    }
-
     private static boolean createTable(Connection connection) {
         String columns = getColumnsWithTypes();
-        String primaryKey = getPrimaryKey("accountNumber", "transactionNumber");
-        String createTable = "CREATE TABLE IF NOT EXISTS transactions ("
-                + columns
-                + primaryKey
-                + ");";
-        return executeUpdateStatement(connection, createTable);
+        String primaryKey = SqliteUtil.getPrimaryKey("accountNumber", "transactionNumber");
+        return SqliteUtil.createTable(connection, TRANSACTIONS_TABLE, columns, primaryKey);
     }
 
     private static String getColumnsWithTypes() {
@@ -124,37 +102,10 @@ public class TransactionWriterForSqlite extends TransactionWriter {
         }
     }
 
-    public static String getPrimaryKey(String... columns) {
-        String result = "PRIMARY KEY (";
-        for (String value : columns) {
-            result += value + ", ";
-        }
-        return removeLastTwoChars(result) + ")";
-    }
-
-    public static String removeLastTwoChars(String value) {
-        return value.substring(0, value.length() - 2); // remove the trailing comma and space ", "
-    }
-
-    private static boolean clearTable(Connection connection) {
-        String truncateTable = "DELETE FROM transactions";
-        return executeUpdateStatement(connection, truncateTable);
-    }
-
-    private static boolean executeUpdateStatement(Connection connection, String sql) {
-        try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate(sql);
-        } catch (SQLException ex) {
-            Logger.getLogger(TransactionWriterForSqlite.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
-        return true;
-    }
-
     private static boolean insertTransactions(Connection connection, Collection<CashTransaction> transactions) {
         String columns = getColumns();
-        String placeholders = getPlaceholders();
-        String insertTransactions = "INSERT INTO transactions (" + columns + ") "
+        String placeholders = SqliteUtil.getPlaceholders(HEADER.length);
+        String insertTransactions = "INSERT INTO " + TRANSACTIONS_TABLE + " (" + columns + ") "
                 + "VALUES (" + placeholders + ")";
 
         try (PreparedStatement statement = connection.prepareStatement(insertTransactions)) {
@@ -183,11 +134,7 @@ public class TransactionWriterForSqlite extends TransactionWriter {
         for (String column : HEADER) {
             result += column + ", ";
         }
-        return removeLastTwoChars(result);
-    }
-
-    private static String getPlaceholders() {
-        return String.join(", ", Collections.nCopies(HEADER.length, "?"));
+        return SqliteUtil.removeLastTwoChars(result);
     }
 
     private static void setValueForStatement(int index, Object value, PreparedStatement statement) {

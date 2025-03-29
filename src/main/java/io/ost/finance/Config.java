@@ -7,8 +7,10 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import picocli.CommandLine.Spec;
 
 /**
  *
@@ -29,22 +31,30 @@ public class Config implements Runnable {
         }
         return config;
     }
+//
+    @Spec
+    CommandSpec spec; // Inject CommandSpec to manually print help
 
     @Override
     public void run() {
+        spec.commandLine().usage(System.out);
+        System.out.println();
     }
-    
-    @Option(names = {"-h", "--help"}, usageHelp = true, description = "Print help")
-    private boolean help;
+
+//    @Option(names = {"-h", "--help"}, usageHelp = true, description = "Print help")
+//    private boolean help;
 
     @Option(names = {"-c", "--clear-todo"}, description = "Clear the todo folder after processing it.")
     private boolean clearTodo = false;
-    
+
     @Option(names = {"-d", "--decimal-separator"}, description = "Decimal separator options: DOT or COMMA. If not specified the system's locale default is used.")
     private final DecimalSeparator decimalSepator = DecimalSeparator.LOCALE;
 
-    @Option(names = {"-m", "--mode"}, description = "Processing mode options: CSV, XLSX, BUDGET and SQLITE. The app is run in CSV mode by default, which writes all bank statements to a comma separated files. XLSX mode writes all bank statements to one Excel file, with each sheet representing a single account. Budget mode summarizes all transactions into categories defined by which you labeled it.")
+    @Option(names = {"-m", "--mode"}, defaultValue = "CSV", description = "Processing mode options: CSV, XLSX and BUDGET. The app is run in CSV mode by default, which writes all bank statements to a comma separated files. XLSX mode writes all bank statements to one Excel file, with each sheet representing a single account. Budget mode summarizes all transactions into categories defined by which you labeled it.")
     private final Mode mode = Mode.CSV;
+
+    @Option(names = {"-s", "--sqlite"}, description = "Use SQLite database")
+    private boolean sqlite;
 
     @Parameters
     private static String[] paths = {};
@@ -54,6 +64,10 @@ public class Config implements Runnable {
         return Config.get().clearTodo;
     }
     
+    public static boolean hasSqlite() {
+        return Config.get().sqlite;
+    }
+
     public static char getDecimalSeperator() {
         switch (Config.get().decimalSepator) {
             case DOT:
@@ -85,7 +99,7 @@ public class Config implements Runnable {
 
             } else {
                 Logger.getLogger(Config.class.getName()).log(Level.INFO, "{0} does not exist or is not a CSV file. File will be skipped.", file.getPath());
-                
+
             }
         }
         return result;
@@ -96,7 +110,7 @@ public class Config implements Runnable {
     }
 
     public enum Mode {
-        CSV, XLSX, BUDGET, SQLITE
+        CSV, XLSX, BUDGET
     }
 
 }

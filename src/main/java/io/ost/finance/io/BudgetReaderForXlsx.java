@@ -19,13 +19,13 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  *
  * @author joost
  */
-public class BudgetReader {
+public class BudgetReaderForXlsx {
 
     public static final String BUDGET_MASTER = "budget.xlsx";
 
     private final MultiAccountBudget budget;
 
-    public BudgetReader() {
+    public BudgetReaderForXlsx() {
         // at this point the account is still unknown
         budget = new MultiAccountBudget();
     }
