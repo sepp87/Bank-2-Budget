@@ -80,17 +80,17 @@ public class Launcher {
 
     public static void main(String[] args) throws Exception {
 
-        CommandLineArgs cliArgs = new CommandLineArgs();
-        new CommandLine(cliArgs).execute(args);
-
-        AppPaths paths = new AppPaths();
-        App app = new App(paths);
-        CliAppRunner runner = new CliAppRunner(app, cliArgs, paths);
-        runner.run();
-
-        if (true) {
-            return;
-        }
+//        CommandLineArgs cliArgs = new CommandLineArgs();
+//        new CommandLine(cliArgs).execute(args);
+//
+//        AppPaths paths = new AppPaths();
+//        App app = new App(paths);
+//        CliAppRunner runner = new CliAppRunner(app, cliArgs, paths);
+//        runner.run();
+//
+//        if (true) {
+//            return;
+//        }
 
         compiling = false;
 
