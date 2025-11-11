@@ -1,8 +1,7 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.cli.Launcher;
+import bank2budget.Launcher;
 import bank2budget.core.CashTransaction;
-import bank2budget.core.Rule;
 import bank2budget.core.Util;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,16 +18,13 @@ import java.util.logging.Logger;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import static bank2budget.cli.Launcher.get;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Properties;
 
 /**
  * The abstract class TransactionParser parses the CashTranasactions inside the
- * CSV file and post processes them according to Rules defined in the config
- * (post-processing.json). Furthermore it offers several general purpose
- * functions for its subclasses to help with parsing dates, numbers and IBANs
+ * CSV file. Furthermore it offers several general purpose functions for its
+ * subclasses to help with parsing dates, numbers and IBANs
  *
  * Before parsing CashTransactions together with the CSV format it needs to
  * determines which records are actual CashTransactions. Depending on the CSV
@@ -43,29 +39,28 @@ import java.util.Properties;
  */
 public abstract class TransactionParser {
 
-    protected final ParserConfig config;
+    private static final Logger LOGGER = Logger.getLogger(TransactionParser.class.getName());
+
+    protected final ParserConfig parserConfig;
 
     public TransactionParser(ParserConfig config) {
-        this.config = config;
+        this.parserConfig = config;
     }
 
     public List<CashTransaction> parse() {
         //ANSI files are  read correctly, but now UTF-8 files are not
-        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), config.getCharset()), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
+        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(parserConfig.getFile()), parserConfig.getCharset()), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
 
-//        try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(config.getFile()), "Cp1252"), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
             List<CashTransaction> transactions = parseRecordsWith(parser);
             if (Launcher.log_transactions) {
                 for (CashTransaction t : transactions) {
-                    t.setFileOrigin(config.getFile());
-
                     System.out.println(t.toString());
                 }
             }
 
             return transactions;
         } catch (IOException ex) {
-            Logger.getLogger(TransactionParser.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
         return Collections.emptyList();
     }
@@ -86,10 +81,10 @@ public abstract class TransactionParser {
                 if (transaction == null) {
                     continue;
                 }
-                postProcess(transaction);
+                setAccountInstitutionAndFileOrigin(transaction);
                 transactions.add(transaction);
             } catch (ParseException ex) {
-                Logger.getLogger(TransactionParser.class.getName()).log(Level.WARNING, "Record skipped due to inccorrect values. {0}", ex.getMessage());
+                LOGGER.log(Level.WARNING, "Record skipped due to inccorrect values. {0}", ex.getMessage());
             }
         }
         generateTransactionNumberAndDeriveLastOfDay(transactions);
@@ -117,84 +112,9 @@ public abstract class TransactionParser {
      */
     protected abstract CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException;
 
-    public void postProcess(CashTransaction transaction) {
-        transaction.setAccountInstitution(config.getCreditInstitution());
-        transaction.setFileOrigin(config.getFile());
-
-        for (Rule rule : get().rules) {
-            rule.process(transaction);
-        }
-
-        overwriteAccountNames(transaction);
-        addMissingAccountNumbers(transaction);
-    }
-
-    public static void overwriteAccountNames(CashTransaction transaction) {
-        String accountNumber = transaction.getAccountNumber();
-        String accountName = getAccountNameFrom(accountNumber);
-        if (accountName != null) {
-            transaction.setAccountName(accountName);
-        }
-
-        String contraAccountNumber = transaction.getContraAccountNumber();
-        String contraAccountName = getAccountNameFrom(contraAccountNumber);
-        if (contraAccountName != null) {
-            transaction.setContraAccountName(contraAccountName);
-        }
-    }
-
-    private static String getAccountNameFrom(String accountNumber) {
-        if (accountNumber == null) {
-            return null;
-        }
-        String result = get().myAccounts.getProperty(accountNumber);
-        if (result == null) {
-            result = get().otherAccounts.getProperty(accountNumber);
-        }
-        return result;
-    }
-
-    public static void addMissingAccountNumbers(CashTransaction transaction) {
-        if (transaction.getAccountNumber() == null) {
-            transaction.setAccountNumber(getAccountNumberFrom(transaction.getAccountName()));
-        }
-        if (transaction.getContraAccountNumber() == null) {
-            transaction.setContraAccountNumber(getAccountNumberFrom(transaction.getContraAccountName()));
-        }
-    }
-
-    private static String getAccountNumberFrom(String accountName) {
-        if (accountName == null) {
-            return null;
-        }
-
-        String result = getKeyFromValue(accountName, Launcher.get().myAccounts);
-        if (result == null) {
-            result = getKeyFromValue(accountName, Launcher.get().otherAccounts);
-        }
-        return result;
-    }
-
-    private static String getKeyFromValue(String value, Properties properties) {
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            String candidate = (String) entry.getValue();
-            if (candidate.equals(value)) {
-                String key = (String) entry.getKey();
-                return key;
-            }
-        }
-        return null;
-    }
-
-    public static String getMyAccountNumberFrom(String accountName) {
-        for (Map.Entry<Object, Object> entry : get().myAccounts.entrySet()) {
-            String myAccountName = (String) entry.getValue();
-            if (myAccountName.equals(accountName)) {
-                String myAccountNumber = (String) entry.getKey();
-                return myAccountNumber;
-            }
-        }
-        return null;
+    protected void setAccountInstitutionAndFileOrigin(CashTransaction transaction) {
+        transaction.setAccountInstitution(parserConfig.getCreditInstitution());
+        transaction.setFileOrigin(parserConfig.getFile());
     }
 
     /**
@@ -286,7 +206,7 @@ public abstract class TransactionParser {
     }
 
     public ParserConfig getConfig() {
-        return config;
+        return parserConfig;
     }
 
 }

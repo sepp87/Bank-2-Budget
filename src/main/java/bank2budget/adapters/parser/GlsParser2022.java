@@ -37,7 +37,7 @@ public class GlsParser2022 extends TransactionParser {
             "Mandatsreferenz"
         };
         
-        return CSVFormat.DEFAULT.withDelimiter(config.getDelimiter()).withFirstRecordAsHeader();
+        return CSVFormat.DEFAULT.withDelimiter(parserConfig.getDelimiter()).withFirstRecordAsHeader();
     }
 
     @Override

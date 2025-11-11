@@ -20,7 +20,7 @@ public class SnsBankParser extends TransactionParser {
             "Bedrag", "Transactiedatum", "Valutadatum", "Unknown number 1",
             "Soort bij-/afschrijving", "Unknown number 2", "Unknown value 4",
             "Omschrijving", "Unknown number 3",};
-        return CSVFormat.DEFAULT.withDelimiter(config.getDelimiter()).withHeader(header);
+        return CSVFormat.DEFAULT.withDelimiter(parserConfig.getDelimiter()).withHeader(header);
     }
 
     @Override

@@ -1,11 +1,11 @@
 package bank2budget.adapters.reader;
 
-import bank2budget.cli.Launcher;
 import bank2budget.core.CashTransaction;
 import bank2budget.core.CreditInstitution;
 import bank2budget.adapters.parser.TransactionParser;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,12 +23,13 @@ import org.apache.poi.ss.usermodel.*;
  */
 public class TransactionReaderForXlsxDone {
 
-    public static final String BUDGET_TRANSACTIONS = "transactions.xlsx";
 
     private final List<CashTransaction> budgetTransactions;
     private final Map<String, List< CashTransaction>> budgetTransactionsPerSheet;
+    private final Path transactionsFile;
 
-    public TransactionReaderForXlsxDone() {
+    public TransactionReaderForXlsxDone(Path transactionsFile) {
+        this.transactionsFile = transactionsFile;
         budgetTransactions = new ArrayList<>();
         budgetTransactionsPerSheet = new TreeMap<>();
     }
@@ -44,8 +45,7 @@ public class TransactionReaderForXlsxDone {
     }
 
     public TransactionReaderForXlsxDone read() {
-        File file = new File(Launcher.getDoneDirectory() + BUDGET_TRANSACTIONS);
-        readFrom(file);
+        readFrom(transactionsFile.toFile());
         return this;
     }
 
@@ -103,8 +103,8 @@ public class TransactionReaderForXlsxDone {
             }
 
             CashTransaction transaction = getCashTransactionFrom(row);
-            TransactionParser.overwriteAccountNames(transaction);
-            TransactionParser.addMissingAccountNumbers(transaction);
+//            ruleEngine.overwriteAccountNames(transaction);
+//            ruleEngine.addMissingAccountNumbers(transaction);
             transactions.add(transaction);
         }
         TransactionParser.deriveLastOfDay(transactions);
@@ -125,8 +125,8 @@ public class TransactionReaderForXlsxDone {
             Cell cell = row.getCell(i);
             if (cell != null) {
                 switch (column) {
-                    case "label": // String
-                        transaction.setLabel(cell.getStringCellValue());
+                    case "category": // String
+                        transaction.setCategory(cell.getStringCellValue());
                         break;
                     case "amount": // Numeric
                         transaction.setAmount(cell.getNumericCellValue());

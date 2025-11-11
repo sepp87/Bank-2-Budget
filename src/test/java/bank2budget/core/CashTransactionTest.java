@@ -63,7 +63,7 @@ public class CashTransactionTest {
     public void testEquals_WhenExactlyTheSame_ThenReturnTrue() {
         System.out.println("testEquals_WhenExactlyTheSame_ThenReturnTrue");
 
-        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label", null);
+        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some category", null);
         CashTransaction duplicate = new CashTransaction(transaction);
 
         boolean expected = true;
@@ -77,12 +77,12 @@ public class CashTransactionTest {
      * Test of equals method, of class CashTransaction.
      */
     @Test
-    public void testEquals_WhenLabelsDiffer_ThenReturnTrue() {
-        System.out.println("testEquals_WhenLabelsDiffer_ThenReturnTrue");
+    public void testEquals_WhenCategoriesDiffer_ThenReturnTrue() {
+        System.out.println("testEquals_WhenCategoriesDiffer_ThenReturnTrue");
 
-        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label", null);
+        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some category", null);
         CashTransaction duplicate = new CashTransaction(transaction);
-        duplicate.setLabel("Other label");
+        duplicate.setCategory("Other category");
 
         boolean expected = true;
         boolean result = transaction.equals(duplicate);
@@ -98,7 +98,7 @@ public class CashTransactionTest {
     public void testEquals_WhenLastOfDaysDiffer_ThenReturnTrue() {
         System.out.println("testEquals_WhenLastOfDaysDiffer_ThenReturnTrue");
 
-        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some label", null);
+        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some category", null);
         transaction.setLastOfDay(true);
         CashTransaction duplicate = new CashTransaction(transaction);
         duplicate.setLastOfDay(false);
@@ -110,13 +110,13 @@ public class CashTransactionTest {
         UtilTest.printResult(expected, result);
     }
 
-    public static List<CashTransaction> generateTransactionsForAccountWithinTimespan(String account, LocalDate from, LocalDate to, String label) {
-        return generateTransactionsForAccountWithinTimespan(account, from, to, label, null);
+    public static List<CashTransaction> generateTransactionsForAccountWithinTimespan(String account, LocalDate from, LocalDate to, String category) {
+        return generateTransactionsForAccountWithinTimespan(account, from, to, category, null);
     }
 
-    public static List<CashTransaction> generateTransactionsForAccountWithinTimespan(String account, LocalDate from, LocalDate to, String label, Double amount) {
+    public static List<CashTransaction> generateTransactionsForAccountWithinTimespan(String account, LocalDate from, LocalDate to, String category, Double amount) {
         List<LocalDate> dates = generateDatesForTimespan(from, to);
-        List<CashTransaction> transactions = generateTransactionforEachDate(account, dates, label, amount);
+        List<CashTransaction> transactions = generateTransactionforEachDate(account, dates, category, amount);
         return transactions;
     }
 
@@ -131,22 +131,22 @@ public class CashTransactionTest {
         return dates;
     }
 
-    private static List<CashTransaction> generateTransactionforEachDate(String account, List<LocalDate> dates, String label, Double amount) {
+    private static List<CashTransaction> generateTransactionforEachDate(String account, List<LocalDate> dates, String category, Double amount) {
         List<CashTransaction> transactions = new ArrayList<>();
         for (LocalDate date : dates) {
-            CashTransaction transaction = CashTransactionTest.generateOneTransaction(account, date, label, amount);
+            CashTransaction transaction = CashTransactionTest.generateOneTransaction(account, date, category, amount);
             transactions.add(transaction);
         }
         TransactionParser.generateTransactionNumberAndDeriveLastOfDay(transactions);
         return transactions;
     }
 
-    public static CashTransaction generateOneTransaction(String account, LocalDate date, String label, Double amount) {
+    public static CashTransaction generateOneTransaction(String account, LocalDate date, String category, Double amount) {
         CashTransaction transaction = new CashTransaction();
         transaction.setAccountNumber(account);
         transaction.setAccountName(account);
         transaction.setDate(date);
-        transaction.setLabel(label);
+        transaction.setCategory(category);
         transaction.setAccountBalance(0);
         if (amount == null) {
             transaction.setAmount(Math.floor(ThreadLocalRandom.current().nextDouble(-100, 100) * 100) / 100);

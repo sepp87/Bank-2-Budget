@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.io.FileFilter;
-import static bank2budget.cli.Launcher.get;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -64,31 +63,6 @@ public class Util {
             Logger.getLogger(Util.class.getName()).log(Level.SEVERE, null, ex);
         }
         return fallbackPath;
-    }
-
-    public static boolean isMyAccountNumber(String accountNumber) {
-        if (accountNumber == null) {
-            return false;
-        }
-        return get().myAccounts.containsKey(accountNumber);
-    }
-
-    public static boolean isMyAccountName(String accountName) {
-        if (accountName == null) {
-            return false;
-        }
-        return get().myAccounts.containsValue(accountName);
-    }
-
-    public static String getMyAccountNumberFrom(String accountName) {
-        for (Map.Entry<Object, Object> entry : get().myAccounts.entrySet()) {
-            String myAccountName = (String) entry.getValue();
-            if (myAccountName.equals(accountName)) {
-                String myAccountNumber = (String) entry.getKey();
-                return myAccountNumber;
-            }
-        }
-        return null;
     }
 
     public static File[] getFilesByExtensionFrom(File directory, String extension) {

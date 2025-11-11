@@ -18,7 +18,7 @@
         by adding a new rule. Processing rules are used
         to change or add values to your digital bank
         statement e.g. if description contains the word
-        "restaurant" then it gets labeled "dining out".
+        "restaurant" then it gets categorized as "dining out".
     </p>
     <p style="width: 700px;">
         Rules can be triggered by values set through previous
@@ -26,7 +26,7 @@
         set by earlier rules. Each rule can have multiple "if"
         and "then" statements. Each subsequent statement
         adds an additional check or change. For example, all
-        cash transcations in July are labeled vacation, but the
+        cash transactions in July are categorized as vacation, but the
         electrical bill should still be appointed to fix costs.
     </p>
     <p style="width: 700px;">
@@ -116,7 +116,7 @@
 
             this.id = 'rule_' + Rule.index;
 
-            this.variables = ['label', 'amount', 'transactionNumber',
+            this.variables = ['category', 'amount', 'transactionNumber',
                 'date', 'accountBalance', 'accountInstitution', 'accountNumber',
                 'accountName', 'contraAccountNumber', 'contraAccountName',
                 'internal', 'transactionType', 'description'

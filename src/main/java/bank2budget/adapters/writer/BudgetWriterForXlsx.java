@@ -1,13 +1,14 @@
 package bank2budget.adapters.writer;
 
 import bank2budget.adapters.writer.TransactionWriterForXlsx;
-import bank2budget.cli.Launcher;
+import bank2budget.Launcher;
 import bank2budget.core.MonthlyBudget;
 import bank2budget.core.MultiAccountBudget;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,12 +33,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class BudgetWriterForXlsx {
 
-    public static final String BUDGET_MASTER = "budget.xlsx";
-
+    private final Path budgetFile;
     private XSSFWorkbook workbook;
+    
+    public BudgetWriterForXlsx(Path budgetFile) {
+        this.budgetFile = budgetFile;
+    }
 
     public void write(MultiAccountBudget budget) {
-        File file = new File(Launcher.getDoneDirectory() + BUDGET_MASTER);
+        File file = budgetFile.toFile();
 
         // Create a Workbook
         workbook = new XSSFWorkbook(); // new HSSFWorkbook() for generating `.xls` file

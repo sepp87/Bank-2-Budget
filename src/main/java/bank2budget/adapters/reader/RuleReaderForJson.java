@@ -28,7 +28,6 @@ import java.util.logging.Logger;
  */
 public class RuleReaderForJson {
 
-    public static final String PROCESSING_RULES = "processing-rules.txt";
     private final JsonParser parser;
     private final File rulesFile;
 

@@ -103,7 +103,7 @@ public class ComdirectParser extends TransactionParser {
             for (var record : transactionRecords) {
                 try {
                     CashTransaction transaction = parseCashTransactionFrom(record);
-                    postProcess(transaction);
+                    setAccountInstitutionAndFileOrigin(transaction);
                     transactions.add(transaction);
                 } catch (ParseException ex) {
                     Logger.getLogger(ComdirectParser.class.getName()).log(Level.WARNING, "Record skipped since value date was left open, meaning the cash transaction was NOT yet processed by the bank.");

@@ -48,7 +48,7 @@ public class BudgetDatabase {
               contraAccountName TEXT,
               contraAccountNumber TEXT,
               internal INTEGER,
-              label TEXT,
+              category TEXT,
               lastOfDay INTEGER,
               positionOfDay INTEGER,
               notes TEXT,
@@ -84,7 +84,7 @@ public class BudgetDatabase {
             INSERT OR REPLACE INTO transactions
             (accountNumber, transactionNumber, date, amount, balanceAfter,
              transactionType, description, contraAccountName, contraAccountNumber,
-             internal, label, lastOfDay, positionOfDay, notes)
+             internal, category, lastOfDay, positionOfDay, notes)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """;
 
@@ -102,7 +102,7 @@ public class BudgetDatabase {
                 ps.setString(8, t.getContraAccountName());
                 ps.setString(9, t.getContraAccountNumber());
                 ps.setInt(10, t.isInternal() ? 1 : 0);
-                ps.setString(11, t.getLabel());
+                ps.setString(11, t.getCategory());
                 ps.setInt(12, t.isLastOfDay() ? 1 : 0);
                 ps.setInt(13, t.getPositionOfDay());
                 ps.setString(14, t.getNotes());
@@ -303,21 +303,21 @@ public class BudgetDatabase {
                   ELSE date(date, 'start of month', '+%2$d day', '-1 month')  -- previous month
                 END
               ) AS firstOfMonth,
-              label,
+              category,
               SUM(amount) AS amount
             FROM tx
-            GROUP BY firstOfMonth, label
-            ORDER BY firstOfMonth, label;
+            GROUP BY firstOfMonth, category
+            ORDER BY firstOfMonth, category;
             """.formatted(firstOfMonth, firstOfMonth - 1)
             );
 
             s.executeUpdate("""
             CREATE VIEW IF NOT EXISTS expenses_total AS
             SELECT
-              label,
+              category,
               SUM(amount) AS amount
             FROM transactions
-            GROUP BY label
+            GROUP BY category
             ORDER BY amount;
             """);
 
@@ -327,21 +327,21 @@ public class BudgetDatabase {
               SELECT MAX(firstOfMonth) AS current_month FROM expenses_by_month
             )
             SELECT
-              label,
+              category,
               SUM(amount) AS amount
             FROM expenses_by_month
             WHERE firstOfMonth = (SELECT current_month FROM latest)
-            GROUP BY label
+            GROUP BY category
             ORDER BY amount;
             """);
 
             s.executeUpdate("""
             CREATE VIEW IF NOT EXISTS average_expenses_total AS
             SELECT
-              label,
+              category,
               SUM(amount) / (SELECT COUNT(DISTINCT firstOfMonth) FROM expenses_by_month) AS amount
             FROM expenses_by_month
-            GROUP BY label
+            GROUP BY category
             ORDER BY amount;
             """);
 
@@ -474,11 +474,11 @@ public class BudgetDatabase {
               LIMIT %1$d
             )
             SELECT
-              label,
+              category,
               SUM(amount) / (SELECT COUNT(*) FROM recent) AS amount
             FROM expenses_by_month
             WHERE firstOfMonth IN (SELECT firstOfMonth FROM recent)
-            GROUP BY label
+            GROUP BY category
             ORDER BY amount;
         """.formatted(n);
     }
@@ -491,11 +491,11 @@ public class BudgetDatabase {
           FROM expenses_by_month
         )
         SELECT
-          label,
+          category,
           SUM(amount) / COUNT(DISTINCT firstOfMonth) AS amount
         FROM expenses_by_month
         WHERE substr(firstOfMonth, 1, 4) = (SELECT value FROM year)
-        GROUP BY label
+        GROUP BY category
         ORDER BY amount
         """;
     }
@@ -526,14 +526,14 @@ public class BudgetDatabase {
           CROSS JOIN bounds b
         )
         SELECT
-          e.label,
+          e.category,
           strftime('%Y', date(e.firstOfMonth)) AS year,
           ROUND(SUM(e.amount) / m.divisor, 2) AS amount
         FROM expenses_by_month e
         JOIN month_counts m
           ON m.year = strftime('%Y', date(e.firstOfMonth))
-        GROUP BY e.label, year
-        ORDER BY e.label, year;
+        GROUP BY e.category, year
+        ORDER BY e.category, year;
         """;
     }
 

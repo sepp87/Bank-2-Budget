@@ -82,7 +82,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenOldAddNewWithUnorderedOverlap_ThenAddUniqueOnlyAndOldNotExistWithinNew");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some category");
         List<CashTransaction> transactionsNew = generateTransactionsForAccountWithinTimespanWithOverlap("abc", LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"), null, transactionsOld, false);
 
         // Perform test
@@ -116,7 +116,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenNewAddOldWithUnorderedOverlap_ThenAddUniqueOnlyAndOldNotExistWithinNew");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some category");
         List<CashTransaction> transactionsNew = generateTransactionsForAccountWithinTimespanWithOverlap("abc", LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"), null, transactionsOld, false);
 
         // Perform test
@@ -147,7 +147,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenOldAddNewWithOrderedOverlap_ThenAddUniqueOnlyAndOldExistWithinNew");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some category");
         List<CashTransaction> transactionsNew = generateTransactionsForAccountWithinTimespanWithOverlap("abc", LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"), null, transactionsOld, true);
 
         // Perform test
@@ -178,7 +178,7 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenNewAddOldWithOrderedOverlap_ThenAddUniqueOnlyAndOldExistWithinNew");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some category");
         List<CashTransaction> transactionsNew = generateTransactionsForAccountWithinTimespanWithOverlap("abc", LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"), null, transactionsOld, true);
 
         // Perform test
@@ -201,11 +201,11 @@ public class AccountTest {
         UtilTest.printResult(expected, result);
     }
 
-    private List<CashTransaction> generateTransactionsForAccountWithinTimespanWithOverlap(String account, LocalDate from, LocalDate to, String label, List<CashTransaction> transactions, boolean overlappingFirst) {
-        List<CashTransaction> result = CashTransactionTest.generateTransactionsForAccountWithinTimespan(account, from, to, label);
+    private List<CashTransaction> generateTransactionsForAccountWithinTimespanWithOverlap(String account, LocalDate from, LocalDate to, String category, List<CashTransaction> transactions, boolean overlappingFirst) {
+        List<CashTransaction> result = CashTransactionTest.generateTransactionsForAccountWithinTimespan(account, from, to, category);
         List<CashTransaction> overlap = filterTransactionsWithinTimespan(transactions, from, to);
         List<CashTransaction> copies = copyTransactions(overlap);
-        setLabels(copies, label);
+        setCategories(copies, category);
         if (overlappingFirst) {
             result.addAll(0, copies);
         } else {
@@ -236,9 +236,9 @@ public class AccountTest {
         return result;
     }
 
-    private void setLabels(List<CashTransaction> list, String label) {
+    private void setCategories(List<CashTransaction> list, String category) {
         for (CashTransaction transaction : list) {
-            transaction.setLabel(label);
+            transaction.setCategory(category);
         }
     }
 
@@ -261,15 +261,15 @@ public class AccountTest {
      * Test of addTransactionsToAccounts method, of class Account.
      */
     @Test
-    public void testAddTransactionsToAccounts_WhenOldWithLabelsAddNewWithoutLabels_ThenPersistOldLabels() {
+    public void testAddTransactionsToAccounts_WhenOldWithCategoriesAddNewWithoutCategories_ThenPersistOldCategories() {
         /**
-         * old with labels should not be overwritten by new without labels
+         * old with categories should not be overwritten by new without categories
          */
-        System.out.println("testAddTransactionsToAccounts_WhenOldWithLabelsAddNewWithoutLabels_ThenPersistOldLabels");
+        System.out.println("testAddTransactionsToAccounts_WhenOldWithCategoriesAddNewWithoutCategories_ThenPersistOldCategories");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
-        List<CashTransaction> transactionsNew = copyTransactionsAndSetLabels(transactionsOld, null);
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some category");
+        List<CashTransaction> transactionsNew = copyTransactionsAndSetCategories(transactionsOld, null);
 
         // Perform test
         Account.addTransactionsToAccounts(transactionsOld);
@@ -283,15 +283,15 @@ public class AccountTest {
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
         for (CashTransaction transaction : transactionsAll) {
-            assertEquals("Some label", transaction.getLabel());
+            assertEquals("Some category", transaction.getCategory());
         }
 
         UtilTest.printResult(expected, result);
     }
 
-    private List<CashTransaction> copyTransactionsAndSetLabels(List<CashTransaction> list, String label) {
+    private List<CashTransaction> copyTransactionsAndSetCategories(List<CashTransaction> list, String category) {
         List<CashTransaction> result = copyTransactions(list);
-        setLabels(result, label);
+        setCategories(result, category);
         return result;
     }
 
@@ -299,12 +299,12 @@ public class AccountTest {
      * Test of addTransactionsToAccounts method, of class Account.
      */
     @Test
-    public void testAddTransactionsToAccounts_WhenOldWithLabelsAddNewWithLabels_ThenPersistOldLabels() {
-        System.out.println("testAddTransactionsToAccounts_WhenOldWithLabelsAddNewWithLabels_ThenPersistOldLabels");
+    public void testAddTransactionsToAccounts_WhenOldWithCategoriesAddNewWithCategories_ThenPersistOldCategories() {
+        System.out.println("testAddTransactionsToAccounts_WhenOldWithCategoriesAddNewWithCategories_ThenPersistOldCategories");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
-        List<CashTransaction> transactionsNew = copyTransactionsAndSetLabels(transactionsOld, "Other label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some category");
+        List<CashTransaction> transactionsNew = copyTransactionsAndSetCategories(transactionsOld, "Other category");
 
         // Perform test
         Account.addTransactionsToAccounts(transactionsOld);
@@ -318,7 +318,7 @@ public class AccountTest {
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
         for (CashTransaction transaction : transactionsAll) {
-            assertEquals("Some label", transaction.getLabel());
+            assertEquals("Some category", transaction.getCategory());
         }
 
         UtilTest.printResult(expected, result);
@@ -328,12 +328,12 @@ public class AccountTest {
      * Test of addTransactionsToAccounts method, of class Account.
      */
     @Test
-    public void testAddTransactionsToAccounts_WhenOldWithoutLabelsAddNewWithLabels_ThenAddNewLabels() {
-        System.out.println("testAddTransactionsToAccounts_WhenOldWithoutLabelsAddNewWithLabels_ThenAddNewLabels");
+    public void testAddTransactionsToAccounts_WhenOldWithoutCategoriesAddNewWithCategories_ThenAddNewCategories() {
+        System.out.println("testAddTransactionsToAccounts_WhenOldWithoutCategoriesAddNewWithCategories_ThenAddNewCategories");
 
         // Create test data        
         List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), null);
-        List<CashTransaction> transactionsNew = copyTransactionsAndSetLabels(transactionsOld, "Other label");
+        List<CashTransaction> transactionsNew = copyTransactionsAndSetCategories(transactionsOld, "Other category");
 
         // Perform test
         Account.addTransactionsToAccounts(transactionsOld);
@@ -347,7 +347,7 @@ public class AccountTest {
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
         for (CashTransaction transaction : transactionsAll) {
-            assertEquals("Other label", transaction.getLabel());
+            assertEquals("Other category", transaction.getCategory());
         }
 
         UtilTest.printResult(expected, result);
@@ -357,12 +357,12 @@ public class AccountTest {
      * Test of addTransactionsToAccounts method, of class Account.
      */
     @Test
-    public void testAddTransactionsToAccounts_WhenNewWithLabelsOverwriteOldWithLabels_ThenPersistOldLabels() {
-        System.out.println("testAddTransactionsToAccounts_WhenNewWithLabelsOverwriteOldWithLabels_ThenPersistOldLabels");
+    public void testAddTransactionsToAccounts_WhenNewWithCategoriesOverwriteOldWithCategories_ThenPersistOldCategories() {
+        System.out.println("testAddTransactionsToAccounts_WhenNewWithCategoriesOverwriteOldWithCategories_ThenPersistOldCategories");
 
         // Create test data        
-        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some label");
-        List<CashTransaction> transactionsNew = copyTransactionsAndSetLabels(transactionsOld, "Other label");
+        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some category");
+        List<CashTransaction> transactionsNew = copyTransactionsAndSetCategories(transactionsOld, "Other category");
 
         // Perform test
         Account.addTransactionsToAccounts(transactionsNew);
@@ -376,7 +376,7 @@ public class AccountTest {
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
         for (CashTransaction transaction : transactionsAll) {
-            assertEquals("Some label", transaction.getLabel());
+            assertEquals("Some category", transaction.getCategory());
         }
 
         UtilTest.printResult(expected, result);
@@ -386,12 +386,12 @@ public class AccountTest {
      * Test of addTransactionsToAccounts method, of class Account.
      */
     @Test
-    public void testAddTransactionsToAccounts_WhenNewWithLabelsOverwriteOldWithoutLabels_ThenPersistNewLabels() {
-        System.out.println("testAddTransactionsToAccounts_WhenNewWithLabelsOverwriteOldWithoutLabels_ThenPersistNewLabels");
+    public void testAddTransactionsToAccounts_WhenNewWithCategoriesOverwriteOldWithoutCategories_ThenPersistNewCategories() {
+        System.out.println("testAddTransactionsToAccounts_WhenNewWithCategoriesOverwriteOldWithoutCategories_ThenPersistNewCategories");
 
         // Create test data        
         List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), null);
-        List<CashTransaction> transactionsNew = copyTransactionsAndSetLabels(transactionsOld, "Other label");
+        List<CashTransaction> transactionsNew = copyTransactionsAndSetCategories(transactionsOld, "Other category");
 
         // Perform test
         Account.addTransactionsToAccounts(transactionsNew);
@@ -405,7 +405,7 @@ public class AccountTest {
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
         for (CashTransaction transaction : transactionsAll) {
-            assertEquals("Other label", transaction.getLabel());
+            assertEquals("Other category", transaction.getCategory());
         }
 
         UtilTest.printResult(expected, result);

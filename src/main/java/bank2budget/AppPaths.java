@@ -1,4 +1,4 @@
-package bank2budget.cli;
+package bank2budget;
 
 import java.io.IOException;
 import java.nio.file.Files;

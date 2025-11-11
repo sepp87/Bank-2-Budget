@@ -84,7 +84,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>bank2budget.cli.Launcher</mainClass>
+                            <mainClass>bank2budget.Launcher</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -109,7 +109,7 @@
                 <version>1.0.1</version>
                 <executions>
                     <execution>
-                        <id>rename-file</id>
+                        <id>copy-main-jar</id>
                         <phase>install</phase>
                         <goals>
                             <goal>copy</goal>
@@ -117,6 +117,17 @@
                         <configuration>
                             <sourceFile>${basedir}/target/Bank-2-Budget-jar-with-dependencies.jar</sourceFile>
                             <destinationFile>${basedir}/build/Bank-2-Budget.jar</destinationFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-rule-builder</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>${basedir}/Rule-Builder.html</sourceFile>
+                            <destinationFile>${basedir}/build/Rule-Builder.html</destinationFile>
                         </configuration>
                     </execution>
                 </executions>

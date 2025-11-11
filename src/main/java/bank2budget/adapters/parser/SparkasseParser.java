@@ -33,7 +33,7 @@ public class SparkasseParser extends TransactionParser {
             "Verwendungszweck", "Beguenstigter/Zahlungspflichtiger",
             "Kontonummer", "BLZ", "Betrag", "Waehrung", "Info"};
 
-        return CSVFormat.DEFAULT.withDelimiter(config.getDelimiter()).withFirstRecordAsHeader();
+        return CSVFormat.DEFAULT.withDelimiter(parserConfig.getDelimiter()).withFirstRecordAsHeader();
     }
 
     @Override

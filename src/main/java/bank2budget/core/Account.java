@@ -60,7 +60,7 @@ public class Account {
         addTransactionsToAccounts(transactions, false);
     }
 
-    public static void addTransactionsToAccounts(List<CashTransaction> transactions, boolean overwriteExistingLabels) {
+    public static void addTransactionsToAccounts(List<CashTransaction> transactions, boolean overwriteExistingCategories) {
         // Split up the transactions by account
         Map<String, List<CashTransaction>> transactionsByAccountNumber = new TreeMap<>();
         for (CashTransaction transaction : transactions) {
@@ -81,7 +81,7 @@ public class Account {
             // If the accounts exist, evaluate the transactions before adding them
             if (accounts.containsKey(accountNumber)) {
                 Account account = accounts.get(accountNumber);
-                account.evaluateAndAddTransactions(transactions, overwriteExistingLabels);
+                account.evaluateAndAddTransactions(transactions, overwriteExistingCategories);
             } else {
                 Account account = new Account(accountNumber);
                 accounts.put(accountNumber, account);
@@ -97,8 +97,8 @@ public class Account {
         }
     }
 
-    private void evaluateAndAddTransactions(List<CashTransaction> transactions, boolean overwriteExistingLabels) {
-        // Evaluate which transactions to add, discard and add labels to
+    private void evaluateAndAddTransactions(List<CashTransaction> transactions, boolean overwriteExistingCategories) {
+        // Evaluate which transactions to add, discard and add categories to
         LocalDate[] overlap = CashTransaction.findOverlap(transactions, getAllTransactionsAscending());
 
         if (overlap == null) {
@@ -113,12 +113,12 @@ public class Account {
                 removeTransactions(existingOverlappingTransactions);
                 addTransactions(transactions);
 
-                // the labels (of the existing list of transactions) can be used to enrich the new ones as long as they are actually the same transaction
-                addLabelsToExistingTransactionsFrom(existingOverlappingTransactions, overwriteExistingLabels);
+                // the categories (of the existing list of transactions) can be used to enrich the new ones as long as they are actually the same transaction
+                addCategoriesToExistingTransactionsFrom(existingOverlappingTransactions, overwriteExistingCategories);
 
             } else {
-                // the labels (of the newly imported list of transactions) can be used to enrich the existing ones as long as they are actually the same transaction
-                addLabelsToExistingTransactionsFrom(newOverlappingTransactions, overwriteExistingLabels);
+                // the categories (of the newly imported list of transactions) can be used to enrich the existing ones as long as they are actually the same transaction
+                addCategoriesToExistingTransactionsFrom(newOverlappingTransactions, overwriteExistingCategories);
 
                 List<CashTransaction> otherNewTransactions = CashTransaction.filterByTimespan(transactions, overlap[0], overlap[1], true);
                 addTransactions(otherNewTransactions);
@@ -133,18 +133,18 @@ public class Account {
         }
     }
 
-    private void addLabelsToExistingTransactionsFrom(List<CashTransaction> transactions, boolean overwriteExistingLabels) {
+    private void addCategoriesToExistingTransactionsFrom(List<CashTransaction> transactions, boolean overwriteExistingCategories) {
         for (CashTransaction transaction : transactions) {
             int number = transaction.getTransactionNumber();
             if (allTransactionsIndex.containsKey(number)) {
                 CashTransaction existing = allTransactionsIndex.get(number);
                 boolean isSame = transaction.equals(existing);
-                if (isSame && transaction.getLabel() != null && (existing.getLabel() == null || overwriteExistingLabels)) {
-                    existing.setLabel(transaction.getLabel());
+                if (isSame && transaction.getCategory() != null && (existing.getCategory() == null || overwriteExistingCategories)) {
+                    existing.setCategory(transaction.getCategory());
 //                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});
                 }
 //                else {
-//                    System.out.println("isSame " + isSame + "   transaction.getLabel()!=null " + (transaction.getLabel() != null) + "  overwriteExistingLabels " + overwriteExistingLabels);
+//                    System.out.println("isSame " + isSame + "   transaction.getCategory()!=null " + (transaction.getCategory() != null) + "  overwriteExistingCategories " + overwriteExistingCategories);
 //                    System.out.println(existing);
 //                    System.out.println(transaction);
 //                    System.out.println();

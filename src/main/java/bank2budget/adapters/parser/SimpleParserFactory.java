@@ -1,22 +1,7 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.core.CreditInstitution;
-import bank2budget.adapters.parser.TransactionParser;
-import bank2budget.adapters.parser.MuenchnerBankParser;
-import bank2budget.adapters.parser.GlsParser2019;
-import bank2budget.adapters.parser.GlsParser2022;
-import bank2budget.adapters.parser.UnifiedCsvParser;
-import bank2budget.adapters.parser.SparkasseParser;
-import bank2budget.adapters.parser.RabobankParser;
-import bank2budget.adapters.parser.DkbParser;
-import bank2budget.adapters.parser.AsnBankParser;
-import bank2budget.adapters.parser.IngDiBaParser;
-import bank2budget.adapters.parser.FlatexParser;
-import bank2budget.adapters.parser.SnsBankParser;
-import bank2budget.adapters.parser.ComdirectParser;
-import bank2budget.adapters.parser.DkbParser2024;
-import bank2budget.adapters.parser.GrenkeBankParser;
-import bank2budget.adapters.parser.IngParser;
+import bank2budget.core.Config;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -32,6 +17,7 @@ import java.util.logging.Logger;
  */
 public class SimpleParserFactory {
 
+
     public static TransactionParser createTransactionParser(File csvFile) throws Exception {
 
         String firstLine = openFileAndReadFirstLine(csvFile);
@@ -41,7 +27,7 @@ public class SimpleParserFactory {
         if (!firstLine.isEmpty() && firstLine.charAt(0) == '\uFEFF') {
             firstLine = firstLine.substring(1);
         }
-        
+
         if (firstLine.matches("^\"\\d{2}-\\d{2}-\\d{4}\";\"NL\\d{2}ASNB.*")) {
             parser = new AsnBankParser(new ParserConfig(CreditInstitution.ASN_BANK, csvFile, ';'));
 
@@ -96,7 +82,7 @@ public class SimpleParserFactory {
         } else if (firstLine.startsWith("Auftragskonto;Buchungstag;Valutadatum;Buchungstext;Verwendungszweck;")) {
             parser = new SparkasseParser(new ParserConfig(CreditInstitution.SPARKASSE, csvFile, ';'));
 
-        } else if (firstLine.startsWith("\"label\",\"amount\",\"transactionNumber\",\"date\",\"accountBalance\"")) {
+        } else if (firstLine.startsWith("\"category\",\"amount\",\"transactionNumber\",\"date\",\"accountBalance\"")) {
             parser = new UnifiedCsvParser(new ParserConfig(CreditInstitution.UNKNOWN, csvFile, ','));
         }
 
@@ -104,6 +90,7 @@ public class SimpleParserFactory {
             throw new Exception("ERROR: Unknown bank, please validate if " + csvFile.getName() + " is really a CSV file. Does the file exist? Create transaction parser terminated. First line: " + firstLine);
         }
         System.out.println("\nIdentified " + parser.getConfig().getCreditInstitution().toString() + " from file \"" + csvFile.getName() + "\"");
+
         return parser;
     }
 

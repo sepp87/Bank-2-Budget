@@ -15,7 +15,7 @@ public class UnifiedCsvParser extends TransactionParser {
     @Override
     public CSVFormat getCsvFormat() {
         String[] header = new String[]{
-            "label", "amount", "transactionNumber", "date",
+            "category", "amount", "transactionNumber", "date",
             "accountBalance", "accountInstitution", "accountNumber", "accountName",
             "contraAccountNumber", "contraAccountName", "internal", "transactionType", "description"
         };

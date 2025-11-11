@@ -21,7 +21,7 @@ public class IngParser extends TransactionParser {
             "Datum", "Naam / Omschrijving", "Rekening", "Tegenrekening", "Code", "Af Bij",
             "Bedrag (EUR)", "Mutatiesoort", "Mededelingen", "Saldo na mutatie", "Tag"
         };
-        return CSVFormat.DEFAULT.withDelimiter(config.getDelimiter()).withFirstRecordAsHeader();
+        return CSVFormat.DEFAULT.withDelimiter(parserConfig.getDelimiter()).withFirstRecordAsHeader();
     }
 
     @Override
@@ -38,9 +38,9 @@ public class IngParser extends TransactionParser {
         transaction.setAccountNumber(record.get("Rekening"));
         transaction.setContraAccountName(record.get("Naam / Omschrijving"));
         transaction.setContraAccountNumber(record.get("Tegenrekening"));
-        if (config.getDelimiter() == ';') {
+        if (parserConfig.getDelimiter() == ';') {
             transaction.setAccountBalance(getDoubleFrom(record.get("Saldo na mutatie")));
-            transaction.setLabel(record.get("Tag"));
+            transaction.setCategory(record.get("Tag"));
         } else {
             calculateBalanceAfter(transaction);
         }

@@ -1,7 +1,7 @@
 package bank2budget.adapters.writer;
 
 import bank2budget.core.CashTransaction;
-import bank2budget.cli.Config;
+//import bank2budget.cli.Config;
 import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public abstract class TransactionWriter {
 
     public static final String[] HEADER = {
-        "label",
+        "category",
         "amount",
         "transactionNumber",
         "positionOfDay",
@@ -29,17 +29,6 @@ public abstract class TransactionWriter {
         "transactionType",
         "description"
     };
-
-    public static String[] getStringArrayFrom(CashTransaction transaction) {
-        Object[] values = getObjectArrayFrom(transaction);
-        String[] stringValues = new String[values.length];
-        int i = 0;
-        for (Object value : values) {
-            stringValues[i] = valueToString(value);
-            i++;
-        }
-        return stringValues;
-    }
 
     public static Object[] getObjectArrayFrom(CashTransaction transaction) {
         Object[] values = new Object[HEADER.length];
@@ -58,14 +47,5 @@ public abstract class TransactionWriter {
         return values;
     }
 
-    private static String valueToString(Object value) {
-        if (value == null) {
-            return null;
-        } else if (value instanceof String) {
-            return value.toString();
-        } else if (value instanceof Number) {
-            return (value + "").replace('.', Config.getDecimalSeperator());
-        }
-        return value.toString();
-    }
+
 }

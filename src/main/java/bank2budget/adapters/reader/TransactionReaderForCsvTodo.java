@@ -1,17 +1,16 @@
 package bank2budget.adapters.reader;
 
+import bank2budget.Launcher;
 import bank2budget.adapters.parser.SimpleParserFactory;
-import bank2budget.cli.Launcher;
 import bank2budget.core.CashTransaction;
-import bank2budget.cli.Config;
-import bank2budget.core.Util;
 import bank2budget.adapters.parser.TransactionParser;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,13 +21,14 @@ import java.util.logging.Logger;
  */
 public class TransactionReaderForCsvTodo {
 
-    public static final String TODO_DIRECTORY = "todo";
-    private final List<CashTransaction> todoTransactions;
     protected final Map<String, List<CashTransaction>> todoTransactionsPerFile;
+    private final Path todoDirectory;
+    private final Path[] commandLinePaths;
 
-    public TransactionReaderForCsvTodo() {
-        todoTransactions = new ArrayList<>();
+    public TransactionReaderForCsvTodo(Path todoDirectory, Path... commandLinePaths) {
         todoTransactionsPerFile = new TreeMap<>();
+        this.todoDirectory = todoDirectory;
+        this.commandLinePaths = commandLinePaths;
     }
 
     public Map<String, List<CashTransaction>> getPerFile() {
@@ -36,31 +36,17 @@ public class TransactionReaderForCsvTodo {
     }
 
     public TransactionReaderForCsvTodo read() {
-        File todoDirectory = new File(Launcher.getRootDirectory() + TODO_DIRECTORY);
-        if (todoDirectory.exists() && todoDirectory.isDirectory()) {
-            File[] files = getFilesFromCommandLineAnd(todoDirectory);
-            processCsv(files);
-        } else {
-            Logger.getLogger(TransactionReaderForCsvTodo.class.getName()).log(Level.INFO, "Could NOT find \"todo\" directory, creating {0}", todoDirectory.getPath());
-            todoDirectory.mkdir();
-            read();
-        }
+        List<Path> csvFiles = new ArrayList<>();
+        csvFiles.addAll(FileUtil.filterDirectoryByExtension(".csv", todoDirectory));
+        csvFiles.addAll(FileUtil.filterFilesByExtension(".csv", commandLinePaths));   
+        processCsv(csvFiles);
         return this;
     }
 
-    private File[] getFilesFromCommandLineAnd(File todoDirectory) {
-        File[] todoFiles = Util.getFilesByExtensionFrom(todoDirectory, ".csv");
-        List<File> commandLineFiles = Config.getCsvFiles();
-        for (File file : todoFiles) {
-            commandLineFiles.add(file);
-        }
-        return commandLineFiles.toArray(new File[0]);
-    }
-
-    private void processCsv(File... files) {
-        for (File csv : files) {
-            List<CashTransaction> transactions = getTransactionsFromCsv(csv);
-            todoTransactionsPerFile.put(csv.getName(), transactions);
+    private void processCsv(Collection<Path> csvFiles) {
+        for (Path csv : csvFiles) {
+            List<CashTransaction> transactions = getTransactionsFromCsv(csv.toFile());
+            todoTransactionsPerFile.put(csv.getFileName().toString(), transactions);
             System.out.println(transactions.size() + " Transactions parsed \n\n");
         }
     }

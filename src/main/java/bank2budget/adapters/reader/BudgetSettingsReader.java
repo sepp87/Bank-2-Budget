@@ -23,10 +23,20 @@ public class BudgetSettingsReader {
 
     private final JsonParser parser;
     private final File budgetSettingsFile;
+    private int firstOfMonth = -1;
+    private Map<String, Double> budgetTemplate;
 
     public BudgetSettingsReader(File budgetSettingsFile) {
         this.budgetSettingsFile = budgetSettingsFile;
         parser = new JsonParser();
+    }
+    
+    public int getFirstOfMonth() {
+        return firstOfMonth;
+    }
+    
+    public Map<String, Double> getBudgetTemplate() {
+        return budgetTemplate;
     }
 
     public void read() {
@@ -44,8 +54,10 @@ public class BudgetSettingsReader {
         Iterator<JsonElement> iterator = settingsArray.iterator();
         while (iterator.hasNext()) {
             JsonObject settingsObject = iterator.next().getAsJsonObject();
-            MultiAccountBudget.setFirstOfMonth(getFirstOfMonthFrom(settingsObject));
-            MultiAccountBudget.setBudgetTemplate(getBudgetTemplateFrom(settingsObject));
+            firstOfMonth = getFirstOfMonthFrom(settingsObject);
+            budgetTemplate = getBudgetTemplateFrom(settingsObject);
+            MultiAccountBudget.setFirstOfMonth(firstOfMonth);
+            MultiAccountBudget.setBudgetTemplate(budgetTemplate);
         }
     }
 

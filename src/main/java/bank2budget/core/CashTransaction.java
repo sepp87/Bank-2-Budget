@@ -24,7 +24,7 @@ import java.util.Set;
 public class CashTransaction {
 
     private static int count = 0;
-    private String label;
+    private String category;
     private double amount;
     /**
      * The transaction number is a unique number bound to this transaction.
@@ -52,7 +52,7 @@ public class CashTransaction {
 
     public CashTransaction(CashTransaction transaction) {
         this();
-        this.label = transaction.label;
+        this.category = transaction.category;
         this.amount = transaction.amount;
         this.transactionNumber = transaction.transactionNumber;
         this.date = transaction.date;
@@ -84,7 +84,6 @@ public class CashTransaction {
             accountNumber = null;
         }
         this.accountNumber = accountNumber;
-        this.internal = Util.isMyAccountNumber(accountNumber) && Util.isMyAccountNumber(contraAccountNumber);
     }
 
     public String getAccountName() {
@@ -127,7 +126,6 @@ public class CashTransaction {
             contraAccountNumber = null;
         }
         this.contraAccountNumber = contraAccountNumber;
-        this.internal = Util.isMyAccountNumber(accountNumber) && Util.isMyAccountNumber(contraAccountNumber);
     }
 
     public String getContraAccountName() {
@@ -173,15 +171,19 @@ public class CashTransaction {
         return internal;
     }
 
-    public String getLabel() {
-        return label;
+    public void setInternal(boolean internal) {
+        this.internal = internal;
+    }
+    
+    public String getCategory() {
+        return category;
     }
 
-    public void setLabel(String label) {
-        if (label == null || label.equals("")) {
+    public void setCategory(String category) {
+        if (category == null || category.equals("")) {
             return;
         }
-        this.label = label;
+        this.category = category;
     }
 
     public Collection<String> getOriginalRecord() {
@@ -255,7 +257,7 @@ public class CashTransaction {
     }
 
     /**
-     * When comparing transactions, label and lastOfDay is not compared
+     * When comparing transactions, category and lastOfDay is not compared
      *
      * @param transaction
      * @return
@@ -294,8 +296,8 @@ public class CashTransaction {
 
     @Override
     public String toString() {
-        String result = transactionNumber + "\t" + lastOfDay + "\t" + date + "\t" + Util.padWithTabs("€" + amount, 2) + Util.padWithTabs(accountName, 4) + Util.padWithTabs(contraAccountName, 4) + Util.padWithTabs(label, 4);
-//        String result = date + "\t" + Util.padWithTabs("€" + amount, 3) + Util.padWithTabs(accountName, 4) + Util.padWithTabs(contraAccountName, 5) + Util.padWithTabs(label, 4);
+        String result = transactionNumber + "\t" + lastOfDay + "\t" + date + "\t" + Util.padWithTabs("€" + amount, 2) + Util.padWithTabs(accountName, 4) + Util.padWithTabs(contraAccountName, 4) + Util.padWithTabs(category, 4);
+//        String result = date + "\t" + Util.padWithTabs("€" + amount, 3) + Util.padWithTabs(accountName, 4) + Util.padWithTabs(contraAccountName, 5) + Util.padWithTabs(category, 4);
         return result;
     }
 

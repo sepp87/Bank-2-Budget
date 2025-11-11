@@ -1,10 +1,11 @@
 package bank2budget.adapters.reader;
 
-import bank2budget.cli.Launcher;
+import bank2budget.Launcher;
 import bank2budget.core.MonthlyBudget;
 import bank2budget.core.MultiAccountBudget;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -21,17 +22,17 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  */
 public class BudgetReaderForXlsx {
 
-    public static final String BUDGET_MASTER = "budget.xlsx";
-
+    private final Path budgetFile;
     private final MultiAccountBudget budget;
 
-    public BudgetReaderForXlsx() {
+    public BudgetReaderForXlsx(Path budgetFile) {
         // at this point the account is still unknown
+        this.budgetFile = budgetFile;
         budget = new MultiAccountBudget();
     }
 
     public MultiAccountBudget read() {
-        File file = new File(Launcher.getDoneDirectory() + BUDGET_MASTER);
+        File file = budgetFile.toFile();
         readFrom(file);
         return budget;
     }

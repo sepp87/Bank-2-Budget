@@ -2,9 +2,10 @@ package bank2budget.adapters.writer;
 
 import bank2budget.adapters.db.SqliteUtil;
 import bank2budget.core.Account;
-import bank2budget.cli.Launcher;
+import bank2budget.Launcher;
 import bank2budget.core.CashTransaction;
 import java.lang.reflect.Field;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -22,14 +23,19 @@ import java.util.logging.Logger;
  */
 public class TransactionWriterForSqlite extends TransactionWriter {
 
-    private static final String DATABASE_PATH = Launcher.getDatabaseDirectory() + "bank-2-budget.db";
+    
     private static final String TRANSACTIONS_TABLE = "transactions";
     private static final Map<String, Class<?>> COLUMN_TYPES = new TreeMap<>();
 
+    private final Path databaseFile;
     private Connection connection;
+    
+    public TransactionWriterForSqlite(Path databaseFile) {
+        this.databaseFile = databaseFile;
+    }
 
     public void write(Collection<Account> accounts) {
-        connection = SqliteUtil.getConnection(DATABASE_PATH);
+        connection = SqliteUtil.getConnection(databaseFile.toAbsolutePath().toString());
         if (connection == null) {
             return;
         }

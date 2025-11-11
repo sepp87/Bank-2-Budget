@@ -1,11 +1,11 @@
 package bank2budget.adapters.writer;
 
 import bank2budget.core.Account;
-import bank2budget.cli.Launcher;
 import bank2budget.core.CashTransaction;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,11 +21,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class TransactionWriterForXlsx extends TransactionWriter {
 
-    public static final String BUDGET_TRANSACTIONS = "transactions.xlsx";
+    private final Path transactionsFile;
+    
+    public TransactionWriterForXlsx(Path transactionsFile) {
+        this.transactionsFile = transactionsFile;
+    }
 
-    // TODO when there is no label yet, add the label to the transaction
+    // TODO when there is no category yet, add the category to the transaction
     public void write(Collection<Account> accounts) {
-        File file = new File(Launcher.getDoneDirectory() + BUDGET_TRANSACTIONS);
+        File file = transactionsFile.toFile();
 
         // Create a Workbook
         Workbook workbook = new XSSFWorkbook(); // new HSSFWorkbook() for generating `.xls` file

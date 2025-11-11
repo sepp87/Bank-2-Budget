@@ -36,7 +36,7 @@ public class RuleTest {
                                                         "description": "=="
                                                     },
                                                     "then": {
-                                                        "label": "Groceries"                           
+                                                        "category": "Groceries"                           
                                                     }
                                                 },
                                                 {
@@ -47,7 +47,7 @@ public class RuleTest {
                                                         "amount": "<"
                                                     },
                                                     "then": {
-                                                        "label": "Expensive stuff"                           
+                                                        "category": "Expensive stuff"                           
                                                     }
                                                 },
                                                 {
@@ -58,7 +58,7 @@ public class RuleTest {
                                                         "amount": ">"
                                                     },
                                                     "then": {
-                                                        "label": "Woohoo"                           
+                                                        "category": "Woohoo"                           
                                                     }
                                                 }
                                              ]
@@ -68,8 +68,8 @@ public class RuleTest {
      * Test of process method, of class Rule.
      */
     @Test
-    public void testProcess_WhenDescriptionContainsString_ThenSetLabel() {
-        System.out.println("testProcess_WhenDescriptionContainsString_ThenSetLabel");
+    public void testProcess_WhenDescriptionContainsString_ThenSetCategory() {
+        System.out.println("testProcess_WhenDescriptionContainsString_ThenSetCategory");
 
         // Create test data
         RuleReaderForJson reader = new RuleReaderForJson(null);
@@ -82,7 +82,7 @@ public class RuleTest {
 
         // Prepare results
         String expected = "Groceries";
-        String result = transaction.getLabel();
+        String result = transaction.getCategory();
 
         // Evaluate result
         assertEquals(expected, result);
@@ -95,8 +95,8 @@ public class RuleTest {
      * Test of process method, of class Rule.
      */
     @Test
-    public void testProcess_WhenAmountLessThanMinusOneThousand_ThenSetLabelExpensiveStuff() {
-        System.out.println("testProcess_WhenAmountLessThanMinusOneThousand_ThenSetLabelExpensiveStuff");
+    public void testProcess_WhenAmountLessThanMinusOneThousand_ThenSetCategoryExpensiveStuff() {
+        System.out.println("testProcess_WhenAmountLessThanMinusOneThousand_ThenSetCategoryExpensiveStuff");
 
         // Create test data
         RuleReaderForJson reader = new RuleReaderForJson(null);
@@ -109,7 +109,7 @@ public class RuleTest {
 
         // Prepare results
         String expected = "Expensive stuff";
-        String result = transaction.getLabel();
+        String result = transaction.getCategory();
 
         // Evaluate result
         assertEquals(expected, result);
@@ -122,8 +122,8 @@ public class RuleTest {
      * Test of process method, of class Rule.
      */
     @Test
-    public void testProcess_WhenAmountGreaterThanOneHundred_ThenSetLabelWoohoo() {
-        System.out.println("testProcess_WhenAmountGreaterThanOneHundred_ThenSetLabelWoohoo");
+    public void testProcess_WhenAmountGreaterThanOneHundred_ThenSetCategoryWoohoo() {
+        System.out.println("testProcess_WhenAmountGreaterThanOneHundred_ThenSetCategoryWoohoo");
 
         // Create test data
         RuleReaderForJson reader = new RuleReaderForJson(null);
@@ -136,7 +136,7 @@ public class RuleTest {
 
         // Prepare results
         String expected = "Woohoo";
-        String result = transaction.getLabel();
+        String result = transaction.getCategory();
 
         // Evaluate result
         assertEquals(expected, result);
