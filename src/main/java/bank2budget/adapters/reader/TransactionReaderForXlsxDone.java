@@ -23,7 +23,6 @@ import org.apache.poi.ss.usermodel.*;
  */
 public class TransactionReaderForXlsxDone {
 
-
     private final List<CashTransaction> budgetTransactions;
     private final Map<String, List< CashTransaction>> budgetTransactionsPerSheet;
     private final Path transactionsFile;
@@ -103,8 +102,6 @@ public class TransactionReaderForXlsxDone {
             }
 
             CashTransaction transaction = getCashTransactionFrom(row);
-//            ruleEngine.overwriteAccountNames(transaction);
-//            ruleEngine.addMissingAccountNumbers(transaction);
             transactions.add(transaction);
         }
         TransactionParser.deriveLastOfDay(transactions);
@@ -160,6 +157,9 @@ public class TransactionReaderForXlsxDone {
                         break;
                     case "description": // String
                         transaction.setDescription(cell.getStringCellValue());
+                        break;
+                    case "notes": // String
+                        transaction.setNotes(cell.getStringCellValue());
                         break;
                 }
             }

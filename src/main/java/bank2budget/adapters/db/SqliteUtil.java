@@ -1,6 +1,5 @@
 package bank2budget.adapters.db;
 
-import bank2budget.adapters.writer.TransactionWriterForSqlite;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

@@ -1,7 +1,6 @@
 package bank2budget.adapters.writer;
 
 import bank2budget.core.CashTransaction;
-//import bank2budget.cli.Config;
 import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,7 +26,8 @@ public abstract class TransactionWriter {
         "contraAccountName",
         "internal",
         "transactionType",
-        "description"
+        "description",
+        "notes"
     };
 
     public static Object[] getObjectArrayFrom(CashTransaction transaction) {

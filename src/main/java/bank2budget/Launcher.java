@@ -1,9 +1,8 @@
 package bank2budget;
 
-import bank2budget.AppPaths;
-import bank2budget.App;
 import bank2budget.cli.CliAppRunner;
 import bank2budget.cli.CommandLineArgs;
+import bank2budget.ui.UiAppRunner;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import picocli.CommandLine;
@@ -43,15 +42,28 @@ public class Launcher {
 
     public static void main(String[] args) throws Exception {
 
-        boolean devMode = Boolean.getBoolean("bank2budget.dev");
+        boolean devMode = Boolean.getBoolean("bank2budget.dev") || "dev".equalsIgnoreCase(System.getenv("BANK2BUDGET_MODE"));
         boolean hasConsole = System.console() != null;
         boolean isHeadless = GraphicsEnvironment.isHeadless();
 
         if (devMode) {
             runCli(args);
+//            runUi(args);
         } else if (hasConsole || isHeadless) {
             runCli(args);
         }
+    }
+
+    private static void runUi(String[] args) throws IOException {
+        CommandLineArgs cliArgs = new CommandLineArgs();
+        int exitCode = new CommandLine(cliArgs).execute(args);
+
+        AppPaths paths = new AppPaths();
+        App app = new App(paths, cliArgs.getDecimalSeparatorChar());
+        UiAppRunner runner = new UiAppRunner(app);
+        runner.run();
+
+        System.exit(exitCode);
     }
 
     private static void runCli(String[] args) throws IOException {

@@ -37,7 +37,7 @@ public class CliAppRunner {
         TransactionReaderForCsvTodo todoTransactions = app.getTransactionReaderForCsvTodo().read();
         for (List<CashTransaction> transactions : todoTransactions.getPerFile().values()) {
             ruleEngine.overwriteAccountNames(transactions);
-            ruleEngine.addMissingAccountNumbers(transactions);
+//            ruleEngine.addMissingAccountNumbers(transactions);
             ruleEngine.determineInternalTransactions(transactions);
             ruleEngine.applyRules(transactions);
             Account.addTransactionsToAccounts(transactions);
@@ -51,7 +51,8 @@ public class CliAppRunner {
             case BUDGET:
 
                 TransactionReaderForXlsxDone oldXlsxTransactions = app.getTransactionReaderForXlsxDone().read();
-
+                ruleEngine.overwriteAccountNames(oldXlsxTransactions.getAsList());
+                ruleEngine.determineInternalTransactions(oldXlsxTransactions.getAsList());
                 Account.addTransactionsToAccounts(oldXlsxTransactions.getAsList(), true);
 
                 boolean isValid = IntegrityChecker.check(Account.getAccounts());
