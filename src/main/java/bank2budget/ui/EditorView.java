@@ -1,16 +1,23 @@
 package bank2budget.ui;
 
+import bank2budget.adapters.reader.TransactionReaderForCsv;
 import bank2budget.core.Account;
 import bank2budget.core.CashTransaction;
+import bank2budget.core.RuleEngine;
+import java.io.File;
 import java.util.Iterator;
+import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
 /**
  *
@@ -18,7 +25,12 @@ import javafx.scene.layout.BorderPane;
  */
 public class EditorView extends BorderPane {
 
-    public EditorView() {
+    private TransactionsView transactionsView;
+    private final RuleEngine ruleEngine;
+
+    public EditorView(RuleEngine ruleEngine) {
+
+        this.ruleEngine = ruleEngine;
 
         MenuBar menuBar = getMenuBar();
         this.setTop(menuBar);
@@ -27,7 +39,7 @@ public class EditorView extends BorderPane {
             Iterator<Account> iterator = Account.getAccounts().iterator();
             iterator.next();
             ObservableList<CashTransaction> transactions = FXCollections.observableArrayList(iterator.next().getAllTransactionsAscending());
-            TransactionsView transactionsView = new TransactionsView(transactions);
+            this.transactionsView = new TransactionsView(transactions);
             this.setCenter(transactionsView);
 
         } else {
@@ -47,10 +59,56 @@ public class EditorView extends BorderPane {
         MenuItem save = new MenuItem("Save");
         MenuItem quit = new MenuItem("Quit");
 
+        importCsvs.setOnAction((e) -> onImportCsvs(menuBar.getScene().getWindow()));
+        save.setOnAction(this::onSave);
+
         menuBar.getMenus().add(fileMenu);
         fileMenu.getItems().addAll(importCsvs, save, quit);
 
         return menuBar;
+    }
+
+    private void onImportCsvs(Window ownerWindow) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Import CSV Files");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv")
+        );
+
+        List<File> files = fileChooser.showOpenMultipleDialog(ownerWindow);
+        if (files == null) {
+            return;
+        }
+
+        // move files to todo or archive
+        // process files
+        TransactionReaderForCsv reader = new TransactionReaderForCsv(files);
+        List<CashTransaction> importedTransactions = reader.getAllTransactions();
+
+        // apply rules        
+        ruleEngine.overwriteAccountNames(importedTransactions);
+        ruleEngine.determineInternalTransactions(importedTransactions);
+        ruleEngine.applyRules(importedTransactions);
+
+        // add to accounts
+        Account.addTransactionsToAccounts(importedTransactions);
+
+        // check integrity 
+        // reload table
+        Iterator<Account> iterator = Account.getAccounts().iterator();
+        iterator.next();
+        List<CashTransaction> allTransactions = iterator.next().getAllTransactionsAscending();
+        transactionsView.reloadTransactions(allTransactions);
+
+        // show import finished
+    }
+
+    private void onSave(ActionEvent e) {
+        // save transactions to xlsx and db
+
+        // process budget
+        // save budget to xlsx and db
+        // show save finished
     }
 
     private void buildBudgetSettingsView() {

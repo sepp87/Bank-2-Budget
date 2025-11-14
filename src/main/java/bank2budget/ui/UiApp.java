@@ -17,14 +17,15 @@ public class UiApp extends Application {
         UiApp.app = app;
     }
 
-    private static final double APP_WIDTH = 800;
+    private static final double APP_WIDTH = 1200;
     private static final double APP_HEIGHT = 800;
 
     @Override
     public void start(Stage stage) throws Exception {
-        Scene scene = new Scene(new EditorView(), APP_WIDTH, APP_HEIGHT);
+        Scene scene = new Scene(new EditorView(app.getRuleEngine()), APP_WIDTH, APP_HEIGHT);
         stage.setScene(scene);
         stage.show();
+        stage.setTitle("Bank-2-Budget");
         stage.setFullScreen(false);
     }
 

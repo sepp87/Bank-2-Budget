@@ -19,34 +19,41 @@ import java.util.logging.Logger;
  *
  * @author joost
  */
-public class TransactionReaderForCsvTodo {
+public class TransactionReaderForCsv {
 
-    protected final Map<String, List<CashTransaction>> todoTransactionsPerFile;
-    private final Path todoDirectory;
-    private final Path[] commandLinePaths;
+    protected final Map<String, List<CashTransaction>> transactionsPerFile = new TreeMap<>();
 
-    public TransactionReaderForCsvTodo(Path todoDirectory, Path... commandLinePaths) {
-        todoTransactionsPerFile = new TreeMap<>();
-        this.todoDirectory = todoDirectory;
-        this.commandLinePaths = commandLinePaths;
+    public TransactionReaderForCsv(Path directory) {
+        List<Path> csvFiles = FileUtil.filterDirectoryByExtension(".csv", directory);
+        processCsv(csvFiles);
+    }
+
+    public TransactionReaderForCsv(Path... files) {
+        List<Path> csvFiles = FileUtil.filterFilesByExtension(".csv", files);
+        processCsv(csvFiles);
+    }
+
+    public TransactionReaderForCsv(Collection<File> files) {
+        List<Path> csvFiles = FileUtil.filterFilesByExtension(".csv", files.stream().map(File::toPath).toArray(Path[]::new));
+        processCsv(csvFiles);
     }
 
     public Map<String, List<CashTransaction>> getPerFile() {
-        return todoTransactionsPerFile;
+        return transactionsPerFile;
     }
 
-    public TransactionReaderForCsvTodo read() {
-        List<Path> csvFiles = new ArrayList<>();
-        csvFiles.addAll(FileUtil.filterDirectoryByExtension(".csv", todoDirectory));
-        csvFiles.addAll(FileUtil.filterFilesByExtension(".csv", commandLinePaths));   
-        processCsv(csvFiles);
-        return this;
+    public List<CashTransaction> getAllTransactions() {
+        List<CashTransaction> result = new ArrayList<>();
+        for(List<CashTransaction> transactions : transactionsPerFile.values()) {
+            result.addAll(transactions);
+        }
+        return result;
     }
 
     private void processCsv(Collection<Path> csvFiles) {
         for (Path csv : csvFiles) {
             List<CashTransaction> transactions = getTransactionsFromCsv(csv.toFile());
-            todoTransactionsPerFile.put(csv.getFileName().toString(), transactions);
+            transactionsPerFile.put(csv.getFileName().toString(), transactions);
             System.out.println(transactions.size() + " Transactions parsed \n\n");
         }
     }

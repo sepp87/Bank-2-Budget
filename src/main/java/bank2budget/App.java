@@ -4,7 +4,7 @@ import bank2budget.adapters.db.BudgetDatabase;
 import bank2budget.adapters.parser.SimpleParserFactory;
 import bank2budget.adapters.reader.BudgetReaderForXlsx;
 import bank2budget.adapters.reader.ConfigReader;
-import bank2budget.adapters.reader.TransactionReaderForCsvTodo;
+import bank2budget.adapters.reader.TransactionReaderForCsv;
 import bank2budget.adapters.reader.TransactionReaderForXlsxDone;
 import bank2budget.adapters.writer.BudgetWriterForXlsx;
 import bank2budget.adapters.writer.TransactionWriterForCsv;
@@ -19,7 +19,6 @@ import bank2budget.core.RuleEngine;
 public class App {
 
     private final AppPaths paths;
-    private final TransactionReaderForCsvTodo transactionReaderForCsvTodo;
     private final TransactionReaderForXlsxDone transactionReaderForXlsxDone;
     private final TransactionWriterForCsv transactionWriterForCsv;
     private final TransactionWriterForXlsx transactionWriterForXlsx;
@@ -33,7 +32,6 @@ public class App {
 
         Config config = new ConfigReader(paths).getConfig();
 
-        this.transactionReaderForCsvTodo = new TransactionReaderForCsvTodo(paths.getTodoDirectory());
         this.transactionReaderForXlsxDone = new TransactionReaderForXlsxDone(paths.getTransactionsFile());
         this.transactionWriterForCsv = new TransactionWriterForCsv(paths.getDoneDirectory(), decimalSeparatorChar);
         this.transactionWriterForXlsx = new TransactionWriterForXlsx(paths.getTransactionsFile());
@@ -41,10 +39,6 @@ public class App {
         this.budgetWriterForXlsx = new BudgetWriterForXlsx(paths.getBudgetFile());
         this.budgetDatabase = new BudgetDatabase(paths.getDatabaseFile().toString());
         this.ruleEngine = new RuleEngine(config.rules(), config.myAccounts(), config.otherAccounts());
-    }
-
-    public TransactionReaderForCsvTodo getTransactionReaderForCsvTodo() {
-        return transactionReaderForCsvTodo;
     }
 
     public TransactionReaderForXlsxDone getTransactionReaderForXlsxDone() {
