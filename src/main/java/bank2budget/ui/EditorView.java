@@ -8,10 +8,7 @@ import bank2budget.core.CashTransaction;
 import bank2budget.core.MultiAccountBudget;
 import bank2budget.core.RuleEngine;
 import java.io.File;
-import java.util.Iterator;
 import java.util.List;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -28,7 +25,7 @@ import javafx.stage.Window;
  */
 public class EditorView extends BorderPane {
 
-    private TransactionsView transactionsView;
+    private AccountsView accountsView;
     private final App app;
 
     public EditorView(App app) {
@@ -38,11 +35,8 @@ public class EditorView extends BorderPane {
         this.setTop(menuBar);
 
         if (true) {
-            Iterator<Account> iterator = Account.getAccounts().iterator();
-            iterator.next();
-            ObservableList<CashTransaction> transactions = FXCollections.observableArrayList(iterator.next().getAllTransactionsAscending());
-            this.transactionsView = new TransactionsView(transactions);
-            this.setCenter(transactionsView);
+            this.accountsView = new AccountsView();
+            this.setCenter(accountsView);
 
         } else {
             BudgetView budgetView = new BudgetView();
@@ -98,10 +92,7 @@ public class EditorView extends BorderPane {
 
         // check integrity 
         // reload table
-        Iterator<Account> iterator = Account.getAccounts().iterator();
-        iterator.next();
-        List<CashTransaction> allTransactions = iterator.next().getAllTransactionsAscending();
-        transactionsView.reload(allTransactions);
+        accountsView.reload();
 
         // show import finished
     }

@@ -17,6 +17,8 @@ public class AccountsView extends TabPane {
     private final Map<String, TransactionsView> transactionsViews = new TreeMap<>();
 
     public AccountsView() {
+        this.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+
         Collection<Account> accounts = Account.getAccounts();
         for (Account account : accounts) {
             addTransactionsView(account);
