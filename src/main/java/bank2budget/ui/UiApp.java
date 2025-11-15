@@ -22,7 +22,7 @@ public class UiApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Scene scene = new Scene(new EditorView(app.getRuleEngine()), APP_WIDTH, APP_HEIGHT);
+        Scene scene = new Scene(new EditorView(app), APP_WIDTH, APP_HEIGHT);
         stage.setScene(scene);
         stage.show();
         stage.setTitle("Bank-2-Budget");

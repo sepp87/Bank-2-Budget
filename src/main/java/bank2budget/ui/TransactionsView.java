@@ -64,7 +64,7 @@ public class TransactionsView extends TableView<CashTransaction> {
 
     }
 
-    public void reloadTransactions(List<CashTransaction> transactions) {
+    public void reload(List<CashTransaction> transactions) {
         reloadCategorySuggestions(transactions);
         this.getItems().clear();
         this.getItems().addAll(transactions);

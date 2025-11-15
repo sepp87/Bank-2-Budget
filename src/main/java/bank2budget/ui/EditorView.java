@@ -1,8 +1,11 @@
 package bank2budget.ui;
 
+import bank2budget.App;
+import bank2budget.adapters.db.BudgetDatabase;
 import bank2budget.adapters.reader.TransactionReaderForCsv;
 import bank2budget.core.Account;
 import bank2budget.core.CashTransaction;
+import bank2budget.core.MultiAccountBudget;
 import bank2budget.core.RuleEngine;
 import java.io.File;
 import java.util.Iterator;
@@ -26,11 +29,10 @@ import javafx.stage.Window;
 public class EditorView extends BorderPane {
 
     private TransactionsView transactionsView;
-    private final RuleEngine ruleEngine;
+    private final App app;
 
-    public EditorView(RuleEngine ruleEngine) {
-
-        this.ruleEngine = ruleEngine;
+    public EditorView(App app) {
+        this.app = app;
 
         MenuBar menuBar = getMenuBar();
         this.setTop(menuBar);
@@ -85,7 +87,8 @@ public class EditorView extends BorderPane {
         TransactionReaderForCsv reader = new TransactionReaderForCsv(files);
         List<CashTransaction> importedTransactions = reader.getAllTransactions();
 
-        // apply rules        
+        // apply rules  
+        RuleEngine ruleEngine = app.getRuleEngine();
         ruleEngine.overwriteAccountNames(importedTransactions);
         ruleEngine.determineInternalTransactions(importedTransactions);
         ruleEngine.applyRules(importedTransactions);
@@ -98,16 +101,27 @@ public class EditorView extends BorderPane {
         Iterator<Account> iterator = Account.getAccounts().iterator();
         iterator.next();
         List<CashTransaction> allTransactions = iterator.next().getAllTransactionsAscending();
-        transactionsView.reloadTransactions(allTransactions);
+        transactionsView.reload(allTransactions);
 
         // show import finished
     }
 
     private void onSave(ActionEvent e) {
-        // save transactions to xlsx and db
+        // save transactions to xlsx and db 
+        app.getTransactionWriterForXlsx().write(Account.getAccounts());
+        BudgetDatabase database = app.getBudgetDatabase();
+        for (Account account : Account.getAccounts()) {
+            database.insertTransactions(account.getAllTransactionsAscending());
+        }
 
         // process budget
+        MultiAccountBudget budget = app.getBudgetReaderForXlsx().read();
+        budget.setAccounts(Account.getAccounts());
+
         // save budget to xlsx and db
+        app.getBudgetWriterForXlsx().write(budget);
+        database.insertMonthlyBudgets(budget.getMonthlyBudgets().values());
+
         // show save finished
     }
 
