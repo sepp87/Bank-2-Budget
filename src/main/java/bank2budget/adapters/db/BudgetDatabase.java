@@ -14,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public class BudgetDatabase {
 
     private static final Logger LOGGER = Logger.getLogger(BudgetDatabase.class.getName());
@@ -205,7 +204,7 @@ public class BudgetDatabase {
             s.executeUpdate("DROP VIEW IF EXISTS balance_current_total");
             s.executeUpdate("DROP VIEW IF EXISTS expenses_by_month");
             s.executeUpdate("DROP VIEW IF EXISTS expenses_current_month");
-            s.executeUpdate("DROP VIEW IF EXISTS expenses_total");
+            s.executeUpdate("DROP VIEW IF EXISTS expenses_total"); //
             s.executeUpdate("DROP VIEW IF EXISTS average_expenses");
             s.executeUpdate("DROP VIEW IF EXISTS average_expenses_total");
             s.executeUpdate("DROP VIEW IF EXISTS average_expenses_last_3_months");
@@ -214,6 +213,13 @@ public class BudgetDatabase {
             s.executeUpdate("DROP VIEW IF EXISTS incoming_vs_outgoing_by_month");
             s.executeUpdate("DROP VIEW IF EXISTS incoming_vs_outgoing_current_month");
             s.executeUpdate("DROP VIEW IF EXISTS budgets_current_month");
+
+            s.executeUpdate("DROP VIEW IF EXISTS average_expenses_by_year");
+            s.executeUpdate("DROP VIEW IF EXISTS budgets_current_month_without_cumulative_remainders");
+            s.executeUpdate("DROP VIEW IF EXISTS budgets_current_month_savings_and_deficits");
+            s.executeUpdate("DROP VIEW IF EXISTS last_export");
+            s.executeUpdate("DROP VIEW IF EXISTS average_expenses_by_year_negated_amount");
+            s.executeUpdate("DROP VIEW IF EXISTS transactions_negated_amount");
 
             s.executeUpdate("CREATE INDEX IF NOT EXISTS index_transactions_account_date ON transactions(accountNumber, date)");
 
@@ -313,16 +319,6 @@ public class BudgetDatabase {
             );
 
             s.executeUpdate("""
-            CREATE VIEW IF NOT EXISTS expenses_total AS
-            SELECT
-              category,
-              SUM(amount) AS amount
-            FROM transactions
-            GROUP BY category
-            ORDER BY amount;
-            """);
-
-            s.executeUpdate("""
             CREATE VIEW IF NOT EXISTS expenses_current_month AS
             WITH latest AS (
               SELECT MAX(firstOfMonth) AS current_month FROM expenses_by_month
@@ -332,6 +328,16 @@ public class BudgetDatabase {
               SUM(amount) AS amount
             FROM expenses_by_month
             WHERE firstOfMonth = (SELECT current_month FROM latest)
+            GROUP BY category
+            ORDER BY amount;
+            """);
+
+            s.executeUpdate("""
+            CREATE VIEW IF NOT EXISTS expenses_total AS
+            SELECT
+              category,
+              SUM(amount) AS amount
+            FROM transactions
             GROUP BY category
             ORDER BY amount;
             """);
@@ -488,7 +494,7 @@ public class BudgetDatabase {
         return """
         CREATE VIEW IF NOT EXISTS average_expenses_last_year AS
         WITH year AS (
-          SELECT strftime('%%Y', date(MAX(firstOfMonth), '-1 year')) AS value
+          SELECT strftime('%Y', date(MAX(firstOfMonth), '-1 year')) AS value
           FROM expenses_by_month
         )
         SELECT

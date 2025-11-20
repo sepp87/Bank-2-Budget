@@ -1,6 +1,5 @@
 package bank2budget.core;
 
-import bank2budget.core.Account;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -16,8 +15,8 @@ import java.util.TreeMap;
 public class MultiAccountBudget {
 
     static int firstOfMonth = 1;
-    static Map<String, Double> budgetedForCategory = new TreeMap<>();
-    Map<String, MonthlyBudget> monthlyBudgets;
+    static TreeMap<String, Double> budgetedForCategory = new TreeMap<>();
+    TreeMap<String, MonthlyBudget> monthlyBudgets;
 
     private final Map<String, Account> accounts;
 
@@ -43,7 +42,7 @@ public class MultiAccountBudget {
         monthlyBudgets.putIfAbsent(month.getFirstOfMonth(), month);
     }
 
-    public Map<String, MonthlyBudget> getMonthlyBudgets() {
+    public TreeMap<String, MonthlyBudget> getMonthlyBudgets() {
         return monthlyBudgets;
     }
 

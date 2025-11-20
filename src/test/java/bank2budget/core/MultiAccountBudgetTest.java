@@ -1,12 +1,7 @@
 package bank2budget.core;
 
-import bank2budget.core.CashTransaction;
-import bank2budget.core.Account;
-import bank2budget.core.MultiAccountBudget;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -59,8 +54,8 @@ public class MultiAccountBudgetTest {
         return budget;
     }
 
-    private static Map<String, Double> generateBudgetedForCategory() {
-        Map<String, Double> budgetedForCategory = new TreeMap<>();
+    private static TreeMap<String, Double> generateBudgetedForCategory() {
+        TreeMap<String, Double> budgetedForCategory = new TreeMap<>();
         budgetedForCategory.put("GROCERIES", 100.);
         return budgetedForCategory;
     }

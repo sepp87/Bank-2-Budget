@@ -30,7 +30,7 @@ public class Util {
     }
 
     public static boolean compareDoubles(double a, double b, int precision) {
-        return (a - b) < Math.pow(0.1, precision);
+        return Math.abs(a - b) < Math.pow(0.1, precision);
     }
 
     public static String readFileAsString(File file) throws IOException {

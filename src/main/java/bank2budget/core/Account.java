@@ -14,10 +14,10 @@ import java.util.TreeMap;
  */
 public class Account {
 
-    private static Map<String, Account> accounts = new TreeMap<>();
+    private final static Map<String, Account> accounts = new TreeMap<>();
 
     private final String accountNumber;
-    private Map<Integer, CashTransaction> allTransactionsIndex = new TreeMap<>();
+    private final TreeMap<Integer, CashTransaction> allTransactionsIndex = new TreeMap<>();
 
     private Account(String accountNumber) {
         this.accountNumber = accountNumber;
@@ -39,7 +39,7 @@ public class Account {
      */
     public LocalDate getOldestTransactionDate() {
         // By default, TreeMap sorts all its entries according to their natural ordering
-        return allTransactionsIndex.values().iterator().next().getDate();
+        return allTransactionsIndex.firstEntry().getValue().getDate();
     }
 
     /**
@@ -48,12 +48,59 @@ public class Account {
      */
     public LocalDate getNewestTransactionDate() {
         // By default, TreeMap sorts all its entries according to their natural ordering
-        Iterator<CashTransaction> i = allTransactionsIndex.values().iterator();
-        CashTransaction last = null;
-        while (i.hasNext()) {
-            last = i.next();
+        return allTransactionsIndex.lastEntry().getValue().getDate();
+    }
+
+    /**
+     *
+     * @return the date of the latest transaction across all accounts. Returns
+     * null if there are no accounts respectively no transactions available.
+     */
+    public static LocalDate getLastExportDate() {
+        LocalDate result = null;
+        for (Account a : getAccounts()) {
+            LocalDate candidate = a.getNewestTransactionDate();
+            if (result == null) {
+                result = candidate;
+            }
+            if (candidate.isAfter(result)) {
+                result = candidate;
+            }
         }
-        return last.getDate();
+        return result;
+    }
+
+    /**
+     *
+     * @return the balance of all accounts put together.
+     */
+    public static double getTotalBalance() {
+        return getTotalBalanceOn(null);
+    }
+
+    /**
+     *
+     * @return the balance of all accounts put together.
+     */
+    public static double getTotalBalanceOn(LocalDate date) {
+        if (date == null) {
+            date = getLastExportDate();
+        }
+        double result = 0.;
+        for (Account a : getAccounts()) {
+            List<CashTransaction> transactions = a.getAllTransactionsAscending();
+            CashTransaction newest = null;
+            for (CashTransaction transaction : transactions) {
+                if (transaction.getDate().isAfter(date)) {
+                    break;
+                }
+                newest = transaction;
+            }
+            if (newest != null) {
+                result += newest.getAccountBalance();
+            }
+        }
+        return result;
     }
 
     public static void addTransactionsToAccounts(List<CashTransaction> transactions) {

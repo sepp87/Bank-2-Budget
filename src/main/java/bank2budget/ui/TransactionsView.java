@@ -40,26 +40,33 @@ public class TransactionsView extends TableView<CashTransaction> {
         this.getSelectionModel().setCellSelectionEnabled(true);
         this.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        TableColumn<CashTransaction, Integer> transactionNumber = buildColumn("Transaction Number", CashTransaction::getTransactionNumber);
-
+        TableColumn<CashTransaction, Integer> transactionNumberColumn = buildColumn("Transaction Number", CashTransaction::getTransactionNumber);
+        TableColumn<CashTransaction, String> descriptionColumn = buildColumn("Description", CashTransaction::getDescription);
+        TableColumn<CashTransaction, String> notesColumn = buildEditableColumn("Notes", CashTransaction::getNotes, CashTransaction::setNotes);
+        TableColumn<CashTransaction, String> contraAccountNameColumn = buildColumn("Contra Account Name", CashTransaction::getContraAccountName);
+        
+        descriptionColumn.setPrefWidth(240);
+        notesColumn.setPrefWidth(240);
+        contraAccountNameColumn.setPrefWidth(240);
+        
         reloadCategorySuggestions(transactions);
 
         this.getColumns().add(buildAutoCompleteColumn("Category", CashTransaction::getCategory, CashTransaction::setCategory, categorySuggestions));
         this.getColumns().add(buildColumn("Amount", CashTransaction::getAmount));
-        this.getColumns().add(transactionNumber);
+        this.getColumns().add(transactionNumberColumn);
         this.getColumns().add(buildColumn("Date", CashTransaction::getDate));
         this.getColumns().add(buildColumn("Account Balance", CashTransaction::getAccountBalance));
         this.getColumns().add(buildColumn("Account Name", CashTransaction::getAccountName));
-        this.getColumns().add(buildColumn("Contra Account Name", CashTransaction::getContraAccountName));
-        this.getColumns().add(buildColumn("Description", CashTransaction::getDescription));
-        this.getColumns().add(buildEditableColumn("Notes", CashTransaction::getNotes, CashTransaction::setNotes));
+        this.getColumns().add(contraAccountNameColumn);
+        this.getColumns().add(descriptionColumn);
+        this.getColumns().add(notesColumn);
 
         this.setOnKeyPressed((e) -> {
             handleShortcutTriggered(e, this);
         });
 
-        transactionNumber.setSortType(TableColumn.SortType.DESCENDING);
-        this.getSortOrder().add(transactionNumber);
+        transactionNumberColumn.setSortType(TableColumn.SortType.DESCENDING);
+        this.getSortOrder().add(transactionNumberColumn);
         this.sort();
 
     }

@@ -34,15 +34,12 @@ public class EditorView extends BorderPane {
         MenuBar menuBar = getMenuBar();
         this.setTop(menuBar);
 
-        if (true) {
+        if (false) {
             this.accountsView = new AccountsView();
             this.setCenter(accountsView);
 
         } else {
-            BudgetView budgetView = new BudgetView();
-            budgetView.addBudgetCategory("GROCERIES", 500., 100.);
-            budgetView.addBudgetCategory("RESTAURANT", 500., 100.);
-            budgetView.addBudgetCategory("VACATION", 500., 100.);
+            BudgetView budgetView = new BudgetView(app);
             this.setCenter(budgetView);
         }
 
