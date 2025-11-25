@@ -16,7 +16,7 @@ public class MultiAccountBudget {
 
     static int firstOfMonth = 1;
     static TreeMap<String, Double> budgetedForCategory = new TreeMap<>();
-    TreeMap<String, MonthlyBudget> monthlyBudgets;
+    TreeMap<LocalDate, MonthlyBudget> monthlyBudgets;
 
     private final Map<String, Account> accounts;
 
@@ -42,7 +42,7 @@ public class MultiAccountBudget {
         monthlyBudgets.putIfAbsent(month.getFirstOfMonth(), month);
     }
 
-    public TreeMap<String, MonthlyBudget> getMonthlyBudgets() {
+    public TreeMap<LocalDate, MonthlyBudget> getMonthlyBudgets() {
         return monthlyBudgets;
     }
 
@@ -104,12 +104,12 @@ public class MultiAccountBudget {
     private void calculateMonthlyBudgetFor(LocalDate firstOfMonth) {
         List<CashTransaction> transactions = getTransactionsFromAccountsFor(firstOfMonth);
         // check for existing months before creating a new one
-        if (monthlyBudgets.containsKey(firstOfMonth.toString())) {
-            MonthlyBudget month = monthlyBudgets.get(firstOfMonth.toString());
+        if (monthlyBudgets.containsKey(firstOfMonth)) {
+            MonthlyBudget month = monthlyBudgets.get(firstOfMonth);
             month.addTransactions(transactions);
         } else {
-            MonthlyBudget month = new MonthlyBudget(this, firstOfMonth.toString(), transactions);
-            monthlyBudgets.put(firstOfMonth.toString(), month);
+            MonthlyBudget month = new MonthlyBudget(this, firstOfMonth, transactions);
+            monthlyBudgets.put(firstOfMonth, month);
         }
     }
 

@@ -21,16 +21,17 @@ import org.apache.poi.ss.usermodel.*;
  *
  * @author joost
  */
-public class TransactionReaderForXlsxDone {
+public class AccountReader {
 
     private final List<CashTransaction> budgetTransactions;
     private final Map<String, List< CashTransaction>> budgetTransactionsPerSheet;
     private final Path transactionsFile;
 
-    public TransactionReaderForXlsxDone(Path transactionsFile) {
+    public AccountReader(Path transactionsFile) {
         this.transactionsFile = transactionsFile;
         budgetTransactions = new ArrayList<>();
         budgetTransactionsPerSheet = new TreeMap<>();
+        readFrom(transactionsFile.toFile());
     }
 
     static List<String> header;
@@ -43,10 +44,10 @@ public class TransactionReaderForXlsxDone {
         return budgetTransactions;
     }
 
-    public TransactionReaderForXlsxDone read() {
-        readFrom(transactionsFile.toFile());
-        return this;
-    }
+//    public TransactionReaderForXlsxDone read() {
+//        readFrom(transactionsFile.toFile());
+//        return this;
+//    }
 
     private Map<String, List< CashTransaction>> readFrom(File file) {
 
@@ -70,7 +71,7 @@ public class TransactionReaderForXlsxDone {
 
             return accountMap;
         } catch (IOException | EncryptedDocumentException ex) {
-            Logger.getLogger(TransactionReaderForXlsxDone.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AccountReader.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return Collections.emptyMap();

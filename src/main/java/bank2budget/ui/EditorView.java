@@ -1,7 +1,7 @@
 package bank2budget.ui;
 
 import bank2budget.App;
-import bank2budget.adapters.db.BudgetDatabase;
+import bank2budget.adapters.repository.BudgetDatabase;
 import bank2budget.adapters.reader.TransactionReaderForCsv;
 import bank2budget.core.Account;
 import bank2budget.core.CashTransaction;
@@ -10,12 +10,18 @@ import bank2budget.core.RuleEngine;
 import java.io.File;
 import java.util.List;
 import javafx.event.ActionEvent;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -34,14 +40,33 @@ public class EditorView extends BorderPane {
         MenuBar menuBar = getMenuBar();
         this.setTop(menuBar);
 
+//        
+        VBox contentWrapper = new VBox();
+//        VBox.setVgrow(contentWrapper, Priority.ALWAYS);
+//        contentWrapper.maxHeight(Double.MAX_VALUE);
+        contentWrapper.setMinWidth(800);
+        contentWrapper.setMaxWidth(1200);
+        contentWrapper.prefWidthProperty().bind(
+                this.widthProperty().multiply(0.80)
+        );
+        contentWrapper.setStyle("-fx-background-color: green;");
+
         if (false) {
             this.accountsView = new AccountsView();
-            this.setCenter(accountsView);
+            VBox.setVgrow(accountsView, Priority.ALWAYS);
+            contentWrapper.getChildren().add(accountsView);
 
         } else {
             BudgetView budgetView = new BudgetView(app);
-            this.setCenter(budgetView);
+            contentWrapper.getChildren().add(budgetView);
         }
+
+        HBox center = new HBox(contentWrapper);
+        center.setMaxWidth(USE_PREF_SIZE);
+        center.setAlignment(Pos.TOP_CENTER);
+//        center.setStyle("-fx-background-color: green;");
+
+        this.setCenter(center);
 
     }
 

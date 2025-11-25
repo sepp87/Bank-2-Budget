@@ -1,4 +1,4 @@
-package bank2budget.adapters.db;
+package bank2budget.adapters.repository;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

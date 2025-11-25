@@ -6,6 +6,7 @@ import bank2budget.core.MultiAccountBudget;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -57,7 +58,7 @@ public class BudgetReaderForXlsx {
             }
 
         } catch (IOException | EncryptedDocumentException ex) {
-            Logger.getLogger(TransactionReaderForXlsxDone.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AccountReader.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return budget;
@@ -88,7 +89,7 @@ public class BudgetReaderForXlsx {
 
             // unassigned should be the last row
         }
-        MonthlyBudget month = new MonthlyBudget(budget, firstOfMonth, budgetedForCategory);
+        MonthlyBudget month = new MonthlyBudget(budget, LocalDate.parse(firstOfMonth), budgetedForCategory);
 
         return month;
     }

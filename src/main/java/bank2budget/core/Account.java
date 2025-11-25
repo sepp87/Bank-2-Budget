@@ -1,9 +1,9 @@
 package bank2budget.core;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -19,8 +19,15 @@ public class Account {
     private final String accountNumber;
     private final TreeMap<Integer, CashTransaction> allTransactionsIndex = new TreeMap<>();
 
-    private Account(String accountNumber) {
+    Account(String accountNumber) {
         this.accountNumber = accountNumber;
+    }
+
+    public Account(String accountNumber, List<CashTransaction> transactions) {
+        this.accountNumber = accountNumber;
+        for (CashTransaction t : transactions) {
+            allTransactionsIndex.put(t.getTransactionNumber(), t);
+        }
     }
 
     public List<CashTransaction> getTransactions(LocalDate from, LocalDate to) {
@@ -74,7 +81,7 @@ public class Account {
      *
      * @return the balance of all accounts put together.
      */
-    public static double getTotalBalance() {
+    public static BigDecimal getTotalBalance() {
         return getTotalBalanceOn(null);
     }
 
@@ -82,11 +89,11 @@ public class Account {
      *
      * @return the balance of all accounts put together.
      */
-    public static double getTotalBalanceOn(LocalDate date) {
+    public static BigDecimal getTotalBalanceOn(LocalDate date) {
         if (date == null) {
             date = getLastExportDate();
         }
-        double result = 0.;
+        BigDecimal result = BigDecimal.ZERO;
         for (Account a : getAccounts()) {
             List<CashTransaction> transactions = a.getAllTransactionsAscending();
             CashTransaction newest = null;
@@ -97,7 +104,7 @@ public class Account {
                 newest = transaction;
             }
             if (newest != null) {
-                result += newest.getAccountBalance();
+                result = result.add(BigDecimal.valueOf(newest.getAccountBalance()));
             }
         }
         return result;

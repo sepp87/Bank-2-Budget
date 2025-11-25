@@ -1,0 +1,16 @@
+.label {
+    font-family: 'Helvetica';
+}
+
+.header {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.tile {
+    -fx-background-color: white;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4;
+    -fx-padding: 10 10 10 10;
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.1) , 10,0,7,7 );
+}

@@ -1,6 +1,6 @@
-package bank2budget.adapters.db;
+package bank2budget.adapters.repository;
 
-import bank2budget.adapters.db.SqliteUtil;
+import bank2budget.adapters.repository.SqliteUtil;
 import bank2budget.core.Account;
 import bank2budget.Launcher;
 import bank2budget.adapters.writer.TransactionWriter;

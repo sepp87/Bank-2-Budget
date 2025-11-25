@@ -1,4 +1,4 @@
-package bank2budget.adapters.db;
+package bank2budget.adapters.repository;
 
 import bank2budget.core.CashTransaction;
 import bank2budget.core.MonthlyBudget;
@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
@@ -130,11 +131,11 @@ public class BudgetDatabase {
 
             for (MonthlyBudget b : monthlyBudgets) {
 
-                String firstOfMonth = b.getFirstOfMonth();
+                LocalDate firstOfMonth = b.getFirstOfMonth();
                 for (Entry<String, Double> budgetForCategory : b.getBudgetedForCategories().entrySet()) {
                     String category = budgetForCategory.getKey();
                     Double budgeted = budgetForCategory.getValue();
-                    ps.setString(1, firstOfMonth);
+                    ps.setString(1, firstOfMonth.toString());
                     ps.setString(2, category);
                     ps.setDouble(3, budgeted);
                     ps.setDouble(4, b.getExpensesForCategories().get(category));
@@ -143,7 +144,7 @@ public class BudgetDatabase {
                     ps.addBatch();
                 }
 
-                ps.setString(1, firstOfMonth);
+                ps.setString(1, firstOfMonth.toString());
                 ps.setString(2, "UNASSIGNED EXPENSES");
                 ps.setDouble(3, 0.);
                 ps.setDouble(4, b.getUnassignedExpenses());
@@ -151,7 +152,7 @@ public class BudgetDatabase {
                 ps.setDouble(6, b.getUnassignedExpensesRemainder());
                 ps.addBatch();
 
-                ps.setString(1, firstOfMonth);
+                ps.setString(1, firstOfMonth.toString());
                 ps.setString(2, "UNASSIGNED INCOME");
                 ps.setDouble(3, 0.);
                 ps.setDouble(4, b.getUnassignedIncome());

@@ -19,11 +19,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *
  * @author joost
  */
-public class TransactionWriterForXlsx extends TransactionWriter {
+public class AccountWriter extends TransactionWriter {
 
     private final Path transactionsFile;
     
-    public TransactionWriterForXlsx(Path transactionsFile) {
+    public AccountWriter(Path transactionsFile) {
         this.transactionsFile = transactionsFile;
     }
 
@@ -105,7 +105,7 @@ public class TransactionWriterForXlsx extends TransactionWriter {
             // Closing the workbook
             workbook.close();
         } catch (IOException ex) {
-            Logger.getLogger(TransactionWriterForXlsx.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AccountWriter.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

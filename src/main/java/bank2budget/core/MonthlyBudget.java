@@ -18,7 +18,7 @@ import java.util.TreeMap;
 public class MonthlyBudget {
 
     private final MultiAccountBudget budget;
-    private final String firstOfMonth;
+    private final LocalDate firstOfMonth;
     private final List<CashTransaction> transactions;
 
     // split into unassigned expenses and income
@@ -36,7 +36,7 @@ public class MonthlyBudget {
     final Map<String, Double> remainderForCategories = new TreeMap<>();
     final Map<String, Double> remainderForCategoriesLastMonth = new TreeMap<>();
 
-    public MonthlyBudget(MultiAccountBudget budget, String firstOfMonth, Map<String, Double> budgetedForCategories) {
+    public MonthlyBudget(MultiAccountBudget budget, LocalDate firstOfMonth, Map<String, Double> budgetedForCategories) {
         this.budget = budget;
         this.firstOfMonth = firstOfMonth;
         this.transactions = new ArrayList<>();
@@ -47,7 +47,7 @@ public class MonthlyBudget {
 //        calculateRemainder();
     }
 
-    public MonthlyBudget(MultiAccountBudget budget, String firstOfMonth, List<CashTransaction> transactions) {
+    public MonthlyBudget(MultiAccountBudget budget, LocalDate firstOfMonth, List<CashTransaction> transactions) {
         this.budget = budget;
         this.firstOfMonth = firstOfMonth;
         this.transactions = transactions;
@@ -59,7 +59,7 @@ public class MonthlyBudget {
     }
 
     public int getFinancialYear() {
-        LocalDate date = LocalDate.parse(firstOfMonth);
+        LocalDate date = firstOfMonth;
         int day = date.getDayOfMonth();
         int month = date.getMonthValue();
         int year = date.getYear();
@@ -70,7 +70,7 @@ public class MonthlyBudget {
     }
 
     public int getFinancialMonth() {
-        LocalDate date = LocalDate.parse(firstOfMonth);
+        LocalDate date = firstOfMonth;
         if (date.getDayOfMonth() > 16) {
             return date.plusMonths(1).getMonthValue();
         }
@@ -128,11 +128,15 @@ public class MonthlyBudget {
     public double getUnassignedIncomeRemainderLastMonth() {
         return unassignedIncomeRemainderLastMonth;
     }
-
-    public String getFirstOfMonth() {
+    
+    public LocalDate getFirstOfMonth() {
         return firstOfMonth;
     }
 
+    public LocalDate getLastOfMonth() {
+        return firstOfMonth.plusMonths(1).minusDays(1);
+    }
+    
     public double getBudgetedTotal() {
         double result = 0.;
         for (double value : budgetedForCategories.values()) {
@@ -202,10 +206,10 @@ public class MonthlyBudget {
 
     private MonthlyBudget getPreviousMonthlyBudget() {
         MonthlyBudget result = null;
-        LocalDate first = LocalDate.parse(firstOfMonth);
+        LocalDate first = firstOfMonth;
         LocalDate previousFirst = ChronoUnit.MONTHS.addTo(first, -1);
-        if (budget.monthlyBudgets.containsKey(previousFirst.toString())) {
-            result = budget.monthlyBudgets.get(previousFirst.toString());
+        if (budget.monthlyBudgets.containsKey(previousFirst)) {
+            result = budget.monthlyBudgets.get(previousFirst);
         }
         return result;
     }

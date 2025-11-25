@@ -4,9 +4,9 @@ import bank2budget.Launcher;
 import bank2budget.AppPaths;
 import bank2budget.App;
 import static bank2budget.cli.CommandLineArgs.Mode.*;
-import bank2budget.adapters.db.BudgetDatabase;
+import bank2budget.adapters.repository.BudgetDatabase;
 import bank2budget.adapters.reader.TransactionReaderForCsv;
-import bank2budget.adapters.reader.TransactionReaderForXlsxDone;
+import bank2budget.adapters.reader.AccountReader;
 import bank2budget.core.Account;
 import bank2budget.core.CashTransaction;
 import bank2budget.core.IntegrityChecker;
@@ -49,7 +49,7 @@ public class CliAppRunner {
             case XLSX:
             case BUDGET:
 
-                TransactionReaderForXlsxDone oldXlsxTransactions = app.getTransactionReaderForXlsxDone().read();
+                AccountReader oldXlsxTransactions = app.getTransactionReaderForXlsxDone();
                 ruleEngine.overwriteAccountNames(oldXlsxTransactions.getAsList());
                 ruleEngine.determineInternalTransactions(oldXlsxTransactions.getAsList());
                 Account.addTransactionsToAccounts(oldXlsxTransactions.getAsList(), true);

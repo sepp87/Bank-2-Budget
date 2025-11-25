@@ -1,6 +1,6 @@
 package bank2budget.adapters.writer;
 
-import bank2budget.adapters.writer.TransactionWriterForXlsx;
+import bank2budget.adapters.writer.AccountWriter;
 import bank2budget.Launcher;
 import bank2budget.core.MonthlyBudget;
 import bank2budget.core.MultiAccountBudget;
@@ -89,11 +89,11 @@ public class BudgetWriterForXlsx {
             for (MonthlyBudget month : reversedMonthlyBudgets) {
 
                 // Create a sheet
-                Sheet sheet = workbook.createSheet(month.getFirstOfMonth());
+                Sheet sheet = workbook.createSheet(month.getFirstOfMonth().toString());
 
                 // Create a title row
                 Row titleRow = sheet.createRow(0);
-                titleRow.createCell(1).setCellValue(month.getFirstOfMonth());
+                titleRow.createCell(1).setCellValue(month.getFirstOfMonth().toString());
                 titleRow.setHeight((short) 500);
 //                titleRow.setHeight((short) -1);
 
@@ -222,7 +222,7 @@ public class BudgetWriterForXlsx {
             // Closing the workbook
             workbook.close();
         } catch (IOException ex) {
-            Logger.getLogger(TransactionWriterForXlsx.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AccountWriter.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
