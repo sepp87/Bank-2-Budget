@@ -47,7 +47,7 @@ public class Launcher {
         boolean isHeadless = GraphicsEnvironment.isHeadless();
 
         if (devMode) {
-//            runCli(args);
+            runCli(args);
             runUi(args);
         } else if (hasConsole || isHeadless) {
             runCli(args);
@@ -59,7 +59,7 @@ public class Launcher {
         int exitCode = new CommandLine(cliArgs).execute(args);
 
         AppPaths paths = new AppPaths();
-        App app = new App(paths, cliArgs.getDecimalSeparatorChar());
+        App app = new App(paths, cliArgs.getDecimalSeparatorChar(), cliArgs.useSqlite());
         UiAppRunner runner = new UiAppRunner(app);
         runner.run();
 
@@ -71,7 +71,7 @@ public class Launcher {
         int exitCode = new CommandLine(cliArgs).execute(args);
 
         AppPaths paths = new AppPaths();
-        App app = new App(paths, cliArgs.getDecimalSeparatorChar());
+        App app = new App(paths, cliArgs.getDecimalSeparatorChar(), cliArgs.useSqlite());
         CliAppRunner runner = new CliAppRunner(app, cliArgs, paths);
         runner.run();
 

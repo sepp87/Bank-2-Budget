@@ -35,7 +35,7 @@ public class BudgetWriterForXlsx {
 
     private final Path budgetFile;
     private XSSFWorkbook workbook;
-    
+
     public BudgetWriterForXlsx(Path budgetFile) {
         this.budgetFile = budgetFile;
     }

@@ -1,9 +1,7 @@
 package bank2budget.core;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -19,9 +17,6 @@ public class Account {
     private final String accountNumber;
     private final TreeMap<Integer, CashTransaction> allTransactionsIndex = new TreeMap<>();
 
-    Account(String accountNumber) {
-        this.accountNumber = accountNumber;
-    }
 
     public Account(String accountNumber, List<CashTransaction> transactions) {
         this.accountNumber = accountNumber;
@@ -58,97 +53,14 @@ public class Account {
         return allTransactionsIndex.lastEntry().getValue().getDate();
     }
 
-    /**
-     *
-     * @return the date of the latest transaction across all accounts. Returns
-     * null if there are no accounts respectively no transactions available.
-     */
-    public static LocalDate getLastExportDate() {
-        LocalDate result = null;
-        for (Account a : getAccounts()) {
-            LocalDate candidate = a.getNewestTransactionDate();
-            if (result == null) {
-                result = candidate;
-            }
-            if (candidate.isAfter(result)) {
-                result = candidate;
-            }
-        }
-        return result;
+
+
+    public void merge(Account imported) {
+        merge(imported, false);
     }
 
-    /**
-     *
-     * @return the balance of all accounts put together.
-     */
-    public static BigDecimal getTotalBalance() {
-        return getTotalBalanceOn(null);
-    }
-
-    /**
-     *
-     * @return the balance of all accounts put together.
-     */
-    public static BigDecimal getTotalBalanceOn(LocalDate date) {
-        if (date == null) {
-            date = getLastExportDate();
-        }
-        BigDecimal result = BigDecimal.ZERO;
-        for (Account a : getAccounts()) {
-            List<CashTransaction> transactions = a.getAllTransactionsAscending();
-            CashTransaction newest = null;
-            for (CashTransaction transaction : transactions) {
-                if (transaction.getDate().isAfter(date)) {
-                    break;
-                }
-                newest = transaction;
-            }
-            if (newest != null) {
-                result = result.add(BigDecimal.valueOf(newest.getAccountBalance()));
-            }
-        }
-        return result;
-    }
-
-    public static void addTransactionsToAccounts(List<CashTransaction> transactions) {
-        addTransactionsToAccounts(transactions, false);
-    }
-
-    public static void addTransactionsToAccounts(List<CashTransaction> transactions, boolean overwriteExistingCategories) {
-        // Split up the transactions by account
-        Map<String, List<CashTransaction>> transactionsByAccountNumber = new TreeMap<>();
-        for (CashTransaction transaction : transactions) {
-            String accountNumber = transaction.getAccountNumber();
-            if (transactionsByAccountNumber.containsKey(accountNumber)) {
-                transactionsByAccountNumber.get(accountNumber).add(transaction);
-            } else {
-                List<CashTransaction> list = new ArrayList<>();
-                list.add(transaction);
-                transactionsByAccountNumber.put(accountNumber, list);
-            }
-        }
-
-        // Add the transactions to the corresponding accounts
-        for (String accountNumber : transactionsByAccountNumber.keySet()) {
-            transactions = transactionsByAccountNumber.get(accountNumber);
-
-            // If the accounts exist, evaluate the transactions before adding them
-            if (accounts.containsKey(accountNumber)) {
-                Account account = accounts.get(accountNumber);
-                account.evaluateAndAddTransactions(transactions, overwriteExistingCategories);
-            } else {
-                Account account = new Account(accountNumber);
-                accounts.put(accountNumber, account);
-                account.addTransactions(transactions);
-            }
-        }
-
-    }
-
-    private void addTransactions(List<CashTransaction> transactions) {
-        for (CashTransaction transaction : transactions) {
-            allTransactionsIndex.put(transaction.getTransactionNumber(), transaction);
-        }
+    public void merge(Account imported, boolean overwriteExistingCategories) {
+        evaluateAndAddTransactions(imported.getAllTransactionsAscending(), overwriteExistingCategories);
     }
 
     private void evaluateAndAddTransactions(List<CashTransaction> transactions, boolean overwriteExistingCategories) {
@@ -180,6 +92,12 @@ public class Account {
         }
     }
 
+    private void addTransactions(List<CashTransaction> transactions) {
+        for (CashTransaction transaction : transactions) {
+            allTransactionsIndex.put(transaction.getTransactionNumber(), transaction);
+        }
+    }
+
     private void removeTransactions(List<CashTransaction> transactions) {
         for (CashTransaction transaction : transactions) {
             int number = transaction.getTransactionNumber();
@@ -188,13 +106,13 @@ public class Account {
     }
 
     private void addCategoriesToExistingTransactionsFrom(List<CashTransaction> transactions, boolean overwriteExistingCategories) {
-        for (CashTransaction transaction : transactions) {
-            int number = transaction.getTransactionNumber();
+        for (CashTransaction imported : transactions) {
+            int number = imported.getTransactionNumber();
             if (allTransactionsIndex.containsKey(number)) {
                 CashTransaction existing = allTransactionsIndex.get(number);
-                boolean isSame = transaction.equals(existing);
-                if (isSame && transaction.getCategory() != null && (existing.getCategory() == null || overwriteExistingCategories)) {
-                    existing.setCategory(transaction.getCategory());
+                boolean isSame = imported.equals(existing);
+                if (isSame && imported.getCategory() != null && (existing.getCategory() == null || overwriteExistingCategories)) {
+                    existing.setCategory(imported.getCategory());
 //                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});
                 }
 //                else {
@@ -210,17 +128,6 @@ public class Account {
         }
     }
 
-    public static Collection<Account> getAccounts() {
-        return accounts.values();
-    }
-
-    public static Account getAccountBy(String accountNumber) {
-        return accounts.get(accountNumber);
-    }
-
-    public static void removeAllAccounts() {
-        Account.accounts.clear();
-    }
 
     /**
      *

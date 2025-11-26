@@ -21,10 +21,10 @@ public class MonthlyBudgetTest {
         System.out.println();
     }
 
-    @org.junit.jupiter.api.AfterEach
-    public void removeAccounts() {
-        Account.removeAllAccounts();
-    }
+//    @org.junit.jupiter.api.AfterEach
+//    public void removeAccounts() {
+//        Account.removeAllAccounts();
+//    }
 
     @org.junit.jupiter.api.Test
     public void testGetTransactions_WhenFirstOfMonthIsTenth_ThenReturn9And22Transactions() {
@@ -84,7 +84,7 @@ public class MonthlyBudgetTest {
         MultiAccountBudget budget = MultiAccountBudgetTest.generateBudget(1, transactions);
 
         // Perform test
-        MonthlyBudget monthlyBudget = budget.getMonthlyBudgets().get("2024-02-01");
+        MonthlyBudget monthlyBudget = budget.getMonthlyBudgets().get(LocalDate.parse("2024-02-01"));
         double result = monthlyBudget.remainderForCategories.get("GROCERIES");
 
         // Prepare results
@@ -131,7 +131,7 @@ public class MonthlyBudgetTest {
         MultiAccountBudget budget = MultiAccountBudgetTest.generateBudget(1, transactions);
 
         // Perform test
-        MonthlyBudget monthlyBudget = budget.getMonthlyBudgets().get("2024-02-01");
+        MonthlyBudget monthlyBudget = budget.getMonthlyBudgets().get(LocalDate.parse("2024-02-01"));
         double result = monthlyBudget.remainderForCategories.get("GROCERIES");
 
         // Prepare results

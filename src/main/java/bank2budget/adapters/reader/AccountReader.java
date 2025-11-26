@@ -3,6 +3,7 @@ package bank2budget.adapters.reader;
 import bank2budget.core.CashTransaction;
 import bank2budget.core.CreditInstitution;
 import bank2budget.adapters.parser.TransactionParser;
+import bank2budget.core.Account;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -23,33 +24,20 @@ import org.apache.poi.ss.usermodel.*;
  */
 public class AccountReader {
 
-    private final List<CashTransaction> budgetTransactions;
-    private final Map<String, List< CashTransaction>> budgetTransactionsPerSheet;
-    private final Path transactionsFile;
+    private final Map<String, Account> accountsIndex;
 
     public AccountReader(Path transactionsFile) {
-        this.transactionsFile = transactionsFile;
-        budgetTransactions = new ArrayList<>();
-        budgetTransactionsPerSheet = new TreeMap<>();
-        readFrom(transactionsFile.toFile());
+        accountsIndex = readFrom(transactionsFile.toFile());
+
     }
 
     static List<String> header;
 
-    public Map<String, List< CashTransaction>> getPerSheet() {
-        return budgetTransactionsPerSheet;
+    public Map<String, Account> getAccountsIndex() {
+        return accountsIndex;
     }
 
-    public List<CashTransaction> getAsList() {
-        return budgetTransactions;
-    }
-
-//    public TransactionReaderForXlsxDone read() {
-//        readFrom(transactionsFile.toFile());
-//        return this;
-//    }
-
-    private Map<String, List< CashTransaction>> readFrom(File file) {
+    private Map<String, Account> readFrom(File file) {
 
         if (!file.exists()) {
             return Collections.emptyMap();
@@ -58,15 +46,14 @@ public class AccountReader {
         try {
             Workbook workbook = WorkbookFactory.create(file);
 
-            Map<String, List<CashTransaction>> accountMap = new TreeMap<>();
+            Map<String, Account> accountMap = new TreeMap<>();
             int sheetCount = workbook.getNumberOfSheets();
 
             for (int i = 0; i < sheetCount; i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 String accountNumber = sheet.getSheetName();
                 List<CashTransaction> transactions = getAllCashTransactionsFrom(sheet);
-                accountMap.put(accountNumber, transactions);
-                budgetTransactions.addAll(transactions);
+                accountMap.put(accountNumber, new Account(accountNumber, transactions));
             }
 
             return accountMap;

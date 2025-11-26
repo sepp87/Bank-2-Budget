@@ -1,12 +1,11 @@
 package bank2budget.ui;
 
 import bank2budget.App;
+import bank2budget.adapters.reader.AccountImporter;
 import bank2budget.adapters.repository.BudgetDatabase;
 import bank2budget.adapters.reader.TransactionReaderForCsv;
 import bank2budget.core.Account;
-import bank2budget.core.CashTransaction;
 import bank2budget.core.MultiAccountBudget;
-import bank2budget.core.RuleEngine;
 import java.io.File;
 import java.util.List;
 import javafx.event.ActionEvent;
@@ -19,8 +18,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -52,7 +49,7 @@ public class EditorView extends BorderPane {
         contentWrapper.setStyle("-fx-background-color: green;");
 
         if (false) {
-            this.accountsView = new AccountsView();
+            this.accountsView = new AccountsView(app.getAccountService());
             VBox.setVgrow(accountsView, Priority.ALWAYS);
             contentWrapper.getChildren().add(accountsView);
 
@@ -100,18 +97,13 @@ public class EditorView extends BorderPane {
 
         // move files to todo or archive
         // process files
-        TransactionReaderForCsv reader = new TransactionReaderForCsv(files);
-        List<CashTransaction> importedTransactions = reader.getAllTransactions();
-
         // apply rules  
-        RuleEngine ruleEngine = app.getRuleEngine();
-        ruleEngine.overwriteAccountNames(importedTransactions);
-        ruleEngine.determineInternalTransactions(importedTransactions);
-        ruleEngine.applyRules(importedTransactions);
-
         // add to accounts
-        Account.addTransactionsToAccounts(importedTransactions);
+        TransactionReaderForCsv reader = new TransactionReaderForCsv(files);
+        List<Account> imported = new AccountImporter(reader).importAccounts();
+        app.getAccountService().importAccounts(imported); // normalizes, applies rules and merges with existing accounts
 
+        
         // check integrity 
         // reload table
         accountsView.reload();
@@ -121,15 +113,15 @@ public class EditorView extends BorderPane {
 
     private void onSave(ActionEvent e) {
         // save transactions to xlsx and db 
-        app.getTransactionWriterForXlsx().write(Account.getAccounts());
+        app.getAccountWriter().write(app.getAccountService().getAccounts());
         BudgetDatabase database = app.getBudgetDatabase();
-        for (Account account : Account.getAccounts()) {
+        for (Account account : app.getAccountService().getAccounts()) {
             database.insertTransactions(account.getAllTransactionsAscending());
         }
 
         // process budget
         MultiAccountBudget budget = app.getBudgetReaderForXlsx().read();
-        budget.setAccounts(Account.getAccounts());
+        budget.setAccounts(app.getAccountService().getAccounts());
 
         // save budget to xlsx and db
         app.getBudgetWriterForXlsx().write(budget);

@@ -1,5 +1,6 @@
 package bank2budget.ui;
 
+import bank2budget.application.AccountService;
 import bank2budget.core.Account;
 import java.util.Collection;
 import java.util.Map;
@@ -14,12 +15,14 @@ import javafx.scene.control.TabPane;
  */
 public class AccountsView extends TabPane {
 
+    private final AccountService accountService;
     private final Map<String, TransactionsView> transactionsViews = new TreeMap<>();
 
-    public AccountsView() {
+    public AccountsView(AccountService accountService) {
+        this.accountService = accountService;
         this.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
-        Collection<Account> accounts = Account.getAccounts();
+        Collection<Account> accounts = accountService.getAccounts();
         for (Account account : accounts) {
             addTransactionsView(account);
         }
@@ -35,7 +38,7 @@ public class AccountsView extends TabPane {
     }
 
     public void reload() {
-        Collection<Account> accounts = Account.getAccounts();
+        Collection<Account> accounts = accountService.getAccounts();
         for (Account account : accounts) {
             String accountNumber = account.getAccountNumber();
             if (transactionsViews.containsKey(accountNumber)) {

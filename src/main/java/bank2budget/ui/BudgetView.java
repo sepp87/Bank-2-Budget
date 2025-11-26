@@ -1,7 +1,6 @@
 package bank2budget.ui;
 
 import bank2budget.App;
-import bank2budget.core.Account;
 import bank2budget.core.MonthlyBudget;
 import bank2budget.core.MultiAccountBudget;
 import bank2budget.core.Util;
@@ -48,12 +47,12 @@ public class BudgetView extends AnchorPane {
     public BudgetView(App app) {
         this.app = app;
         this.budget = app.getBudgetReaderForXlsx().read();
-        budget.setAccounts(Account.getAccounts());
+        budget.setAccounts(app.getAccountService().getAccounts());
 
         // Build header
         this.currentMonth = new Label("January 2026");
 
-        String lastExportDate = Account.getLastExportDate() == null ? "" : Account.getLastExportDate().toString();
+        String lastExportDate = app.getAccountService().getLastExportDate() == null ? "" : app.getAccountService().getLastExportDate().toString();
         this.lastExport = new Label(lastExportDate);
         this.remainingIncome = new Label("€500,-");
         this.currentBalance = new Label("€1000,-");
@@ -133,7 +132,7 @@ public class BudgetView extends AnchorPane {
 
     public void reload() {
         selectMonthSubscription.unsubscribe();
-        budget.setAccounts(Account.getAccounts());
+        budget.setAccounts(app.getAccountService().getAccounts());
         monthSelection.getItems().clear();
         LocalDate key = monthSelection.getSelectionModel().getSelectedItem();
         populateMonthSelection(key);
@@ -174,7 +173,7 @@ public class BudgetView extends AnchorPane {
 
         currentMonth.setText(Month.of(month.getFinancialMonth()).toString() + " " + month.getFinancialYear());
 //        remainingIncome.setText(key);
-        currentBalance.setText(Account.getTotalBalanceOn(month.getLastOfMonth()) + "");
+        currentBalance.setText(app.getAccountService().getTotalBalanceOn(month.getLastOfMonth()) + "");
 
         loadBudgetedVsExpenses(month);
         loadSavingsBuffersAndDeficits(month);

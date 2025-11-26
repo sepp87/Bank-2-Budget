@@ -1,7 +1,8 @@
-package bank2budget.core;
+package bank2budget.ports;
 
+import bank2budget.core.Account;
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public interface AccountRepositoryPort {
 
-    List<Account> load();
+    Map<String, Account> load();
 
     void save(Collection<Account> accounts);
 }

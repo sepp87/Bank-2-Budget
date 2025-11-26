@@ -1,7 +1,9 @@
 package bank2budget.core;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,11 +19,10 @@ public class MultiAccountBudgetTest {
         System.out.println();
     }
 
-    @org.junit.jupiter.api.AfterEach
-    public void removeAccounts() {
-        Account.removeAllAccounts();
-    }
-
+//    @org.junit.jupiter.api.AfterEach
+//    public void removeAccounts() {
+//        Account.removeAllAccounts();
+//    }
     @org.junit.jupiter.api.Test
     public void testGetMonthlyBudgets_WhenFirstOfMonthIsTenth_ThenReturnTwoMonthlyBudgets() {
         System.out.println("testGetMonthlyBudgets_WhenFirstOfMonthIsTenth_ThenReturnTwoMonthlyBudgets");
@@ -48,10 +49,27 @@ public class MultiAccountBudgetTest {
         MultiAccountBudget.firstOfMonth = firstOfMonth;
         MultiAccountBudget.budgetedForCategory = generateBudgetedForCategory();
 
-        Account.addTransactionsToAccounts(transactions);
-        budget.setAccounts(Account.getAccounts());
+//        Account.addTransactionsToAccounts(transactions);
+//        budget.setAccounts(Account.getAccounts());
+        List<Account> accounts = groupTransactionsByAccount(transactions);
+        budget.setAccounts(accounts);
 
         return budget;
+    }
+
+    private static List<Account> groupTransactionsByAccount(List<CashTransaction> transactions) {
+        Map<String, List<CashTransaction>> temporary = new TreeMap<>();
+        for (CashTransaction transaction : transactions) {
+            String accountNumber = transaction.getAccountNumber();
+            temporary.computeIfAbsent(accountNumber, k -> new ArrayList<>()).add(transaction);
+        }
+
+        List<Account> result = new ArrayList<>();
+        for (Map.Entry<String, List<CashTransaction>> entry : temporary.entrySet()) {
+            Account account = new Account(entry.getKey(), entry.getValue());
+            result.add(account);
+        }
+        return result;
     }
 
     private static TreeMap<String, Double> generateBudgetedForCategory() {

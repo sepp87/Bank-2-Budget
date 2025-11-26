@@ -1,4 +1,4 @@
-package bank2budget.core;
+package bank2budget.ports;
 
 import java.util.List;
 
