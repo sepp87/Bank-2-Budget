@@ -15,12 +15,12 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class BudgetDatabase {
+public class AnalyticsDatabase {
 
-    private static final Logger LOGGER = Logger.getLogger(BudgetDatabase.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AnalyticsDatabase.class.getName());
     private final String dbPath;
 
-    public BudgetDatabase(String dbPath) {
+    public AnalyticsDatabase(String dbPath) {
         this.dbPath = dbPath;
         createSchema();
         createAnalyticsViews();
@@ -178,7 +178,7 @@ public class BudgetDatabase {
                 LOGGER.info("SQLite version: " + rs.getString(1));
             }
         } catch (SQLException ex) {
-            Logger.getLogger(BudgetDatabase.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AnalyticsDatabase.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         try (Connection c = SqliteUtil.getConnection(dbPath); Statement s = c.createStatement()) {

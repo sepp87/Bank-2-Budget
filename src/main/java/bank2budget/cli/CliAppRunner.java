@@ -1,13 +1,7 @@
 package bank2budget.cli;
 
-import bank2budget.Launcher;
-import bank2budget.AppPaths;
 import bank2budget.App;
 import static bank2budget.cli.CommandLineArgs.Mode.*;
-import bank2budget.adapters.repository.BudgetDatabase;
-import bank2budget.adapters.reader.TransactionReaderForCsv;
-import bank2budget.core.MultiAccountBudget;
-import bank2budget.core.RuleEngine;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,20 +11,14 @@ import java.util.logging.Logger;
  */
 public class CliAppRunner {
 
+    private final static Logger LOGGER = Logger.getLogger(CliAppRunner.class.getName());
+    
     private final App app;
     private final CommandLineArgs cliArgs;
-    private final AppPaths paths;
 
-    private final TransactionReaderForCsv todoReader;
-    private final BudgetDatabase budgetDatabase;
-
-    public CliAppRunner(App app, CommandLineArgs cliArgs, AppPaths paths) {
+    public CliAppRunner(App app, CommandLineArgs cliArgs) {
         this.app = app;
         this.cliArgs = cliArgs;
-        this.paths = paths;
-
-        this.todoReader = new TransactionReaderForCsv(paths.getTodoDirectory());
-        this.budgetDatabase = app.getBudgetDatabase();
     }
 
     public void run() {
@@ -40,42 +28,19 @@ public class CliAppRunner {
                 app.getCsvCleanupService().cleanTodoDirectory();
                 break;
             case XLSX:
-                app.getAccountService().importAndSave();
+                app.getAccountService().importFromTodoAndSave();
+                app.getAnalyticsExportService().exportAccounts(app.getAccountService().getAccounts());
                 break;
             case BUDGET:
-                runBudgetMode();
+                app.getBudgetService().importFromTodoAndSave();
+                app.getAnalyticsExportService().exportAccounts(app.getAccountService().getAccounts());
+                app.getAnalyticsExportService().exportBudget(app.getBudgetService().getBudget());
                 break;
         }
 
         if (cliArgs.shouldClearTodo()) {
-            Logger.getLogger(Launcher.class.getName()).log(Level.INFO, "Clear \"todo\" folder not implemented.");
+            LOGGER.log(Level.INFO, "Clear \"todo\" folder not implemented.");
         }
-    }
-
-    //
-    //
-    // BUDGET MODE
-    private void runBudgetMode() {
-        boolean isSucces = app.getAccountService().importAndSave();
-        if (isSucces) {
-            MultiAccountBudget budget = loadBudget();
-            saveBudget(budget);
-        }
-    }
-
-    private MultiAccountBudget loadBudget() {
-        MultiAccountBudget budget = app.getBudgetReaderForXlsx().read();
-        budget.setAccounts(app.getAccountService().getAccounts());
-        return budget;
-    }
-
-    private void saveBudget(MultiAccountBudget budget) {
-        app.getBudgetWriterForXlsx().write(budget);
-
-        if (budgetDatabase == null) {
-            return;
-        }
-        budgetDatabase.insertMonthlyBudgets(budget.getMonthlyBudgets().values());
     }
 
 }

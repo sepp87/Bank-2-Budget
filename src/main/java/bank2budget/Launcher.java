@@ -72,7 +72,7 @@ public class Launcher {
 
         AppPaths paths = new AppPaths();
         App app = new App(paths, cliArgs.getDecimalSeparatorChar(), cliArgs.useSqlite());
-        CliAppRunner runner = new CliAppRunner(app, cliArgs, paths);
+        CliAppRunner runner = new CliAppRunner(app, cliArgs);
         runner.run();
 
         System.exit(exitCode);

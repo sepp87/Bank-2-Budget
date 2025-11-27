@@ -1,12 +1,13 @@
 package bank2budget.application;
 
-import bank2budget.adapters.repository.BudgetDatabase;
+import bank2budget.adapters.repository.AnalyticsDatabase;
 import bank2budget.core.Account;
 import bank2budget.core.CashTransaction;
 import bank2budget.core.IntegrityChecker;
 import bank2budget.core.RuleEngine;
 import bank2budget.ports.AccountRepositoryPort;
 import bank2budget.ports.AccountImporterPort;
+import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -24,14 +25,12 @@ public class AccountService {
     private final AccountRepositoryPort repository;
     private final AccountImporterPort importer;
     private final RuleEngine ruleEngine;
-    private final BudgetDatabase database;
     private final Map<String, Account> accountsIndex;
 
-    public AccountService(AccountRepositoryPort repository, AccountImporterPort importer, RuleEngine ruleEngine, BudgetDatabase database) {
+    public AccountService(AccountRepositoryPort repository, AccountImporterPort importer, RuleEngine ruleEngine) {
         this.repository = repository;
         this.importer = importer;
         this.ruleEngine = ruleEngine;
-        this.database = database;
         this.accountsIndex = repository.load();
         normalize(accountsIndex.values());
     }
@@ -40,25 +39,30 @@ public class AccountService {
         return accountsIndex.values();
     }
 
-    public void importAccounts(List<Account> imported) {
-        normalize(imported);
-        applyRules(imported);
-        merge(imported);
+    public void importFromFiles(List<File> files) {
+        List<Account> imported = importer.importFromFiles(files);
+        normalizeApplyRulesAndMerge(imported);
     }
 
-    public boolean importAndSave() {
-        List<Account> imported = importer.importAccounts();
-        normalize(imported);
-        applyRules(imported);
-        merge(imported);
+
+    public boolean importFromTodoAndSave() {
+        List<Account> imported = importer.importFromTodo();
+        normalizeApplyRulesAndMerge(imported);
+
 //        if(true) {
 //            return false;
 //        }
         if (hasValidAccounts()) {
-            saveAccounts();
+            save();
             return true;
         }
         return false;
+    }
+
+    private void normalizeApplyRulesAndMerge(List<Account> imported) {
+        normalize(imported);
+        applyRules(imported);
+        merge(imported);
     }
 
     private void normalize(Collection<Account> accounts) {
@@ -83,14 +87,8 @@ public class AccountService {
         return isValid;
     }
 
-    private void saveAccounts() {
+    public void save() {
         repository.save(accountsIndex.values());
-        if (database == null) {
-            return;
-        }
-        for (Account account : accountsIndex.values()) {
-            database.insertTransactions(account.getAllTransactionsAscending());
-        }
     }
 
     private void merge(List<Account> importedAccounts) {

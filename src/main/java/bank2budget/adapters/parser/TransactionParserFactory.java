@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  *
  * @author joost
  */
-public class SimpleParserFactory {
+public class TransactionParserFactory {
 
 
     public static TransactionParser createTransactionParser(File csvFile) throws Exception {
@@ -99,7 +99,7 @@ public class SimpleParserFactory {
         try (BufferedReader reader = new BufferedReader(new FileReader(csvFile))) {
             firstLine = reader.readLine();
         } catch (IOException ex) {
-            Logger.getLogger(SimpleParserFactory.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TransactionParserFactory.class.getName()).log(Level.SEVERE, null, ex);
         }
         return firstLine;
     }

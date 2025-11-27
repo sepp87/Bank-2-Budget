@@ -1,16 +1,11 @@
 package bank2budget.adapters.writer;
 
-import bank2budget.Launcher;
 import bank2budget.core.CashTransaction;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.csv.*;
@@ -21,35 +16,25 @@ import org.apache.commons.csv.*;
  */
 public class TransactionWriterForCsv extends TransactionWriter {
 
-    private final Path doneDirectory;
+    private final static Logger LOGGER = Logger.getLogger(TransactionWriterForCsv.class.getName());
+
+    private final File target;
     private final char decimalSeparator;
 
-    public TransactionWriterForCsv(Path doneDirectory, char decimalSeparator) {
-        this.doneDirectory = doneDirectory;
+    public TransactionWriterForCsv(File target, char decimalSeparator) {
+        this.target = target;
         this.decimalSeparator = decimalSeparator;
     }
-
-    public void write(Map<String, List<CashTransaction>> transactionsPerFile) {
-        File doneDirectory = this.doneDirectory.toFile();
-        for (Entry<String, List<CashTransaction>> entry : transactionsPerFile.entrySet()) {
-            String filename = entry.getKey();
-            List<CashTransaction> transactions = entry.getValue();
-            String filenameWithoutExtension = filename.substring(0, filename.length() - 4);
-            File file = new File(doneDirectory.getPath() + File.separatorChar + filenameWithoutExtension + " cleaned.csv");
-            saveTransactionsToDoneDirectory(transactions, file);
-        }
-    }
-
-    private void saveTransactionsToDoneDirectory(Collection<CashTransaction> transactions, File toCsvFile) {
-//        try (CSVPrinter printer = new CSVPrinter(new FileWriter(toCsvFile, StandardCharsets.UTF_8), CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL))) {
+    
+    public void write(Collection<CashTransaction> transactions) {
         CSVFormat csvFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL).withQuote('"');
-        try (CSVPrinter printer = new CSVPrinter(new FileWriter(toCsvFile, StandardCharsets.UTF_8), csvFormat)) {
+        try (CSVPrinter printer = new CSVPrinter(new FileWriter(target, StandardCharsets.UTF_8), csvFormat)) {
             printer.printRecord((Object[]) HEADER);
             for (CashTransaction transaction : transactions) {
                 printer.printRecord((Object[]) getStringArrayFrom(transaction));
             }
         } catch (IOException ex) {
-            Logger.getLogger(TransactionWriterForCsv.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, "Failed to write CSV file: " + target, ex);
         }
     }
 

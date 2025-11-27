@@ -1,8 +1,11 @@
 package bank2budget.adapters.reader;
 
+import bank2budget.AppPaths;
 import bank2budget.core.Account;
 import bank2budget.ports.AccountImporterPort;
 import bank2budget.core.CashTransaction;
+import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,17 +18,24 @@ import java.util.TreeMap;
  */
 public class AccountImporter implements AccountImporterPort {
 
-    private final TransactionReaderForCsv csvReader;
+    private final AppPaths paths;
 
-    public AccountImporter(TransactionReaderForCsv csvReader) {
-        this.csvReader = csvReader;
+    public AccountImporter(AppPaths paths) {
+        this.paths = paths;
     }
 
     @Override
-    public List<Account> importAccounts() {
+    public List<Account> importFromTodo() {
+        Path todo = paths.getTodoDirectory();
+        List<File> csvFiles = FileUtil.filterDirectoryByExtension(".csv", todo).stream().map(Path::toFile).toList();
+        return importFromFiles(csvFiles);
+    }
+
+    @Override
+    public List<Account> importFromFiles(List<File> files) {
         List<Account> result = new ArrayList<>();
-        Map<String, List<CashTransaction>> transactionsPerFile = csvReader.getPerFile();
-        for (List<CashTransaction> transactions : transactionsPerFile.values()) {
+        for (File file : files) {
+            List<CashTransaction> transactions = TransactionReaderFactory.parse(file).getTransactions();
             List<Account> accounts = groupTransactionsByAccount(transactions);
             result.addAll(accounts);
         }
@@ -33,14 +43,14 @@ public class AccountImporter implements AccountImporterPort {
     }
 
     private List<Account> groupTransactionsByAccount(List<CashTransaction> transactions) {
-        Map<String, List<CashTransaction>> temporary = new TreeMap<>();
+        Map<String, List<CashTransaction>> transactionsByAccounts = new TreeMap<>();
         for (CashTransaction transaction : transactions) {
             String accountNumber = transaction.getAccountNumber();
-            temporary.computeIfAbsent(accountNumber, k -> new ArrayList<>()).add(transaction);
+            transactionsByAccounts.computeIfAbsent(accountNumber, k -> new ArrayList<>()).add(transaction);
         }
-        
+
         List<Account> result = new ArrayList<>();
-        for(Entry<String, List<CashTransaction>> entry : temporary.entrySet()) {
+        for (Entry<String, List<CashTransaction>> entry : transactionsByAccounts.entrySet()) {
             Account account = new Account(entry.getKey(), entry.getValue());
             result.add(account);
         }

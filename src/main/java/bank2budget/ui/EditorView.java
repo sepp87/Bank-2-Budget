@@ -1,11 +1,6 @@
 package bank2budget.ui;
 
 import bank2budget.App;
-import bank2budget.adapters.reader.AccountImporter;
-import bank2budget.adapters.repository.BudgetDatabase;
-import bank2budget.adapters.reader.TransactionReaderForCsv;
-import bank2budget.core.Account;
-import bank2budget.core.MultiAccountBudget;
 import java.io.File;
 import java.util.List;
 import javafx.event.ActionEvent;
@@ -99,11 +94,8 @@ public class EditorView extends BorderPane {
         // process files
         // apply rules  
         // add to accounts
-        TransactionReaderForCsv reader = new TransactionReaderForCsv(files);
-        List<Account> imported = new AccountImporter(reader).importAccounts();
-        app.getAccountService().importAccounts(imported); // normalizes, applies rules and merges with existing accounts
+        app.getAccountService().importFromFiles(files); // normalizes, applies rules and merges with existing accounts
 
-        
         // check integrity 
         // reload table
         accountsView.reload();
@@ -113,19 +105,14 @@ public class EditorView extends BorderPane {
 
     private void onSave(ActionEvent e) {
         // save transactions to xlsx and db 
-        app.getAccountWriter().write(app.getAccountService().getAccounts());
-        BudgetDatabase database = app.getBudgetDatabase();
-        for (Account account : app.getAccountService().getAccounts()) {
-            database.insertTransactions(account.getAllTransactionsAscending());
-        }
+        app.getAccountService().save();
+        app.getAnalyticsExportService().exportAccounts(app.getAccountService().getAccounts());
 
-        // process budget
-        MultiAccountBudget budget = app.getBudgetReaderForXlsx().read();
-        budget.setAccounts(app.getAccountService().getAccounts());
+        // recalculate and save budget
+        app.getBudgetService().recalculateAndSave();
 
-        // save budget to xlsx and db
-        app.getBudgetWriterForXlsx().write(budget);
-        database.insertMonthlyBudgets(budget.getMonthlyBudgets().values());
+        // save to db
+        app.getAnalyticsExportService().exportBudget(app.getBudgetService().getBudget());
 
         // show save finished
     }

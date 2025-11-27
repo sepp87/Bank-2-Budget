@@ -46,8 +46,7 @@ public class BudgetView extends AnchorPane {
     // Row      category - budgeted - expenses - remainder      Row     category - amount
     public BudgetView(App app) {
         this.app = app;
-        this.budget = app.getBudgetReaderForXlsx().read();
-        budget.setAccounts(app.getAccountService().getAccounts());
+        this.budget = app.getBudgetService().getBudget();
 
         // Build header
         this.currentMonth = new Label("January 2026");
