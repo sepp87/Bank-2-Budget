@@ -1,9 +1,6 @@
 package bank2budget.core;
 
-import bank2budget.core.CashTransaction;
-import bank2budget.core.Account;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;

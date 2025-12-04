@@ -30,7 +30,7 @@ public class TransactionParserTest {
         System.out.println("testGenerateTransactionNumberAndDeriveLastOfDay_WhenTenTransactions_ThenTenIsHighestPositionAndLastOfDay");
 
         // Create test data        
-        List<CashTransaction> transactions = generateTenTransactions("abc", LocalDate.parse("2024-03-01"));
+        List<RawCashTransaction> transactions = generateTenRawTransactions("abc", LocalDate.parse("2024-03-01"));
 
         // Perform test
         TransactionParser.generateTransactionNumberAndDeriveLastOfDay(transactions);
@@ -39,59 +39,60 @@ public class TransactionParserTest {
         int expectedTransactionNumber = 240301001;
         int expectedPositionOfDay = 1;
         boolean expectedIsLastOfDay = false;
-        for (CashTransaction transaction : transactions) {
+        for (RawCashTransaction transaction : transactions) {
             if (expectedPositionOfDay == 10) {
                 expectedIsLastOfDay = true;
             }
 
             // Evaluate result
-            assertEquals(expectedTransactionNumber, transaction.getTransactionNumber());
-            assertEquals(expectedPositionOfDay, transaction.getPositionOfDay());
-            assertEquals(expectedIsLastOfDay, transaction.isLastOfDay());
+            assertEquals(expectedTransactionNumber, transaction.transactionNumber);
+            assertEquals(expectedPositionOfDay, transaction.positionOfDay);
+            assertEquals(expectedIsLastOfDay, transaction.lastOfDay);
 
-            UtilTest.printResult(expectedTransactionNumber, transaction.getTransactionNumber());
-            UtilTest.printResult(expectedPositionOfDay, transaction.getPositionOfDay());
-            UtilTest.printResult(expectedIsLastOfDay, transaction.isLastOfDay());
+            UtilTest.printResult(expectedTransactionNumber, transaction.transactionNumber);
+            UtilTest.printResult(expectedPositionOfDay, transaction.positionOfDay);
+            UtilTest.printResult(expectedIsLastOfDay, transaction.lastOfDay);
 
             expectedTransactionNumber++;
             expectedPositionOfDay++;
         }
     }
 
-    @Test
-    public void testDeriveLastOfDay_WhenTenUnsortedTransactions_ThenTenIsLastOfDay() {
-        System.out.println("testDeriveLastOfDay_WhenTenUnsortedTransactions_ThenTenIsLastOfDay");
+//      TEST has become obsolete since, last of day is loaded directly from transactions xlsx    
+//    @Test 
+//    public void testDeriveLastOfDay_WhenTenUnsortedTransactions_ThenTenIsLastOfDay() {
+//        System.out.println("testDeriveLastOfDay_WhenTenUnsortedTransactions_ThenTenIsLastOfDay");
+//
+//        // Create test data        
+//        List<RawCashTransaction> transactions = generateTenRawTransactions("abc", LocalDate.parse("2024-03-01"));
+//        TransactionParser.generateTransactionNumberAndDeriveLastOfDay(transactions);
+//        transactions.getLast().setLastOfDay(false);
+//        Collections.shuffle(transactions);
+//
+//        // Perform test
+//        TransactionParser.deriveLastOfDay(transactions);
+//
+//        // Prepare results
+//        boolean expected = false;
+//        for (CashTransaction transaction : transactions) {
+//            if (transaction.getPositionOfDay() == 10) {
+//                expected = true;
+//            } else {
+//                expected = false;
+//            }
+//
+//            // Evaluate result
+//            assertEquals(expected, transaction.isLastOfDay());
+//
+//            UtilTest.printResult(expected, transaction.isLastOfDay());
+//        }
+//    }
 
-        // Create test data        
-        List<CashTransaction> transactions = generateTenTransactions("abc", LocalDate.parse("2024-03-01"));
-        TransactionParser.generateTransactionNumberAndDeriveLastOfDay(transactions);
-        transactions.getLast().setLastOfDay(false);
-        Collections.shuffle(transactions);
-
-        // Perform test
-        TransactionParser.deriveLastOfDay(transactions);
-
-        // Prepare results
-        boolean expected = false;
-        for (CashTransaction transaction : transactions) {
-            if (transaction.getPositionOfDay() == 10) {
-                expected = true;
-            } else {
-                expected = false;
-            }
-
-            // Evaluate result
-            assertEquals(expected, transaction.isLastOfDay());
-
-            UtilTest.printResult(expected, transaction.isLastOfDay());
-        }
-    }
-
-    private List<CashTransaction> generateTenTransactions(String account, LocalDate date) {
-        List<CashTransaction> list = new ArrayList<>();
+    private List<RawCashTransaction> generateTenRawTransactions(String account, LocalDate date) {
+        List<RawCashTransaction> list = new ArrayList<>();
         int i = 0;
         while (i < 10) {
-            CashTransaction transaction = CashTransactionTest.generateOneTransaction(account, date, null, null);
+            RawCashTransaction transaction = CashTransactionTest.generateOneRawTransaction(account, date, null, null);
             list.add(transaction);
             i++;
         }

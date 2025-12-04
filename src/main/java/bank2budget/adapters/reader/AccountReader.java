@@ -92,7 +92,7 @@ public class AccountReader {
             CashTransaction transaction = getCashTransactionFrom(row);
             transactions.add(transaction);
         }
-        TransactionParser.deriveLastOfDay(transactions);
+//        TransactionParser.deriveLastOfDay(transactions);
         return transactions;
     }
 
@@ -111,7 +111,7 @@ public class AccountReader {
             if (cell != null) {
                 switch (column) {
                     case "category": // String
-                        transaction.setCategory(cell.getStringCellValue());
+                        transaction.setCategory(getStringValue(cell));
                         break;
                     case "amount": // Numeric
                         transaction.setAmount(cell.getNumericCellValue());
@@ -122,38 +122,47 @@ public class AccountReader {
                         int positionOfDay = Integer.parseInt(String.valueOf(transactionNumber).substring(6)); // YYMMDDXXX
                         transaction.setPositionOfDay(positionOfDay);
                         break;
+                    case "lastOfDay": // Boolean
+                        boolean lastOfDay = cell.getBooleanCellValue();
+                        transaction.setLastOfDay(lastOfDay);
+                        break;
                     case "date": // String
-                        transaction.setDate(LocalDate.parse(cell.getStringCellValue()));
+                        transaction.setDate(LocalDate.parse(getStringValue(cell)));
                         break;
                     case "accountBalance": // Numeric
                         transaction.setAccountBalance(cell.getNumericCellValue());
                         break;
                     case "accountInstitution": // String to Enum
-                        transaction.setAccountInstitution(CreditInstitution.valueOf(cell.getStringCellValue()));
+                        transaction.setAccountInstitution(CreditInstitution.valueOf(getStringValue(cell)));
                         break;
                     case "accountNumber": // String
-                        transaction.setAccountNumber(cell.getStringCellValue());
+                        transaction.setAccountNumber(getStringValue(cell));
                         break;
                     case "accountName": // String
-                        transaction.setAccountName(cell.getStringCellValue());
+                        transaction.setAccountName(getStringValue(cell));
                         break;
                     case "contraAccountNumber": // String
-                        transaction.setContraAccountNumber(cell.getStringCellValue());
+                        transaction.setContraAccountNumber(getStringValue(cell));
                         break;
                     case "contraAccountName": // String
-                        transaction.setContraAccountName(cell.getStringCellValue());
+                        transaction.setContraAccountName(getStringValue(cell));
                         break;
                     case "description": // String
-                        transaction.setDescription(cell.getStringCellValue());
+                        transaction.setDescription(getStringValue(cell));
                         break;
                     case "notes": // String
-                        transaction.setNotes(cell.getStringCellValue());
+                        transaction.setNotes(getStringValue(cell));
                         break;
                 }
             }
             i++;
         }
         return transaction;
+    }
+    
+    private static String getStringValue(Cell cell) {
+        String value = cell.getStringCellValue();
+        return value.isBlank() ? null : value;
     }
 
 }

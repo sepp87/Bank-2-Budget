@@ -128,7 +128,7 @@ public class MonthlyBudget {
     public double getUnassignedIncomeRemainderLastMonth() {
         return unassignedIncomeRemainderLastMonth;
     }
-    
+
     public LocalDate getFirstOfMonth() {
         return firstOfMonth;
     }
@@ -136,7 +136,7 @@ public class MonthlyBudget {
     public LocalDate getLastOfMonth() {
         return firstOfMonth.plusMonths(1).minusDays(1);
     }
-    
+
     public double getBudgetedTotal() {
         double result = 0.;
         for (double value : budgetedForCategories.values()) {

@@ -1,6 +1,7 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.core.CashTransaction;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
@@ -9,13 +10,12 @@ import org.apache.commons.csv.CSVRecord;
 
 public class DkbParser extends TransactionParser {
 
-    private double currentBalance;
+    private BigDecimal currentBalance;
     protected String accountNumber;
 
     public DkbParser(ParserConfig config) {
         super(config);
     }
-
 
     @Override
     public CSVFormat getCsvFormat() {
@@ -39,7 +39,7 @@ public class DkbParser extends TransactionParser {
     public List<CSVRecord> getTransactionRecordsFrom(List<CSVRecord> allRecords) { // and set current balance to calculateBalanceAfter(CashTransaction transaction)
         List<CSVRecord> transactionRecords = allRecords.subList(5, allRecords.size());
         Collections.reverse(transactionRecords);
-        currentBalance = getStartingBalanceFrom(allRecords);
+        currentBalance = BigDecimal.valueOf(getStartingBalanceFrom(allRecords));
         CSVRecord accountNumberRecord = allRecords.get(0);
         accountNumber = getAccountNumberFrom(accountNumberRecord);
         return transactionRecords;
@@ -65,23 +65,21 @@ public class DkbParser extends TransactionParser {
     }
 
     @Override
-    public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
-        CashTransaction transaction = new CashTransaction();
-        transaction.setAccountNumber(accountNumber);
-        transaction.setContraAccountName(record.get("Auftraggeber / Begünstigter"));
-        transaction.setContraAccountNumber(record.get("Kontonummer"));
-        transaction.setAmount(getDoubleFrom(record.get("Betrag (EUR)")));
-        transaction.setDescription(record.get("Verwendungszweck"));
-        transaction.setOriginalRecord(record.toMap().values());
-        parseDateFrom(record.get("Buchungstag"), transaction);
-        calculateBalanceAfter(transaction);
+    public RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
+        RawCashTransaction transaction = new RawCashTransaction();
+        transaction.accountNumber = (accountNumber);
+        transaction.contraAccountName = (record.get("Auftraggeber / Begünstigter"));
+        transaction.contraAccountNumber = (record.get("Kontonummer"));
+        transaction.amount = BigDecimal.valueOf(getDoubleFrom(record.get("Betrag (EUR)")));
+        transaction.description = (record.get("Verwendungszweck"));
+        transaction.date = parseDateFrom(record.get("Buchungstag"));
+        calculateBalanceAfterNEW(transaction);
         return transaction;
     }
 
-    private void calculateBalanceAfter(CashTransaction transaction) {
-        double newBalance = currentBalance + transaction.getAmount();
-        currentBalance = (double) Math.round(newBalance * 100) / 100;
-        transaction.setAccountBalance(currentBalance);
+    private void calculateBalanceAfterNEW(RawCashTransaction transaction) {
+        currentBalance = currentBalance.add(transaction.amount);
+        transaction.accountBalance = currentBalance;
     }
 
 }

@@ -1,7 +1,6 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.core.CreditInstitution;
-import bank2budget.core.Config;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

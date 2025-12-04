@@ -5,7 +5,7 @@ import bank2budget.adapters.reader.FileUtil;
 import bank2budget.adapters.reader.TransactionReaderFactory;
 import bank2budget.adapters.writer.TransactionWriterFactory;
 import bank2budget.core.CashTransaction;
-import bank2budget.core.RuleEngine;
+import bank2budget.core.rule.RuleEngine;
 import java.nio.file.Path;
 import java.util.List;
 

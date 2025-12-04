@@ -1,6 +1,9 @@
 package bank2budget.core;
 
+import bank2budget.core.budget.BudgetTemplate;
+import bank2budget.core.rule.RuleConfig;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,17 +18,18 @@ public class Config {
 
     private Map<String, String> myAccounts;
     private Map<String, String> otherAccounts;
-    private Collection<Rule> rules;
-    private Map<String, Double> budgetTemplate;
+    private List<RuleConfig> ruleConfigs;
+    private Map<String, Double> budgetCategories;
     private int firstOfMonth = 1;
+    private BudgetTemplate budgetTemplate;
 
-    public Config(Map<String, String> myAccounts, Map<String, String> otherAccounts, Collection<Rule> rules, Map<String, Double> budgetTemplate, int firstOfMonth) {
+    public Config(Map<String, String> myAccounts, Map<String, String> otherAccounts, List<RuleConfig> ruleConfigs, Map<String, Double> budgetCategories, int firstOfMonth, BudgetTemplate budgetTemplate) {
         this.myAccounts = myAccounts;
         this.otherAccounts = otherAccounts;
-        this.rules = rules;
-        this.budgetTemplate = budgetTemplate;
+        this.ruleConfigs = ruleConfigs;
+        this.budgetCategories = budgetCategories;
         this.firstOfMonth = validateFirstOfMonth(firstOfMonth);
-
+        this.budgetTemplate = budgetTemplate;
     }
 
     private int validateFirstOfMonth(int i) {
@@ -45,15 +49,19 @@ public class Config {
         return otherAccounts;
     }
 
-    public Collection<Rule> rules() {
-        return rules;
+    public List<RuleConfig> ruleConfigs() {
+        return ruleConfigs;
     }
 
-    public Map<String, Double> budgetTemplate() {
-        return budgetTemplate;
+    public Map<String, Double> budgetCategories() {
+        return budgetCategories;
     }
 
     public int firstOfMonth() {
         return firstOfMonth;
+    }
+    
+    public BudgetTemplate budgetTemplate() {
+        return budgetTemplate;
     }
 }

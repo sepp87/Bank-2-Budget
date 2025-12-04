@@ -26,17 +26,16 @@ public class GrenkeBankParser extends MuenchnerBankParser {
     }
 
     @Override
-    public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
-        CashTransaction transaction = new CashTransaction();
-        transaction.setAccountNumber(accountNumber);
-        transaction.setContraAccountName(record.get("Zahlungsempfänger"));
-        transaction.setContraAccountNumber(record.get("ZahlungsempfängerIBAN"));
-        transaction.setDescription(record.get("Vorgang/Verwendungszweck"));
-        transaction.setOriginalRecord(record.toMap().values());
-        parseDateFrom(record.get("Buchungstag"), transaction);
-        parseDescriptionFrom(record, transaction);
-        parseAmountFrom(record, transaction);
-        calculateBalanceAfter(transaction);
+    public RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
+        RawCashTransaction transaction = new RawCashTransaction();
+        transaction.accountNumber = (accountNumber);
+        transaction.contraAccountName = (record.get("Zahlungsempfänger"));
+        transaction.contraAccountNumber = (record.get("ZahlungsempfängerIBAN"));
+        transaction.description = (record.get("Vorgang/Verwendungszweck"));
+        transaction.date  = parseDateFrom(record.get("Buchungstag"));
+        transaction.description = parseDescriptionFrom(record);
+        transaction.amount = parseAmountFrom(record);
+        calculateBalanceAfterNEW(transaction);
         return transaction;
     }
 

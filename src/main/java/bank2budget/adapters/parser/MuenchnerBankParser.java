@@ -1,6 +1,7 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.core.CashTransaction;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
@@ -9,7 +10,7 @@ import org.apache.commons.csv.CSVRecord;
 
 public class MuenchnerBankParser extends TransactionParser {
 
-    private double currentBalance;
+    private BigDecimal currentBalance;
     protected String accountNumber;
     protected int startingBalanceRecordOffset = 2;
     protected int firstRecordIndex = 9;
@@ -17,7 +18,6 @@ public class MuenchnerBankParser extends TransactionParser {
     public MuenchnerBankParser(ParserConfig config) {
         super(config);
     }
-
 
     @Override
     public CSVFormat getCsvFormat() {
@@ -49,22 +49,7 @@ public class MuenchnerBankParser extends TransactionParser {
         return transactionRecords;
     }
 
-    @Override
-    public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
-        CashTransaction transaction = new CashTransaction();
-        transaction.setAccountNumber(accountNumber);
-        transaction.setContraAccountName(record.get("Empfänger/Zahlungspflichtiger"));
-        transaction.setDescription(record.get("Vorgang/Verwendungszweck"));
-        transaction.setOriginalRecord(record.toMap().values());
-        parseDateFrom(record.get("Buchungstag"), transaction);
-        parseDescriptionFrom(record, transaction);
-        parseAmountFrom(record, transaction);
-        calculateBalanceAfter(transaction);
-        filterContraAccountNumberFromDescription(transaction);
-        return transaction;
-    }
-
-    protected void parseDescriptionFrom(CSVRecord record, CashTransaction transaction) {
+    protected String parseDescriptionFrom(CSVRecord record) {
         String description = record.get("Vorgang/Verwendungszweck");
         description = description.replaceAll("\\n|\\r", "")
                 .replaceAll(" ?(CRED:) ?", " CRED: ")
@@ -94,20 +79,20 @@ public class MuenchnerBankParser extends TransactionParser {
                 .replaceAll(" ?(TAN:) ?", " TAN: ")
                 .replaceAll(" ?(IBAN:) ?", " IBAN: ")
                 .replaceAll(" ?(BIC:) ?", " BIC: ");
-        transaction.setDescription(description);
+        return description;
     }
 
     /**
      * Parse amount with explicit transaction type { S:Debit, H:Credit }
      */
-    protected void parseAmountFrom(CSVRecord record, CashTransaction transaction) {
-        double amount = getExplicitAmountFrom(record);
-        transaction.setAmount(amount);
+    protected BigDecimal parseAmountFrom(CSVRecord record) {
+        BigDecimal amount = getExplicitAmountFrom(record);
+        return amount;
     }
 
-    protected double getExplicitAmountFrom(CSVRecord record) {
-        double amount = getDoubleFrom(record.get("Umsatz"));
-        double explicitAmount = isDebit(record) ? -amount : amount;
+    protected BigDecimal getExplicitAmountFrom(CSVRecord record) {
+        BigDecimal amount = BigDecimal.valueOf(getDoubleFrom(record.get("Umsatz")));
+        BigDecimal explicitAmount = isDebit(record) ? amount.negate() : amount;
         return explicitAmount;
     }
 
@@ -116,24 +101,42 @@ public class MuenchnerBankParser extends TransactionParser {
     }
 
     protected void calculateBalanceAfter(CashTransaction transaction) {
-        double newBalance = currentBalance + transaction.getAmount();
-        currentBalance = (double) Math.round(newBalance * 100) / 100;
-        transaction.setAccountBalance(currentBalance);
+        currentBalance = currentBalance.add(BigDecimal.valueOf(transaction.getAmount()));
+        transaction.setAccountBalance(currentBalance.doubleValue());
     }
 
-    private void filterContraAccountNumberFromDescription(CashTransaction transaction) {
-        String description = transaction.getDescription();
+    private String filterContraAccountNumberFromDescription(String description) {
         String descriptionWithoutSpacesAndNewLines = description.replaceAll(" |\\n", "");
         if (descriptionWithoutSpacesAndNewLines.contains("IBAN:")) {
             String iban = descriptionWithoutSpacesAndNewLines.replaceAll("^.*(IBAN:)|(BIC:).*$|(Datum:).*$", "");
-            transaction.setContraAccountNumber(iban);
+            return iban;
         }
+        return null;
     }
 
     protected String getAccountNumberFrom(List<CSVRecord> allRecords) {
         String blz = allRecords.get(2).get(1);
         String konto = allRecords.get(3).get(1);
         return getGermanIban(blz, konto);
+    }
+
+    @Override
+    public RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
+        RawCashTransaction transaction = new RawCashTransaction();
+        transaction.accountNumber = (accountNumber);
+        transaction.contraAccountName = (record.get("Empfänger/Zahlungspflichtiger"));
+        transaction.description = (record.get("Vorgang/Verwendungszweck"));
+        transaction.date = parseDateFrom(record.get("Buchungstag"));
+        transaction.description = parseDescriptionFrom(record);
+        transaction.amount = parseAmountFrom(record);
+        calculateBalanceAfterNEW(transaction);
+        transaction.contraAccountNumber = filterContraAccountNumberFromDescription(record.get("Vorgang/Verwendungszweck"));
+        return transaction;
+    }
+
+    protected void calculateBalanceAfterNEW(RawCashTransaction transaction) {
+        currentBalance = currentBalance.add(transaction.amount);
+        transaction.accountBalance = currentBalance;
     }
 
 }

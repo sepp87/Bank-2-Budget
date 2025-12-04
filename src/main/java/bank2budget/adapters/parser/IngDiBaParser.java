@@ -1,6 +1,7 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.core.CashTransaction;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
@@ -29,26 +30,24 @@ public class IngDiBaParser extends TransactionParser {
         return transactionsRecords;
     }
 
-    @Override
-    public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
-        CashTransaction transaction = new CashTransaction();
-        transaction.setAccountNumber(accountNumber);
-        transaction.setContraAccountName(record.get("CONTRA_ACCOUNT_NAME"));
-        transaction.setAmount(getDoubleFrom(record.get("AMOUNT")));
-        transaction.setAccountBalance(getDoubleFrom(record.get("ACCOUNT_BALANCE")));
-        transaction.setDescription(record.get("DESCRIPTION"));
-        transaction.setOriginalRecord(record.toMap().values());
-        parseDateFrom(record.get("DATE"), transaction);
-        parseContraAccountNumberFrom(record, transaction);
-        return transaction;
+    protected String getAccountNumberFrom(List<CSVRecord> allRecords) {
+        CSVRecord accountNumberRecord = allRecords.get(2);
+        return accountNumberRecord.get(1).replace(" ", "");
     }
 
     private void parseContraAccountNumberFrom(CSVRecord record, CashTransaction transaction) {
         // TODO filter CONTRA_ACCOUNT_NUMBER from record
     }
 
-    protected String getAccountNumberFrom(List<CSVRecord> allRecords) {
-        CSVRecord accountNumberRecord = allRecords.get(2);
-        return accountNumberRecord.get(1).replace(" ", "");
+    @Override
+    public RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
+        RawCashTransaction transaction = new RawCashTransaction();
+        transaction.accountNumber = (accountNumber);
+        transaction.contraAccountName = (record.get("CONTRA_ACCOUNT_NAME"));
+        transaction.amount = BigDecimal.valueOf(getDoubleFrom(record.get("AMOUNT")));
+        transaction.accountBalance = BigDecimal.valueOf(getDoubleFrom(record.get("ACCOUNT_BALANCE")));
+        transaction.description = (record.get("DESCRIPTION"));
+        transaction.date = parseDateFrom(record.get("DATE"));
+        return transaction;
     }
 }

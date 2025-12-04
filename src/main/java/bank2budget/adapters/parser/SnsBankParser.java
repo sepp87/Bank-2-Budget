@@ -1,6 +1,7 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.core.CashTransaction;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.List;
 import org.apache.commons.csv.CSVFormat;
@@ -30,17 +31,16 @@ public class SnsBankParser extends TransactionParser {
 
     // TODO Saldo na trn is actually Saldo voor trn
     @Override
-    public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
-        CashTransaction transaction = new CashTransaction();
-        transaction.setAccountNumber(record.get("IBAN/BBAN"));
-        transaction.setContraAccountName(record.get("Naam tegenpartij"));
-        transaction.setContraAccountNumber(record.get("Tegenrekening IBAN/BBAN"));
-        transaction.setAmount(Double.parseDouble(record.get("Bedrag")));
-        double balance = Double.parseDouble(record.get("Saldo voor trn")) + transaction.getAmount();
-        transaction.setAccountBalance(balance);
-        transaction.setDescription(record.get("Omschrijving"));
-        transaction.setOriginalRecord(record.toMap().values());
-        parseDateFrom(record.get("Datum"), transaction);
+    public RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
+        RawCashTransaction transaction = new RawCashTransaction();
+        transaction.accountNumber = (record.get("IBAN/BBAN"));
+        transaction.contraAccountName = (record.get("Naam tegenpartij"));
+        transaction.contraAccountNumber = (record.get("Tegenrekening IBAN/BBAN"));
+        transaction.amount = BigDecimal.valueOf(Double.parseDouble(record.get("Bedrag")));
+        BigDecimal balance = BigDecimal.valueOf(Double.parseDouble(record.get("Saldo voor trn"))).add(transaction.amount);
+        transaction.accountBalance = (balance);
+        transaction.description = (record.get("Omschrijving"));
+        transaction.date = parseDateFrom(record.get("Datum"));
         return transaction;
     }
 

@@ -1,6 +1,7 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.core.CashTransaction;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
@@ -9,7 +10,7 @@ import org.apache.commons.csv.CSVRecord;
 
 public class DkbParser2024 extends TransactionParser {
 
-    private double currentBalance;
+    private BigDecimal currentBalance;
     protected String accountNumber;
 
     public DkbParser2024(ParserConfig config) {
@@ -39,7 +40,7 @@ public class DkbParser2024 extends TransactionParser {
     public List<CSVRecord> getTransactionRecordsFrom(List<CSVRecord> allRecords) { // and set current balance to calculateBalanceAfter(CashTransaction transaction)
         List<CSVRecord> transactionRecords = allRecords.subList(5, allRecords.size());
         Collections.reverse(transactionRecords);
-        currentBalance = getStartingBalanceFrom(allRecords);
+        currentBalance = BigDecimal.valueOf(getStartingBalanceFrom(allRecords));
         CSVRecord accountNumberRecord = allRecords.get(0);
         accountNumber = getAccountNumberFrom(accountNumberRecord);
         return transactionRecords;
@@ -65,27 +66,26 @@ public class DkbParser2024 extends TransactionParser {
     }
 
     @Override
-    public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
-        CashTransaction transaction = new CashTransaction();
-        transaction.setAccountNumber(accountNumber);
-        transaction.setAmount(getDoubleFrom(record.get("Betrag (€)")));
-        if (transaction.getTransactionType() == CashTransaction.TransactionType.DEBIT) {
-            transaction.setContraAccountName(record.get("Zahlungsempfänger*in"));
+    public RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
+        RawCashTransaction transaction = new RawCashTransaction();
+        transaction.accountNumber = (accountNumber);
+        transaction.amount = BigDecimal.valueOf(getDoubleFrom(record.get("Betrag (€)")));
+        if (transaction.amount.compareTo(BigDecimal.ZERO) > 0) {
+            transaction.contraAccountName = (record.get("Zahlungspflichtige*r"));
         } else {
-            transaction.setContraAccountName(record.get("Zahlungspflichtige*r"));
+            transaction.contraAccountName = (record.get("Zahlungsempfänger*in"));
+
         }
-        transaction.setContraAccountNumber(record.get("IBAN"));
-        transaction.setDescription(record.get("Verwendungszweck"));
-        transaction.setOriginalRecord(record.toMap().values());
-        parseDateFrom(record.get("Buchungsdatum"), transaction);
-        calculateBalanceAfter(transaction);
+        transaction.contraAccountNumber = (record.get("IBAN"));
+        transaction.description = (record.get("Verwendungszweck"));
+        transaction.date = parseDateFrom(record.get("Buchungsdatum"));
+        calculateBalanceAfterNEW(transaction);
         return transaction;
     }
 
-    private void calculateBalanceAfter(CashTransaction transaction) {
-        double newBalance = currentBalance + transaction.getAmount();
-        currentBalance = (double) Math.round(newBalance * 100) / 100;
-        transaction.setAccountBalance(currentBalance);
+    private void calculateBalanceAfterNEW(RawCashTransaction transaction) {
+        currentBalance = currentBalance.add(transaction.amount);
+        transaction.accountBalance = currentBalance;
     }
 
 }

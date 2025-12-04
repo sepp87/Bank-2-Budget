@@ -1,6 +1,7 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.core.CashTransaction;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
@@ -9,7 +10,7 @@ import org.apache.commons.csv.CSVRecord;
 
 public class IngParser extends TransactionParser {
 
-    private double currentBalance = 0;
+    private BigDecimal currentBalance = BigDecimal.ZERO;
 
     public IngParser(ParserConfig config) {
         super(config);
@@ -30,25 +31,6 @@ public class IngParser extends TransactionParser {
         return allRecords.subList(1, allRecords.size());
     }
 
-    @Override
-    public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
-        CashTransaction transaction = new CashTransaction();
-        parseAmountFrom(record, transaction);
-        parseDateFrom(record.get("Datum"), transaction);
-        transaction.setAccountNumber(record.get("Rekening"));
-        transaction.setContraAccountName(record.get("Naam / Omschrijving"));
-        transaction.setContraAccountNumber(record.get("Tegenrekening"));
-        if (parserConfig.getDelimiter() == ';') {
-            transaction.setAccountBalance(getDoubleFrom(record.get("Saldo na mutatie")));
-            transaction.setCategory(record.get("Tag"));
-        } else {
-            calculateBalanceAfter(transaction);
-        }
-        transaction.setDescription(record.get("Mededelingen"));
-        transaction.setOriginalRecord(record.toMap().values());
-        return transaction;
-    }
-
     private void parseAmountFrom(CSVRecord record, CashTransaction transaction) {
         String plusOrMinus = record.get("Af Bij").equals("Af") ? "-" : "+";
         String amountString = plusOrMinus + record.get("Bedrag (EUR)");
@@ -57,8 +39,36 @@ public class IngParser extends TransactionParser {
     }
 
     private void calculateBalanceAfter(CashTransaction transaction) {
-        double newBalance = currentBalance + transaction.getAmount();
-        currentBalance = (double) Math.round(newBalance * 100) / 100;
-        transaction.setAccountBalance(currentBalance);
+        currentBalance = currentBalance.add(BigDecimal.valueOf(transaction.getAmount()));
+        transaction.setAccountBalance(currentBalance.doubleValue());
     }
+
+    @Override
+    public RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
+        RawCashTransaction transaction = new RawCashTransaction();
+        transaction.amount = parseAmountFrom(record);
+        transaction.date = parseDateFrom(record.get("Datum"));
+        transaction.accountNumber = (record.get("Rekening"));
+        transaction.contraAccountName = (record.get("Naam / Omschrijving"));
+        transaction.contraAccountNumber = (record.get("Tegenrekening"));
+        if (parserConfig.getDelimiter() == ';') {
+            transaction.accountBalance = BigDecimal.valueOf(getDoubleFrom(record.get("Saldo na mutatie")));
+        } else {
+            calculateBalanceAfterNEW(transaction);
+        }
+        transaction.description = (record.get("Mededelingen"));
+        return transaction;
+    }
+
+    private BigDecimal parseAmountFrom(CSVRecord record) {
+        String plusOrMinus = record.get("Af Bij").equals("Af") ? "-" : "+";
+        String amountString = plusOrMinus + record.get("Bedrag (EUR)");
+        return BigDecimal.valueOf(getDoubleFrom(amountString));
+    }
+
+    private void calculateBalanceAfterNEW(RawCashTransaction transaction) {
+        currentBalance = currentBalance.add(transaction.amount);
+        transaction.accountBalance = currentBalance;
+    }
+
 }

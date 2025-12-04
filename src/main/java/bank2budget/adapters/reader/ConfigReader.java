@@ -1,17 +1,15 @@
 package bank2budget.adapters.reader;
 
 import bank2budget.AppPaths;
-import bank2budget.Launcher;
 import bank2budget.core.Config;
-import bank2budget.core.Rule;
+import bank2budget.core.budget.BudgetTemplate;
+import bank2budget.core.rule.RuleConfig;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -33,12 +31,13 @@ public class ConfigReader {
         this.paths = paths;
         Map<String, String> myAccounts = propertiesToMap(readProperties(paths.getMyAccountsFile()));
         Map<String, String> otherAccounts = propertiesToMap(readProperties(paths.getOtherAccountsFile()));
-        Collection<Rule> rules = new RuleReaderForJson(paths.getProcessingRulesFile().toFile()).read();
+        List<RuleConfig> ruleConfigs = new RuleReaderNew(paths.getProcessingRulesFile().toFile()).read();
         BudgetSettingsReader budgetSettingsReader = new BudgetSettingsReader(paths.getBudgetSettingsFile().toFile());
         budgetSettingsReader.read();
         int firstOfMonth = budgetSettingsReader.getFirstOfMonth();
-        Map<String, Double> budgetTemplate = budgetSettingsReader.getBudgetTemplate();
-        this.config = new Config(myAccounts, otherAccounts, rules, budgetTemplate, firstOfMonth);
+        Map<String, Double> budgetCategories = budgetSettingsReader.getBudgetTemplate();
+        BudgetTemplate budgetTemplate = new BudgetTemplateReader(paths.getBudgetTemplateFile()).read();
+        this.config = new Config(myAccounts, otherAccounts, ruleConfigs, budgetCategories, firstOfMonth, budgetTemplate);
     }
 
     public Config getConfig() {

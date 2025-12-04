@@ -1,12 +1,15 @@
 package bank2budget.core;
 
+import bank2budget.adapters.parser.RawCashTransaction;
 import bank2budget.core.CashTransaction;
 import bank2budget.core.CashTransaction.TransactionType;
 import bank2budget.adapters.parser.TransactionParser;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -67,7 +70,7 @@ public class CashTransactionTest {
         CashTransaction duplicate = new CashTransaction(transaction);
 
         boolean expected = true;
-        boolean result = transaction.equals(duplicate);
+        boolean result = CashTransactionDomainLogic.areSame(transaction, duplicate);
         assertEquals(expected, result);
 
         UtilTest.printResult(expected, result);
@@ -85,7 +88,7 @@ public class CashTransactionTest {
         duplicate.setCategory("Other category");
 
         boolean expected = true;
-        boolean result = transaction.equals(duplicate);
+        boolean result = CashTransactionDomainLogic.areSame(transaction, duplicate);
         assertEquals(expected, result);
 
         UtilTest.printResult(expected, result);
@@ -104,7 +107,7 @@ public class CashTransactionTest {
         duplicate.setLastOfDay(false);
 
         boolean expected = true;
-        boolean result = transaction.equals(duplicate);
+        boolean result = CashTransactionDomainLogic.areSame(transaction, duplicate);
         assertEquals(expected, result);
 
         UtilTest.printResult(expected, result);
@@ -132,30 +135,34 @@ public class CashTransactionTest {
     }
 
     private static List<CashTransaction> generateTransactionforEachDate(String account, List<LocalDate> dates, String category, Double amount) {
-        List<CashTransaction> transactions = new ArrayList<>();
+        List<RawCashTransaction> transactions = new ArrayList<>();
         for (LocalDate date : dates) {
-            CashTransaction transaction = CashTransactionTest.generateOneTransaction(account, date, category, amount);
+            RawCashTransaction transaction = CashTransactionTest.generateOneRawTransaction(account, date, category, amount);
             transactions.add(transaction);
         }
         TransactionParser.generateTransactionNumberAndDeriveLastOfDay(transactions);
-        return transactions;
+        return transactions.stream().map(RawCashTransaction::toCashTransaction).collect(Collectors.toCollection(ArrayList::new));
     }
 
     public static CashTransaction generateOneTransaction(String account, LocalDate date, String category, Double amount) {
-        CashTransaction transaction = new CashTransaction();
-        transaction.setAccountNumber(account);
-        transaction.setAccountName(account);
-        transaction.setDate(date);
-        transaction.setCategory(category);
-        transaction.setAccountBalance(0);
+        return generateOneRawTransaction(account, date, category, amount).toCashTransaction();
+    }
+
+    public static RawCashTransaction generateOneRawTransaction(String account, LocalDate date, String category, Double amount) {
+        RawCashTransaction raw = new RawCashTransaction();
+        raw.accountNumber = account;
+        raw.accountName = account;
+        raw.date = date;
+        raw.category = category;
+        raw.accountBalance = BigDecimal.ZERO;
         if (amount == null) {
-            transaction.setAmount(Math.floor(ThreadLocalRandom.current().nextDouble(-100, 100) * 100) / 100);
+            raw.amount = BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(-100, 100));
         } else {
-            transaction.setAmount(amount);
+            raw.amount = BigDecimal.valueOf(amount);
         }
         int expenditure = ThreadLocalRandom.current().nextInt(0, SAMPLE_EXPENDITURES.length - 1);
-        transaction.setContraAccountName(SAMPLE_EXPENDITURES[expenditure]);
-        return transaction;
+        raw.contraAccountName = SAMPLE_EXPENDITURES[expenditure];
+        return raw;
     }
 
     private static final String[] SAMPLE_EXPENDITURES = {

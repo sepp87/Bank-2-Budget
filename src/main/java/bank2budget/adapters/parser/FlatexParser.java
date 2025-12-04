@@ -1,6 +1,7 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.core.CashTransaction;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.Collections;
@@ -10,7 +11,7 @@ import org.apache.commons.csv.CSVRecord;
 
 public class FlatexParser extends TransactionParser {
 
-    private double currentBalance = 0;
+    private BigDecimal currentBalance = BigDecimal.ZERO;
     private String accountNumber;
 
     public FlatexParser(ParserConfig config) {
@@ -53,30 +54,27 @@ public class FlatexParser extends TransactionParser {
         return transactionRecords;
     }
 
-    @Override
-    public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
-        CashTransaction transaction = new CashTransaction();
-        transaction.setAccountNumber(accountNumber);
-        transaction.setAccountName(record.get("Konto"));
-        transaction.setContraAccountNumber(record.get("IBAN / Kontonummer"));
-        transaction.setAmount(getDoubleFrom(record.get("Betrag")));
-        transaction.setDescription(record.get("Buchungsinformationen"));
-        transaction.setOriginalRecord(record.toMap().values());
-        parseDateFrom(record.get("Buchtag"), transaction);
-        calculateBalanceAfter(transaction);
-        return transaction;
-    }
-
-    private void calculateBalanceAfter(CashTransaction transaction) {
-        double newBalance = currentBalance + transaction.getAmount();
-        currentBalance = (double) Math.round(newBalance * 100) / 100;
-        transaction.setAccountBalance(currentBalance);
-    }
-
     protected String getAccountNumberFrom(List<CSVRecord> allRecords) {
         String blz = "10130800";
         String konto = allRecords.get(1).get(8);
         return getGermanIban(blz, konto);
     }
 
+    @Override
+    public RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
+        RawCashTransaction transaction = new RawCashTransaction();
+        transaction.contraAccountNumber = (accountNumber);
+        transaction.accountName = (record.get("Konto"));
+        transaction.contraAccountNumber = (record.get("IBAN / Kontonummer"));
+        transaction.amount = BigDecimal.valueOf((getDoubleFrom(record.get("Betrag"))));
+        transaction.description = (record.get("Buchungsinformationen"));
+        transaction.date = parseDateFrom(record.get("Buchtag"));
+        calculateBalanceAfterNEW(transaction);
+        return transaction;
+    }
+
+    private void calculateBalanceAfterNEW(RawCashTransaction transaction) {
+        currentBalance = currentBalance.add(transaction.amount);
+        transaction.accountBalance = currentBalance;
+    }
 }

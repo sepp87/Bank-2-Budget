@@ -72,22 +72,23 @@ public abstract class TransactionParser {
     protected abstract CSVFormat getCsvFormat();
 
     protected List<CashTransaction> parseRecordsWith(CSVParser parser) throws IOException {
-        List<CashTransaction> transactions = new ArrayList<>();
+        List<RawCashTransaction> rawTransactions = new ArrayList<>();
         List<CSVRecord> records = parser.getRecords();
         List<CSVRecord> transactionRecords = getTransactionRecordsFrom(records);
         for (var record : transactionRecords) {
             try {
-                CashTransaction transaction = parseCashTransactionFrom(record);
-                if (transaction == null) {
+                RawCashTransaction raw = parseCashTransactionFromNEW(record);
+                if (raw == null) {
                     continue;
                 }
-                setAccountInstitutionAndFileOrigin(transaction);
-                transactions.add(transaction);
+                setAccountInstitutionAndFileOrigin(raw);
+                rawTransactions.add(raw);
             } catch (ParseException ex) {
                 LOGGER.log(Level.WARNING, "Record skipped due to inccorrect values. {0}", ex.getMessage());
             }
         }
-        generateTransactionNumberAndDeriveLastOfDay(transactions);
+        generateTransactionNumberAndDeriveLastOfDay(rawTransactions);
+        List<CashTransaction> transactions = rawTransactions.stream().map(RawCashTransaction::toCashTransaction).toList();
         return transactions;
     }
 
@@ -110,11 +111,11 @@ public abstract class TransactionParser {
      * @return the newly created CashTransaction
      * @throws ParseException
      */
-    protected abstract CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException;
+    protected abstract RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException;
 
-    protected void setAccountInstitutionAndFileOrigin(CashTransaction transaction) {
-        transaction.setAccountInstitution(parserConfig.getCreditInstitution());
-        transaction.setFileOrigin(parserConfig.getFile());
+    protected void setAccountInstitutionAndFileOrigin(RawCashTransaction transaction) {
+        transaction.accountInstitution = (parserConfig.getCreditInstitution());
+//        transaction.setFileOrigin(parserConfig.getFile());
     }
 
     /**
@@ -124,7 +125,7 @@ public abstract class TransactionParser {
      *
      * @param transactions list sorted by date ascending
      */
-    public static void generateTransactionNumberAndDeriveLastOfDay(List<CashTransaction> transactions) {
+    public static void generateTransactionNumberAndDeriveLastOfDay(List<RawCashTransaction> transactions) {
         generateTransactionNumberAndDeriveLastOfDay(transactions, false);
     }
 
@@ -137,22 +138,22 @@ public abstract class TransactionParser {
      * @param deriveLastOfDayOnly should be set to false if transactionNumber
      * and positionOfDay are not yet generated
      */
-    private static void generateTransactionNumberAndDeriveLastOfDay(List<CashTransaction> transactions, boolean deriveLastOfDayOnly) {
-        Map<String, CashTransaction> lastTransactionOfDateMap = new TreeMap<>();
+    private static void generateTransactionNumberAndDeriveLastOfDay(List<RawCashTransaction> transactions, boolean deriveLastOfDayOnly) {
+        Map<String, RawCashTransaction> lastTransactionOfDateMap = new TreeMap<>();
 
-        for (CashTransaction transaction : transactions) {
-            int uuMMdd = Integer.parseInt(transaction.getDate().format(DateTimeFormatter.ofPattern("uuMMdd")));
-            String key = transaction.getAccountNumber() + transaction.getAccountName() + uuMMdd;
+        for (RawCashTransaction transaction : transactions) {
+            int uuMMdd = Integer.parseInt(transaction.date.format(DateTimeFormatter.ofPattern("uuMMdd")));
+            String key = transaction.accountNumber + transaction.accountName + uuMMdd;
             int positionOfDay = 1;
             if (lastTransactionOfDateMap.containsKey(key)) {
-                CashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
+                RawCashTransaction lastTransaction = lastTransactionOfDateMap.get(key);
                 if (deriveLastOfDayOnly) {
                     // in case the list is not sorted by date e.g. the transactions spreadsheet was resorted
-                    if (transaction.getPositionOfDay() > lastTransaction.getPositionOfDay()) {
+                    if (transaction.positionOfDay > lastTransaction.positionOfDay) {
                         lastTransactionOfDateMap.put(key, transaction);
                     }
                 } else {
-                    positionOfDay = lastTransaction.getPositionOfDay() + 1;
+                    positionOfDay = lastTransaction.positionOfDay + 1;
                     lastTransactionOfDateMap.put(key, transaction);
                 }
 
@@ -162,13 +163,13 @@ public abstract class TransactionParser {
 
             if (!deriveLastOfDayOnly) {
                 int number = uuMMdd * 1000 + positionOfDay;
-                transaction.setTransactionNumber(number);
-                transaction.setPositionOfDay(positionOfDay);
+                transaction.transactionNumber = number;
+                transaction.positionOfDay = positionOfDay;
             }
 
         }
-        for (CashTransaction transaction : lastTransactionOfDateMap.values()) {
-            transaction.setLastOfDay(true);
+        for (RawCashTransaction transaction : lastTransactionOfDateMap.values()) {
+            transaction.lastOfDay = true;
         }
     }
 
@@ -178,7 +179,7 @@ public abstract class TransactionParser {
      *
      * @param transactions unsorted list of transactions
      */
-    public static void deriveLastOfDay(List<CashTransaction> transactions) {
+    public static void deriveLastOfDay(List<RawCashTransaction> transactions) {
         generateTransactionNumberAndDeriveLastOfDay(transactions, true);
     }
 
@@ -191,9 +192,9 @@ public abstract class TransactionParser {
         return Double.parseDouble(cleanNumberString);
     }
 
-    protected void parseDateFrom(String date, CashTransaction transaction) throws ParseException {
+    protected static LocalDate parseDateFrom(String date) throws ParseException {
         String isoDate = Util.getDateIsoFormattedFrom(date);
-        transaction.setDate(LocalDate.parse(isoDate));
+        return LocalDate.parse(isoDate);
     }
 
     // https://www.sparkonto.org/manuelles-berechnen-der-iban-pruefziffer-sepa/

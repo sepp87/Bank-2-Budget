@@ -48,6 +48,7 @@ public class BudgetView extends AnchorPane {
         this.app = app;
         this.budget = app.getBudgetService().getBudget();
 
+
         // Build header
         this.currentMonth = new Label("January 2026");
 

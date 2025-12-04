@@ -1,6 +1,6 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +12,7 @@ import org.apache.commons.csv.CSVRecord;
 //TODO
 public class SparkasseParser extends TransactionParser {
 
-    private double currentBalance = 0;
+    private BigDecimal currentBalance = BigDecimal.ZERO;
 
     public SparkasseParser(ParserConfig config) {
         super(config);
@@ -43,38 +43,20 @@ public class SparkasseParser extends TransactionParser {
         return allRecords;
     }
 
-    
-    private double calculateBalanceDeltaFrom(List<CSVRecord> allRecords) {
-        double delta = 0;
+    private BigDecimal calculateBalanceDeltaFrom(List<CSVRecord> allRecords) {
+        BigDecimal delta = BigDecimal.ONE;
         for (CSVRecord record : allRecords) {
             if (isNotProcessedByBank(record)) {
                 continue;
             }
-            delta -= getDoubleFrom(record.get("Betrag"));
+            BigDecimal amount = BigDecimal.valueOf(getDoubleFrom(record.get("Betrag")));
+            delta = delta.min(amount);
         }
         return delta;
     }
-    
+
     private boolean isNotProcessedByBank(CSVRecord record) {
         return record.get("Info").equals("Umsatz vorgemerkt");
-    }
-
-    @Override
-    public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
-        CashTransaction transaction = new CashTransaction();
-        if (isNotProcessedByBank(record)) {
-            Logger.getLogger(SparkasseParser.class.getName()).log(Level.WARNING, "Record skipped since value date was left open, meaning the cash transaction was NOT yet processed by the bank.");
-            return null;
-        }
-        transaction.setAccountNumber(record.get("Auftragskonto"));
-        transaction.setContraAccountName(record.get("Beguenstigter/Zahlungspflichtiger"));
-        transaction.setContraAccountNumber(getContraAccountNumberFrom(record));
-        transaction.setAmount(getDoubleFrom(record.get("Betrag")));
-        transaction.setDescription(record.get("Verwendungszweck"));
-        transaction.setOriginalRecord(record.toMap().values());
-        parseDateFrom(record.get("Buchungstag"), transaction);
-        calculateBalanceAfter(transaction);
-        return transaction;
     }
 
     private String getContraAccountNumberFrom(CSVRecord record) {
@@ -87,9 +69,26 @@ public class SparkasseParser extends TransactionParser {
         return contraAccountNumber;
     }
 
-    private void calculateBalanceAfter(CashTransaction transaction) {
-        double newBalance = currentBalance + transaction.getAmount();
-        currentBalance = (double) Math.round(newBalance * 100) / 100;
-        transaction.setAccountBalance(currentBalance);
+    @Override
+    public RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
+        RawCashTransaction transaction = new RawCashTransaction();
+        if (isNotProcessedByBank(record)) {
+            Logger.getLogger(SparkasseParser.class.getName()).log(Level.WARNING, "Record skipped since value date was left open, meaning the cash transaction was NOT yet processed by the bank.");
+            return null;
+        }
+        transaction.contraAccountNumber = (record.get("Auftragskonto"));
+        transaction.contraAccountName = (record.get("Beguenstigter/Zahlungspflichtiger"));
+        transaction.contraAccountNumber = (getContraAccountNumberFrom(record));
+        transaction.amount = BigDecimal.valueOf(getDoubleFrom(record.get("Betrag")));
+        transaction.description = (record.get("Verwendungszweck"));
+        transaction.date = parseDateFrom(record.get("Buchungstag"));
+        calculateBalanceAfterNEW(transaction);
+        return transaction;
     }
+
+    private void calculateBalanceAfterNEW(RawCashTransaction transaction) {
+        currentBalance = currentBalance.add(transaction.amount);
+        transaction.accountBalance = currentBalance;
+    }
+
 }

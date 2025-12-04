@@ -2,6 +2,7 @@ package bank2budget.adapters.parser;
 
 import bank2budget.core.CashTransaction;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,13 +45,13 @@ public class ComdirectParser extends TransactionParser {
     }
 
     @Override
-    protected CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
+    protected RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     protected List<CashTransaction> parseRecordsWith(CSVParser parser) throws IOException {
-        List<CashTransaction> transactions = new ArrayList<>();
+        List<RawCashTransaction> rtx = new ArrayList<>();
         List<CSVRecord> records = parser.getRecords();
         List<Batch> batches = new ArrayList<>();
         int i = 0;
@@ -62,7 +63,7 @@ public class ComdirectParser extends TransactionParser {
                 String startingBalance = record.get(1);
                 Batch batch = new Batch();
                 batch.accountName = getAccountNameFrom(titleRecord);
-                batch.currentBalance = getDoubleFrom(startingBalance);
+                batch.currentBalance = BigDecimal.valueOf(getDoubleFrom(startingBalance));
                 batch.transactionRecords = records.subList(batchStart, batchEnd);
                 batches.add(batch);
                 batchStart = getNextBatchStart(i);
@@ -71,9 +72,9 @@ public class ComdirectParser extends TransactionParser {
         }
         for (var batch : batches) {
             Collections.reverse(batch.transactionRecords);
-            transactions.addAll(batch.parse());
+            rtx.addAll(batch.parseNEW());
         }
-        return transactions;
+        return rtx.stream().map(RawCashTransaction::toCashTransaction).toList();
     }
 
     private boolean isStartingBalanceRecord(CSVRecord record) {
@@ -90,7 +91,7 @@ public class ComdirectParser extends TransactionParser {
 
     private class Batch {
 
-        private double currentBalance;
+        private BigDecimal currentBalance;
         private String accountName;
         List<CSVRecord> transactionRecords;
 
@@ -98,11 +99,11 @@ public class ComdirectParser extends TransactionParser {
             transactionRecords = new ArrayList<>();
         }
 
-        private List<CashTransaction> parse() {
-            List<CashTransaction> transactions = new ArrayList<>();
+        private List<RawCashTransaction> parseNEW() {
+            List<RawCashTransaction> transactions = new ArrayList<>();
             for (var record : transactionRecords) {
                 try {
-                    CashTransaction transaction = parseCashTransactionFrom(record);
+                    RawCashTransaction transaction = parseCashTransactionFromNEW(record);
                     setAccountInstitutionAndFileOrigin(transaction);
                     transactions.add(transaction);
                 } catch (ParseException ex) {
@@ -112,33 +113,31 @@ public class ComdirectParser extends TransactionParser {
             return transactions;
         }
 
-        private CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
-            CashTransaction transaction = new CashTransaction();
-            transaction.setOriginalRecord(record.toMap().values());
-            transaction.setAccountName(accountName);
+        private RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
+            RawCashTransaction transaction = new RawCashTransaction();
+            transaction.accountName = accountName;
             if (accountName.equals("Visa-Karte (Kreditkarte)")) {
-                transaction.setAmount(getDoubleFrom(record.get(5)));
-                transaction.setDescription(record.get(4));
+                transaction.amount = BigDecimal.valueOf(getDoubleFrom(record.get(5)));
+                transaction.description = record.get(4);
 
             } else {
-                transaction.setAmount(getDoubleFrom(record.get("Umsatz in EUR")));
-                transaction.setDescription(record.get("Buchungstext"));
+                transaction.amount = BigDecimal.valueOf(getDoubleFrom(record.get("Umsatz in EUR")));
+                transaction.description = (record.get("Buchungstext"));
             }
-            parseDateFrom(record.get("Buchungstag"), transaction);
+            transaction.date = parseDateFrom(record.get("Buchungstag"));
             calculateBalanceAfter(transaction);
             filterContraAccountNameFromDescription(transaction);
             filterContraAccountNumberFromDescription(transaction);
             return transaction;
         }
 
-        private void calculateBalanceAfter(CashTransaction transaction) {
-            double newBalance = currentBalance + transaction.getAmount();
-            currentBalance = (double) Math.round(newBalance * 100) / 100;
-            transaction.setAccountBalance(currentBalance);
+        private void calculateBalanceAfter(RawCashTransaction transaction) {
+            currentBalance = currentBalance.add(transaction.amount);
+            transaction.accountBalance = currentBalance;
         }
 
-        private void filterContraAccountNameFromDescription(CashTransaction transaction) {
-            String description = transaction.getDescription();
+        private void filterContraAccountNameFromDescription(RawCashTransaction transaction) {
+            String description = transaction.description;
             if (description.contains(" Buchungstext:")) {
                 String name = description.substring(0, description.indexOf(" Buchungstext:"));
                 if (name.indexOf("Kto/IBAN:") > 0) {
@@ -146,12 +145,12 @@ public class ComdirectParser extends TransactionParser {
                 }
                 name = name.replace("Auftraggeber: ", "");
                 name = name.replace("Empfänger: ", "");
-                transaction.setContraAccountName(name);
+                transaction.contraAccountName = name;
             }
         }
 
-        private void filterContraAccountNumberFromDescription(CashTransaction transaction) {
-            String description = transaction.getDescription();
+        private void filterContraAccountNumberFromDescription(RawCashTransaction transaction) {
+            String description = transaction.description;
             int startOfAccountNumber = description.indexOf("Kto/IBAN: ") + 10;
             int endOfAccountNumber = description.indexOf(" BLZ/BIC: ");
             if (startOfAccountNumber == -1 + 10) {
@@ -161,7 +160,8 @@ public class ComdirectParser extends TransactionParser {
                 endOfAccountNumber = description.indexOf(" Buchungstext:");
             }
             String number = description.substring(startOfAccountNumber, endOfAccountNumber);
-            transaction.setContraAccountNumber(number);
+            transaction.contraAccountNumber = number;
         }
+
     }
 }

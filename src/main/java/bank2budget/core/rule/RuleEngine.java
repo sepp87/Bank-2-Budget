@@ -1,6 +1,6 @@
-package bank2budget.core;
+package bank2budget.core.rule;
 
-import java.util.Collection;
+import bank2budget.core.CashTransaction;
 import java.util.List;
 import java.util.Map;
 
@@ -8,24 +8,27 @@ import java.util.Map;
  *
  * @author joostmeulenkamp
  */
-public class RuleEngine {
+public class RuleEngine<T> {
 
-    private final Collection<Rule> rules;
+    private final List<Rule<T>> rules;
     private final Map<String, String> myAccounts;
     private final Map<String, String> otherAccounts;
 
-    public RuleEngine(Collection<Rule> rules, Map<String, String> myAccounts, Map<String, String> otherAccounts) {
+    public RuleEngine(List<Rule<T>> rules, Map<String, String> myAccounts, Map<String, String> otherAccounts) {
         this.rules = rules;
         this.myAccounts = myAccounts;
         this.otherAccounts = otherAccounts;
     }
 
-    // apply rules 
-    public void applyRules(List<CashTransaction> transactions) {
-        for (CashTransaction t : transactions) {
-            for (Rule rule : rules) {
-                rule.process(t);
-            }
+    public void applyRules(List<T> transactions) {
+        for (T transaction : transactions) {
+            applyRules(transaction);
+        }
+    }
+
+    public void applyRules(T transaction) {
+        for (Rule<T> rule : rules) {
+            rule.apply(transaction);
         }
     }
 
@@ -101,5 +104,4 @@ public class RuleEngine {
             t.setInternal(internal);
         }
     }
-
 }

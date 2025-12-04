@@ -9,7 +9,7 @@ import bank2budget.ports.BudgetRepositoryPort;
  *
  * @author joostmeulenkamp
  */
-public class BudgetXlsxRepository implements BudgetRepositoryPort {
+public class BudgetXlsxRepository implements BudgetRepositoryPort<MultiAccountBudget> {
 
     private final BudgetReaderForXlsx reader;
     private final BudgetWriterForXlsx writer;

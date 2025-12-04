@@ -95,6 +95,10 @@ public final class AppPaths {
         return resolve(CONFIG_DIRECTORY, "budget-settings.txt");
     }
 
+    public Path getBudgetTemplateFile() {
+        return resolve(CONFIG_DIRECTORY, "budget-template.txt");
+    }
+
     // Input files
     public Path getTodoDirectory() {
         return resolve(TODO_DIRECTORY);
@@ -125,6 +129,10 @@ public final class AppPaths {
 
     public Path getBudgetFile() {
         return resolve(DONE_DIRECTORY, "budget.xlsx");
+    }
+
+    public Path getBudgetFileNew() {
+        return resolve(DONE_DIRECTORY, "budget-new.xlsx");
     }
 
     public Path getDatabaseFile() {

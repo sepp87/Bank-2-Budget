@@ -6,9 +6,9 @@ import bank2budget.core.MultiAccountBudget;
  *
  * @author joostmeulenkamp
  */
-public interface BudgetRepositoryPort {
+public interface BudgetRepositoryPort<T> {
     
-    MultiAccountBudget load();
+    T load();
     
-    void save(MultiAccountBudget budget);
+    void save(T budget);
 }

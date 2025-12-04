@@ -1,10 +1,9 @@
 package bank2budget.application;
 
-import bank2budget.adapters.repository.AnalyticsDatabase;
 import bank2budget.core.Account;
 import bank2budget.core.CashTransaction;
 import bank2budget.core.IntegrityChecker;
-import bank2budget.core.RuleEngine;
+import bank2budget.core.rule.RuleEngine;
 import bank2budget.ports.AccountRepositoryPort;
 import bank2budget.ports.AccountImporterPort;
 import java.io.File;
@@ -24,10 +23,10 @@ public class AccountService {
 
     private final AccountRepositoryPort repository;
     private final AccountImporterPort importer;
-    private final RuleEngine ruleEngine;
+    private final RuleEngine<CashTransaction> ruleEngine;
     private final Map<String, Account> accountsIndex;
 
-    public AccountService(AccountRepositoryPort repository, AccountImporterPort importer, RuleEngine ruleEngine) {
+    public AccountService(AccountRepositoryPort repository, AccountImporterPort importer, RuleEngine<CashTransaction> ruleEngine) {
         this.repository = repository;
         this.importer = importer;
         this.ruleEngine = ruleEngine;

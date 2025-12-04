@@ -1,6 +1,7 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.core.CashTransaction;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +37,7 @@ public class GlsParser2022 extends TransactionParser {
             "Glaeubiger ID",
             "Mandatsreferenz"
         };
-        
+
         return CSVFormat.DEFAULT.withDelimiter(parserConfig.getDelimiter()).withFirstRecordAsHeader();
     }
 
@@ -47,16 +48,15 @@ public class GlsParser2022 extends TransactionParser {
     }
 
     @Override
-    public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
-        CashTransaction transaction = new CashTransaction();
-        transaction.setAccountNumber(record.get("IBAN Auftragskonto"));
-        transaction.setContraAccountName(record.get("Name Zahlungsbeteiligter"));
-        transaction.setContraAccountNumber(record.get("IBAN Zahlungsbeteiligter"));
-        transaction.setAmount(getDoubleFrom(record.get("Betrag")));
-        transaction.setAccountBalance(getDoubleFrom(record.get("Saldo nach Buchung")));
-        transaction.setDescription(record.get("Verwendungszweck"));
-        transaction.setOriginalRecord(record.toMap().values());
-        parseDateFrom(record.get("Buchungstag"), transaction);
+    public RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
+        RawCashTransaction transaction = new RawCashTransaction();
+        transaction.accountNumber = (record.get("IBAN Auftragskonto"));
+        transaction.contraAccountName = (record.get("Name Zahlungsbeteiligter"));
+        transaction.contraAccountNumber = (record.get("IBAN Zahlungsbeteiligter"));
+        transaction.amount =BigDecimal.valueOf(getDoubleFrom(record.get("Betrag")));
+        transaction.accountBalance = BigDecimal.valueOf(getDoubleFrom(record.get("Saldo nach Buchung")));
+        transaction.description = (record.get("Verwendungszweck"));
+        transaction.date = parseDateFrom(record.get("Buchungstag"));
         return transaction;
     }
 }

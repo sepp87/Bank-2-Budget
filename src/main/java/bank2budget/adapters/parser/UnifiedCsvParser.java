@@ -1,6 +1,7 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.core.CashTransaction;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.List;
 import org.apache.commons.csv.CSVFormat;
@@ -29,17 +30,16 @@ public class UnifiedCsvParser extends TransactionParser {
     }
 
     @Override
-    public CashTransaction parseCashTransactionFrom(CSVRecord record) throws ParseException {
-        CashTransaction transaction = new CashTransaction();
-        transaction.setAccountNumber(record.get("accountNumber"));
-        transaction.setContraAccountName(record.get("contraAccountName"));
-        transaction.setContraAccountNumber(record.get("contraAccountNumber"));
-        transaction.setAmount(getDoubleFrom(record.get("amount")));
-        transaction.setAccountBalance(getDoubleFrom(record.get("accountBalance")));
-        transaction.setTransactionNumber(Integer.parseInt(record.get("transactionNumber")));
-        transaction.setDescription(record.get("description"));
-        transaction.setOriginalRecord(record.toMap().values());
-        parseDateFrom(record.get("date"), transaction);
+    public RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
+        RawCashTransaction transaction = new RawCashTransaction();
+        transaction.accountNumber = (record.get("accountNumber"));
+        transaction.contraAccountName = (record.get("contraAccountName"));
+        transaction.contraAccountNumber = (record.get("contraAccountNumber"));
+        transaction.amount =BigDecimal.valueOf(getDoubleFrom(record.get("amount")));
+        transaction.accountBalance = BigDecimal.valueOf(getDoubleFrom(record.get("accountBalance")));
+        transaction.transactionNumber = (Integer.parseInt(record.get("transactionNumber")));
+        transaction.description = (record.get("description"));
+        transaction.date = parseDateFrom(record.get("date"));
         return transaction;
     }
 

@@ -6,6 +6,44 @@ package bank2budget;
  */
 public class Notes {
     
+    // Refactoring notes - TransactionRecord and RawTransactionRow
+    // IntegrityChecker - FileOrigin is null and can't be used by integritychecker anymore
+    // Rules - can rules use transaction record?
+    
+    // Account.merge
+    // inserting new set of incomplete transactions in the middle, leads to merge with incomplete set
+    // [ old ]  [empty]  [ old ] 
+    // [ old ]  [ new ]  [ old ] 
+    
+    // [2,2,1]  [0,0,0]  [2,2,1]
+    // [2,2,1]  [2,2,1]  [2,2,1]
+    
+    
+    //     [     ]      ---> overlap of three days
+    //     [2,2,1]      ---> new set contains 5 transactions
+    // [2,2,1] [2,2,1]  ---> existing contains 3 transactions
+    //     [ ]          ---> new set should be preferred
+    //         [ ]      ---> existing should be preferred 
+    
+    
+    
+    // Budget CLI mode
+    
+    // Budget UI mode
+    // Open app
+    // - load budget template
+    // - load budget
+    // View dashboard
+    // - goal: inspect current status
+    // - view planned vs actual per category
+    // - inspect transactions of category
+    // - shift money between goals/deficits/buffers 
+    // - synonyms for shifting: allocate / adjust / correct / shift / rebalance 
+    // - categorize transactions
+    
+    // LastOfDay
+    // AccountReader takes directly from Excel, what if changed? however, what if accountnumber is changed.
+    
     // BalanceCalculator
     // Takes accounts
     // Filter only last transaction of day
