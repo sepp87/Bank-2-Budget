@@ -22,7 +22,7 @@ public class CashTransactionDomainLogic {
      * @param b
      * @return
      */
-    public static boolean areSame(CashTransaction a, CashTransaction b) {
+    public static boolean areSame(Transaction a, Transaction b) {
         Set<Boolean> result = new HashSet<>();
         
         result.add(a.amount().compareTo(b.amount()) == 0);

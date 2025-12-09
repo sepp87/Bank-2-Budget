@@ -1,11 +1,11 @@
 package bank2budget.core;
 
 import bank2budget.adapters.parser.RawCashTransaction;
-import bank2budget.core.CashTransaction;
 import bank2budget.adapters.parser.TransactionParser;
 import bank2budget.core.Transaction.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -32,7 +32,7 @@ public class CashTransactionTest {
     public void testSetAmount_WhenAmountNegative_ThenTransactionTypeDebit() {
         System.out.println("testSetAmount_WhenAmountNegative_ThenTransactionTypeDebit");
 
-        CashTransaction transaction = new CashTransaction(new TransactionBuilder().amount(BigDecimal.valueOf(-10.)).build());
+        var transaction = new TransactionBuilder().amount(BigDecimal.valueOf(-10.)).build();
 
         TransactionType expected = TransactionType.DEBIT;
         TransactionType result = transaction.transactionType();
@@ -48,7 +48,7 @@ public class CashTransactionTest {
     public void testSetAmount_WhenAmountPositive_ThenTransactionTypeCredit() {
         System.out.println("testSetAmount_WhenAmountPositive_ThenTransactionTypeCredit");
 
-        CashTransaction transaction = new CashTransaction(new TransactionBuilder().amount(BigDecimal.valueOf(10.)).build());
+        var transaction = new TransactionBuilder().amount(BigDecimal.valueOf(10.)).build();
 
         TransactionType expected = TransactionType.CREDIT;
         TransactionType result = transaction.transactionType();
@@ -64,11 +64,11 @@ public class CashTransactionTest {
     public void testEquals_WhenExactlyTheSame_ThenReturnTrue() {
         System.out.println("testEquals_WhenExactlyTheSame_ThenReturnTrue");
 
-        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some category", null);
-        CashTransaction duplicate = new CashTransaction(transaction);
+        var tx = newTx("2025-01-01", 1, true, 10, 10, "abc", "def", "Some category");
+        var ty = newTx("2025-01-01", 1, true, 10, 10, "abc", "def", "Some category");
 
         boolean expected = true;
-        boolean result = CashTransactionDomainLogic.areSame(transaction, duplicate);
+        boolean result = CashTransactionDomainLogic.areSame(tx, ty);
         assertEquals(expected, result);
 
         UtilTest.printResult(expected, result);
@@ -81,12 +81,11 @@ public class CashTransactionTest {
     public void testEquals_WhenCategoriesDiffer_ThenReturnTrue() {
         System.out.println("testEquals_WhenCategoriesDiffer_ThenReturnTrue");
 
-        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some category", null);
-        CashTransaction duplicate = new CashTransaction(transaction);
-        duplicate.setCategory("Other category");
+        var tx = newTx("2025-01-01", 1, true, 10, 10, "abc", "def", "Some category");
+        var ty = tx.withCategory("Other category");
 
         boolean expected = true;
-        boolean result = CashTransactionDomainLogic.areSame(transaction, duplicate);
+        boolean result = CashTransactionDomainLogic.areSame(tx, ty);
         assertEquals(expected, result);
 
         UtilTest.printResult(expected, result);
@@ -99,54 +98,54 @@ public class CashTransactionTest {
     public void testEquals_WhenLastOfDaysDiffer_ThenReturnTrue() {
         System.out.println("testEquals_WhenLastOfDaysDiffer_ThenReturnTrue");
 
-        CashTransaction transaction = generateOneTransaction("abc", LocalDate.now(), "Some category", null);
-        transaction.setLastOfDay(true);
-        CashTransaction duplicate = new CashTransaction(transaction);
-        duplicate.setLastOfDay(false);
+        var tx = newTx("2025-01-01", 1, true, 10, 10, "abc", "def", "Some category");
+        var ty = tx.withLastOfDay(false);
 
         boolean expected = true;
-        boolean result = CashTransactionDomainLogic.areSame(transaction, duplicate);
+        boolean result = CashTransactionDomainLogic.areSame(tx, ty);
         assertEquals(expected, result);
 
         UtilTest.printResult(expected, result);
     }
 
-    public static List<CashTransaction> generateTransactionsForAccountWithinTimespan(String account, LocalDate from, LocalDate to, String category) {
-        return generateTransactionsForAccountWithinTimespan(account, from, to, category, null);
+    public static CashTransaction newCtx(String isoDate, int positionOfDay, boolean lastOfDay, double amount, double balance, String account, String contraAccount, String category) {
+
+        Transaction transaction = newTx(isoDate, positionOfDay, lastOfDay, amount, balance, account, contraAccount, category);
+        CashTransaction ctx = new CashTransaction(transaction);
+
+        return ctx;
     }
 
-    public static List<CashTransaction> generateTransactionsForAccountWithinTimespan(String account, LocalDate from, LocalDate to, String category, Double amount) {
-        List<LocalDate> dates = generateDatesForTimespan(from, to);
-        List<CashTransaction> transactions = generateTransactionforEachDate(account, dates, category, amount);
-        return transactions;
+    public static Transaction newTx(String isoDate, int positionOfDay, boolean lastOfDay, double amount, double balance, String account, String contraAccount, String category) {
+        LocalDate date = LocalDate.parse(isoDate);
+        int txNumber = getTxNumber(date, positionOfDay);
+        Transaction.TransactionType txType = amount > 0 ? Transaction.TransactionType.CREDIT : Transaction.TransactionType.DEBIT;
+
+        return new Transaction(
+                txNumber,
+                date,
+                positionOfDay, // positionOfDay
+                lastOfDay, // lastOfDay
+                BigDecimal.valueOf(amount),
+                BigDecimal.valueOf(balance),
+                account, // accountNumber
+                account, // accountName
+                CreditInstitution.COMDIRECT,
+                contraAccount, // contraAccountNumber
+                contraAccount, // contraAccountName
+                false, // isInternal
+                txType,
+                null, // description
+                category,
+                null // notes
+        );
     }
 
-    private static List<LocalDate> generateDatesForTimespan(LocalDate from, LocalDate to) {
-        List<LocalDate> dates = new ArrayList<>();
-        LocalDate nextDate = from;
-        while (nextDate.isBefore(to)) {
-            dates.add(nextDate);
-            nextDate = nextDate.plusDays(1);
-        }
-        dates.add(to);
-        return dates;
+    private static int getTxNumber(LocalDate date, int positionOfDay) {
+        return Integer.parseInt(date.format(DateTimeFormatter.ofPattern("uuMMdd"))) * 1000 + positionOfDay;
     }
 
-    private static List<CashTransaction> generateTransactionforEachDate(String account, List<LocalDate> dates, String category, Double amount) {
-        List<RawCashTransaction> transactions = new ArrayList<>();
-        for (LocalDate date : dates) {
-            RawCashTransaction transaction = CashTransactionTest.generateOneRawTransaction(account, date, category, amount);
-            transactions.add(transaction);
-        }
-        TransactionParser.generateTransactionNumberAndDeriveLastOfDay(transactions);
-        return transactions.stream().map(RawCashTransaction::toCashTransaction).collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    public static CashTransaction generateOneTransaction(String account, LocalDate date, String category, Double amount) {
-        return generateOneRawTransaction(account, date, category, amount).toCashTransaction();
-    }
-
-    public static RawCashTransaction generateOneRawTransaction(String account, LocalDate date, String category, Double amount) {
+    public static RawCashTransaction newRtx(String account, LocalDate date, String category, Double amount) {
         RawCashTransaction raw = new RawCashTransaction();
         raw.accountNumber = account;
         raw.accountName = account;

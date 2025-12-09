@@ -51,7 +51,7 @@ public class AccountImporter implements AccountImporterPort {
 
         List<Account> result = new ArrayList<>();
         for (Entry<String, List<Transaction>> entry : transactionsByAccounts.entrySet()) {
-            Account account = new Account(entry.getKey(), entry.getValue(), null);
+            Account account = new Account(entry.getKey(), entry.getValue());
             result.add(account);
         }
         return result;

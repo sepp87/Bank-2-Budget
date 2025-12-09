@@ -15,17 +15,10 @@ public class Account {
     private final String accountNumber;
     private final TreeMap<Integer, CashTransaction> allTransactionsIndex = new TreeMap<>();
 
-    public Account(String accountNumber, List<Transaction> transactions, String dummy) {
+    public Account(String accountNumber, List<Transaction> transactions) {
         this.accountNumber = accountNumber;
         for (var t : transactions) {
             allTransactionsIndex.put(t.transactionNumber(), new CashTransaction(t));
-        }
-    }
-
-    public Account(String accountNumber, List<CashTransaction> transactions) {
-        this.accountNumber = accountNumber;
-        for (CashTransaction t : transactions) {
-            allTransactionsIndex.put(t.transactionNumber(), t);
         }
     }
 
@@ -137,7 +130,7 @@ public class Account {
             int number = incoming.transactionNumber();
             if (allTransactionsIndex.containsKey(number)) {
                 CashTransaction existing = allTransactionsIndex.get(number);
-                boolean isSame = CashTransactionDomainLogic.areSame(incoming, existing);
+                boolean isSame = CashTransactionDomainLogic.areSame(incoming.getTransaction(), existing.getTransaction());
                 if (isSame && incoming.category() != null && (existing.category() == null || overwriteCategories)) {
                     existing.setCategory(incoming.category());
 //                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});

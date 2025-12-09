@@ -1,9 +1,8 @@
 package bank2budget.core.budget;
 
 import bank2budget.core.Account;
-import bank2budget.core.CashTransaction;
 import bank2budget.core.UtilTest;
-import static bank2budget.core.AccountTest.newCtx;
+import static bank2budget.core.CashTransactionTest.newTx;
 import static bank2budget.core.budget.BudgetTest.groupTransactionsByAccount;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -33,12 +32,12 @@ public class BudgetMonthCategoryTest {
 
         Budget budget = new Budget();
 
-        List<CashTransaction> transactions = List.of(
-                newCtx("2024-01-01", 1, true, -10, -10, "abc", "xyz", "GROCERIES"), // <--- first month
-                newCtx("2024-01-02", 1, true, -10, -20, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-03", 1, true, -10, -30, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-11", 1, true, -10, -40, "abc", "xyz", "GROCERIES"), // <--- second month
-                newCtx("2024-01-12", 1, true, -10, -50, "abc", "xyz", "GROCERIES")
+        var transactions = List.of(
+                newTx("2024-01-01", 1, true, -10, -10, "abc", "xyz", "GROCERIES"), // <--- first month
+                newTx("2024-01-02", 1, true, -10, -20, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-03", 1, true, -10, -30, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-11", 1, true, -10, -40, "abc", "xyz", "GROCERIES"), // <--- second month
+                newTx("2024-01-12", 1, true, -10, -50, "abc", "xyz", "GROCERIES")
         );
         Collection<Account> accounts = groupTransactionsByAccount(transactions);
 
@@ -72,12 +71,12 @@ public class BudgetMonthCategoryTest {
 
         Budget budget = new Budget();
 
-        List<CashTransaction> transactions = List.of( // <--- 5 * -10 = -50 
-                newCtx("2024-01-01", 1, true, -10, -10, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-02", 1, true, -10, -20, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-03", 1, true, -10, -30, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-11", 1, true, -10, -40, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-12", 1, true, -10, -50, "abc", "xyz", "GROCERIES")
+        var transactions = List.of( // <--- 5 * -10 = -50 
+                newTx("2024-01-01", 1, true, -10, -10, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-02", 1, true, -10, -20, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-03", 1, true, -10, -30, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-11", 1, true, -10, -40, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-12", 1, true, -10, -50, "abc", "xyz", "GROCERIES")
         );
         Collection<Account> accounts = groupTransactionsByAccount(transactions);
 
@@ -107,13 +106,13 @@ public class BudgetMonthCategoryTest {
 
         Budget budget = new Budget();
 
-        List<CashTransaction> transactions = List.of( // <--- 5 * -10 = -50 
-                newCtx("2024-01-01", 1, true, -10, -10, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-02", 1, true, -10, -20, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-03", 1, true, -10, -30, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-11", 1, true, -10, -40, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-12", 1, true, -10, -50, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-02-01", 1, true, 0.0, -50, "abc", "xyz", "GROCERIES") // <--- Transaction without an expense, so a monthly budget for february is generated
+        var transactions = List.of( // <--- 5 * -10 = -50 
+                newTx("2024-01-01", 1, true, -10, -10, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-02", 1, true, -10, -20, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-03", 1, true, -10, -30, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-11", 1, true, -10, -40, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-12", 1, true, -10, -50, "abc", "xyz", "GROCERIES"),
+                newTx("2024-02-01", 1, true, 0.0, -50, "abc", "xyz", "GROCERIES") // <--- Transaction without an expense, so a monthly budget for february is generated
         );
         Collection<Account> accounts = groupTransactionsByAccount(transactions);
 
@@ -144,17 +143,17 @@ public class BudgetMonthCategoryTest {
 
         Budget budget = new Budget();
 
-        List<CashTransaction> transactions = List.of( // <--- 10 * -10 = -100 
-                newCtx("2024-01-01", 1, true, -10, -10, "abc", "xyz", "GROCERIES"), // <--- account abc
-                newCtx("2024-01-02", 1, true, -10, -20, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-03", 1, true, -10, -30, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-11", 1, true, -10, -40, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-12", 1, true, -10, -50, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-01", 1, true, -10, -10, "def", "uvw", "GROCERIES"), // <--- account def
-                newCtx("2024-01-02", 1, true, -10, -20, "def", "uvw", "GROCERIES"),
-                newCtx("2024-01-03", 1, true, -10, -30, "def", "uvw", "GROCERIES"),
-                newCtx("2024-01-11", 1, true, -10, -40, "def", "uvw", "GROCERIES"),
-                newCtx("2024-01-12", 1, true, -10, -50, "def", "uvw", "GROCERIES")
+        var transactions = List.of( // <--- 10 * -10 = -100 
+                newTx("2024-01-01", 1, true, -10, -10, "abc", "xyz", "GROCERIES"), // <--- account abc
+                newTx("2024-01-02", 1, true, -10, -20, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-03", 1, true, -10, -30, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-11", 1, true, -10, -40, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-12", 1, true, -10, -50, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-01", 1, true, -10, -10, "def", "uvw", "GROCERIES"), // <--- account def
+                newTx("2024-01-02", 1, true, -10, -20, "def", "uvw", "GROCERIES"),
+                newTx("2024-01-03", 1, true, -10, -30, "def", "uvw", "GROCERIES"),
+                newTx("2024-01-11", 1, true, -10, -40, "def", "uvw", "GROCERIES"),
+                newTx("2024-01-12", 1, true, -10, -50, "def", "uvw", "GROCERIES")
         );
         Collection<Account> accounts = groupTransactionsByAccount(transactions);
 
@@ -184,18 +183,18 @@ public class BudgetMonthCategoryTest {
 
         Budget budget = new Budget();
 
-        List<CashTransaction> transactions = List.of( // <--- 10 * -10 = -100 
-                newCtx("2024-01-01", 1, true, -10, -10, "abc", "xyz", "GROCERIES"), // <--- account abc
-                newCtx("2024-01-02", 1, true, -10, -20, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-03", 1, true, -10, -30, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-11", 1, true, -10, -40, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-12", 1, true, -10, -50, "abc", "xyz", "GROCERIES"),
-                newCtx("2024-01-01", 1, true, -10, -10, "def", "uvw", "GROCERIES"), // <--- account def
-                newCtx("2024-01-02", 1, true, -10, -20, "def", "uvw", "GROCERIES"),
-                newCtx("2024-01-03", 1, true, -10, -30, "def", "uvw", "GROCERIES"),
-                newCtx("2024-01-11", 1, true, -10, -40, "def", "uvw", "GROCERIES"),
-                newCtx("2024-01-12", 1, true, -10, -50, "def", "uvw", "GROCERIES"),
-                newCtx("2024-02-01", 1, true, 0.0, -50, "abc", "xyz", "GROCERIES") // <--- Transaction without an expense, so a monthly budget for february is generated
+        var transactions = List.of( // <--- 10 * -10 = -100 
+                newTx("2024-01-01", 1, true, -10, -10, "abc", "xyz", "GROCERIES"), // <--- account abc
+                newTx("2024-01-02", 1, true, -10, -20, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-03", 1, true, -10, -30, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-11", 1, true, -10, -40, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-12", 1, true, -10, -50, "abc", "xyz", "GROCERIES"),
+                newTx("2024-01-01", 1, true, -10, -10, "def", "uvw", "GROCERIES"), // <--- account def
+                newTx("2024-01-02", 1, true, -10, -20, "def", "uvw", "GROCERIES"),
+                newTx("2024-01-03", 1, true, -10, -30, "def", "uvw", "GROCERIES"),
+                newTx("2024-01-11", 1, true, -10, -40, "def", "uvw", "GROCERIES"),
+                newTx("2024-01-12", 1, true, -10, -50, "def", "uvw", "GROCERIES"),
+                newTx("2024-02-01", 1, true, 0.0, -50, "abc", "xyz", "GROCERIES") // <--- Transaction without an expense, so a monthly budget for february is generated
         );
         Collection<Account> accounts = groupTransactionsByAccount(transactions);
 

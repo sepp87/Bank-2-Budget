@@ -1,6 +1,5 @@
 package bank2budget.adapters.reader;
 
-import bank2budget.core.CashTransaction;
 import bank2budget.core.CreditInstitution;
 import bank2budget.core.Account;
 import bank2budget.core.Transaction;
@@ -55,7 +54,7 @@ public class AccountReader {
                 Sheet sheet = workbook.getSheetAt(i);
                 String accountNumber = sheet.getSheetName();
                 List<Transaction> transactions = transactionsFromSheet(sheet);
-                accountMap.put(accountNumber, new Account(accountNumber, transactions, null));
+                accountMap.put(accountNumber, new Account(accountNumber, transactions));
             }
 
             return accountMap;

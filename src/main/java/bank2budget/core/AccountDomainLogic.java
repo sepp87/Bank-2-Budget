@@ -39,20 +39,5 @@ public class AccountDomainLogic {
         return result;
     }
 
-    public static List<CashTransaction> getTransactions(Collection<Account> accounts) {
-        List<CashTransaction> result = new ArrayList<>();
-        for (Account account : accounts) {
-            result.addAll(account.getAllTransactionsAscending());
-        }
-        return result;
-    }
-    
-    public static List<CashTransaction> getTransactions(Collection<Account> accounts, LocalDate from, LocalDate to) {
-        List<CashTransaction> result = new ArrayList<>();
-        for (Account account : accounts) {
-            var transactions = account.getTransactions(from, to);
-            result.addAll(transactions);
-        }
-        return result;
-    }
+
 }

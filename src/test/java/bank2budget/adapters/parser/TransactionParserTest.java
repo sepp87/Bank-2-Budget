@@ -88,7 +88,7 @@ public class TransactionParserTest {
         List<RawCashTransaction> list = new ArrayList<>();
         int i = 0;
         while (i < 10) {
-            RawCashTransaction transaction = CashTransactionTest.generateOneRawTransaction(account, date, null, null);
+            RawCashTransaction transaction = CashTransactionTest.newRtx(account, date, null, null);
             list.add(transaction);
             i++;
         }
