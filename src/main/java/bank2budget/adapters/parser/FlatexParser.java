@@ -1,6 +1,5 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
@@ -66,7 +65,7 @@ public class FlatexParser extends TransactionParser {
         transaction.contraAccountNumber = (accountNumber);
         transaction.accountName = (record.get("Konto"));
         transaction.contraAccountNumber = (record.get("IBAN / Kontonummer"));
-        transaction.amount = BigDecimal.valueOf((getDoubleFrom(record.get("Betrag"))));
+        transaction.amount = bigDecimalFromString(record.get("Betrag"));
         transaction.description = (record.get("Buchungsinformationen"));
         transaction.date = parseDateFrom(record.get("Buchtag"));
         calculateBalanceAfterNEW(transaction);

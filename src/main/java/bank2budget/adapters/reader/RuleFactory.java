@@ -18,9 +18,8 @@ public class RuleFactory {
 
     private final static Logger LOGGER = Logger.getLogger(CliAppRunner.class.getName());
 
-    private final static Map<String, Function<CashTransaction, String>> GETTERS = Map.of(
-            "description", CashTransaction::getDescription,
-            "contraAccountName", CashTransaction::getContraAccountName
+    private final static Map<String, Function<CashTransaction, String>> GETTERS = Map.of("description", CashTransaction::description,
+            "contraAccountName", CashTransaction::contraAccountName
     );
 
     private final static Map<String, BiConsumer<CashTransaction, String>> SETTERS = Map.of(
@@ -52,6 +51,51 @@ public class RuleFactory {
             setter.accept(transaction, config.resultValue());
             return transaction;
         };
+    }
+
+    private static Rule<CashTransaction> createInternalRule(Map<String, String> myAccounts) {
+
+        Predicate<CashTransaction> check = tx -> {
+            String number = tx.contraAccountNumber();
+            return number != null && myAccounts.containsKey(number);
+        };
+
+        Function<CashTransaction, CashTransaction> result = tx -> {
+            tx.setInternal(true);
+            return tx;
+        };
+
+        return new Rule<>(check, result);
+    }
+
+    private static Rule<CashTransaction> createOverwriteAccountNameRule(Map<String, String> myAccounts) {
+
+        Predicate<CashTransaction> check = tx -> {
+            String number = tx.accountNumber();
+            return number != null && myAccounts.containsKey(number);
+        };
+
+        Function<CashTransaction, CashTransaction> result = tx -> {
+            tx.setAccountName(myAccounts.get(tx.accountNumber()));
+            return tx;
+        };
+
+        return new Rule<>(check, result);
+    }
+
+    private static Rule<CashTransaction> createOverwriteContraAccountNameRule(Map<String, String> myAccounts) {
+
+        Predicate<CashTransaction> check = tx -> {
+            String number = tx.contraAccountNumber();
+            return number != null && myAccounts.containsKey(number);
+        };
+
+        Function<CashTransaction, CashTransaction> result = tx -> {
+            tx.setContraAccountName(myAccounts.get(tx.contraAccountNumber()));
+            return tx;
+        };
+
+        return new Rule<>(check, result);
     }
 
 }

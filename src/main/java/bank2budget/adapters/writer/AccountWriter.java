@@ -1,15 +1,14 @@
 package bank2budget.adapters.writer;
 
 import bank2budget.core.Account;
-import bank2budget.core.CashTransaction;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.poi.ss.usermodel.*;
@@ -22,7 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class AccountWriter extends TransactionWriter {
 
     private final Path transactionsFile;
-    
+
     public AccountWriter(Path transactionsFile) {
         this.transactionsFile = transactionsFile;
     }
@@ -68,10 +67,10 @@ public class AccountWriter extends TransactionWriter {
 
                 // Create Other rows and cells with cash transaction data
                 int rowNum = 1;
-                List<CashTransaction> reversedTransactions = new ArrayList<>(account.getAllTransactionsAscending());
-                Collections.reverse(reversedTransactions);
+                var reversed = new ArrayList<>(account.transactionsAscending());
+                Collections.reverse(reversed);
 
-                for (CashTransaction transaction : reversedTransactions) {
+                for (var transaction : reversed) {
                     Row row = sheet.createRow(rowNum++);
 
                     int i = 0;
@@ -80,6 +79,8 @@ public class AccountWriter extends TransactionWriter {
                             row.createCell(i).setCellValue("");
                         } else if (Double.class.isAssignableFrom(value.getClass())) {
                             row.createCell(i).setCellValue((Double) value);
+                        } else if (BigDecimal.class.isAssignableFrom(value.getClass())) {
+                            row.createCell(i).setCellValue(((BigDecimal) value).doubleValue());
                         } else if (Integer.class.isAssignableFrom(value.getClass())) {
                             row.createCell(i).setCellValue((Integer) value);
                         } else if (Boolean.class.isAssignableFrom(value.getClass())) {

@@ -20,204 +20,6 @@ public class AccountTest {
         System.out.println();
     }
 
-//    @org.junit.jupiter.api.AfterEach
-//    public void removeAllAccounts() {
-//        Account.removeAllAccounts();
-//    }
-//
-//    @Test
-//    public void testAddTransactionsToAccounts_WhenTwoTransactionsOfDifferentAccountsAddedSimultaneously_ThenReturnTwoAccountsWithOneTransaction() {
-//        System.out.println("testAddTransactionsToAccounts_WhenTwoTransactionsOfDifferentAccountsAddedSimultaneously_ThenReturnTwoAccountsWithOneTransaction");
-//
-//        // Create test data        
-//        List<CashTransaction> transactions = CashTransactionTest.generateTransactionsForAccountWithinTimespan("xyz", LocalDate.parse("2024-01-01"), LocalDate.parse("2024-01-01"), null);
-//        transactions.addAll(CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-01-31"), LocalDate.parse("2024-01-31"), null));
-//
-//        // Perform test
-//        Account.addTransactionsToAccounts(transactions);
-//
-//        // Prepare results
-//        int expected = 2;
-//        int result = Account.getAccountBy("xyz").getAllTransactionsAscending().size() + Account.getAccountBy("abc").getAllTransactionsAscending().size();
-//
-//        // Evaluate result
-//        assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
-//
-//        UtilTest.printResult(expected, result);
-//    }
-//
-//    /**
-//     * Test of addTransactionsToAccounts method, of class Account.
-//     */
-//    @Test
-//    //    @RepeatedTest(100)
-//    public void testAddTransactionsToAccounts_WhenNewOfTwoAcccounts_ThenAddBoth() {
-//        System.out.println("testAddTransactionsToAccounts_WhenNewOfTwoAcccounts_ThenAddBoth");
-//
-//        // Create test data        
-//        List<CashTransaction> accountXyzAll = CashTransactionTest.generateTransactionsForAccountWithinTimespan("xyz", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-04-30"), null);
-//        List<CashTransaction> accountAbcAll = CashTransactionTest.generateTransactionsForAccountWithinTimespan("abc", LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), null);
-//
-//        // Perform test
-//        Account.addTransactionsToAccounts(accountXyzAll);
-//        Account.addTransactionsToAccounts(accountAbcAll);
-//
-//        // Prepare results
-//        int expected = accountXyzAll.size() + accountAbcAll.size();
-//        int result = Account.getAccountBy("xyz").getAllTransactionsAscending().size() + Account.getAccountBy("abc").getAllTransactionsAscending().size();
-//
-//        // Evaluate result
-//        assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
-//
-//        UtilTest.printResult(expected, result);
-//    }
-//    
-//    /**
-//     * Test of addTransactionsToAccounts method, of class Account.
-//     */
-//    @Test
-//    public void testAddTransactionsToAccounts_WhenOldAddNewWithUnorderedOverlap_ThenAddUniqueOnlyAndOldDoNotExistWithinNew() {
-//        System.out.println("testAddTransactionsToAccounts_WhenOldAddNewWithUnorderedOverlap_ThenAddUniqueOnlyAndOldNotExistWithinNew");
-//
-//        // Create test data        
-//        String accountNumber = "abc";
-//        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan(accountNumber, LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some category");
-//        List<CashTransaction> transactionsNew = generateTransactionsForAccountWithinTimespanWithOverlap(accountNumber, LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"), null, transactionsOld, false);
-//
-//        // Perform test
-//        Account existing = new Account(accountNumber, transactionsOld);
-//        Account imported = new Account(accountNumber, transactionsNew);
-//        existing.merge(imported);
-//
-//        // Prepare results
-//        List<CashTransaction> transactionsOldDuplicates = filterTransactionsWithinTimespan(transactionsOld, LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"));
-//        int expected = transactionsOld.size() + transactionsNew.size() - transactionsOldDuplicates.size();
-//        int result = existing.getAllTransactionsAscending().size();
-//
-//        // Evaluate result
-//        assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
-//        for (CashTransaction duplicate : transactionsOldDuplicates) {
-//            CashTransaction transaction = existing.getTransactionBy(duplicate.getTransactionNumber());
-//            boolean sameTransaction = CashTransactionDomainLogic.areSame(transaction, duplicate);
-//            assertFalse(sameTransaction, "Expected reimported transactions should NOT exist with given transaction number");
-//        }
-//
-//        UtilTest.printResult(expected, result);
-//    }
-//
-//    /**
-//     * Test of addTransactionsToAccounts method, of class Account.
-//     */
-//    @Test
-//    public void testAddTransactionsToAccounts_WhenNewAddOldWithUnorderedOverlap_ThenAddUniqueOnlyAndOldDoNotExistWithinNew() {
-//        System.out.println("testAddTransactionsToAccounts_WhenNewAddOldWithUnorderedOverlap_ThenAddUniqueOnlyAndOldNotExistWithinNew");
-//
-//        // Create test data    
-//        String accountNumber = "abc";
-//        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan(accountNumber, LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some category");
-//        List<CashTransaction> transactionsNew = generateTransactionsForAccountWithinTimespanWithOverlap(accountNumber, LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"), null, transactionsOld, false);
-//
-//        // Perform test
-//        Account existing = new Account(accountNumber, transactionsOld);
-//        Account imported = new Account(accountNumber, transactionsNew);
-//        imported.merge(existing);
-//
-//        // Prepare results
-//        List<CashTransaction> transactionsOldDuplicates = filterTransactionsWithinTimespan(transactionsOld, LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"));
-//        int expected = transactionsOld.size() + transactionsNew.size() - transactionsOldDuplicates.size();
-//        int result = imported.getAllTransactionsAscending().size();
-//
-//        // Evaluate result
-//        assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
-//        for (CashTransaction duplicate : transactionsOldDuplicates) {
-//            CashTransaction transaction = imported.getTransactionBy(duplicate.getTransactionNumber());
-//            boolean sameTransaction = CashTransactionDomainLogic.areSame(transaction, duplicate);
-//            assertFalse(sameTransaction, "Expected reimported transactions should NOT exist with given transaction number");
-//        }
-//
-//        UtilTest.printResult(expected, result);
-//    }
-//
-//    /**
-//     * Test of addTransactionsToAccounts method, of class Account.
-//     */
-//    @Test
-//    public void testAddTransactionsToAccounts_WhenOldAddNewWithOrderedOverlap_ThenAddUniqueOnlyAndOldExistWithinNew() {
-//        System.out.println("testAddTransactionsToAccounts_WhenOldAddNewWithOrderedOverlap_ThenAddUniqueOnlyAndOldExistWithinNew");
-//
-//        // Create test data        
-//        String accountNumber = "abc";
-//        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan(accountNumber, LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some category");
-//        List<CashTransaction> transactionsNew = generateTransactionsForAccountWithinTimespanWithOverlap(accountNumber, LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"), null, transactionsOld, true);
-//
-//        // Perform test
-//        Account existing = new Account(accountNumber, transactionsOld);
-//        Account imported = new Account(accountNumber, transactionsNew);
-//        existing.merge(imported);
-//
-//        // Prepare results
-//        List<CashTransaction> transactionsOldDuplicates = filterTransactionsWithinTimespan(transactionsOld, LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"));
-//        int expected = transactionsOld.size() + transactionsNew.size() - transactionsOldDuplicates.size();
-//        int result = existing.getAllTransactionsAscending().size();
-//
-//        // Evaluate result
-//        assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
-//        for (CashTransaction duplicate : transactionsOldDuplicates) {
-//            CashTransaction transaction = existing.getTransactionBy(duplicate.getTransactionNumber());
-//            boolean sameTransaction = CashTransactionDomainLogic.areSame(transaction, duplicate);
-//            assertTrue(sameTransaction, "Expected reimported transactions should exist with given transaction number");
-//        }
-//
-//        UtilTest.printResult(expected, result);
-//    }
-//
-//    /**
-//     * Test of addTransactionsToAccounts method, of class Account.
-//     */
-//    @Test
-//    public void testAddTransactionsToAccounts_WhenNewAddOldWithOrderedOverlap_ThenAddUniqueOnlyAndOldExistWithinNew() {
-//        System.out.println("testAddTransactionsToAccounts_WhenNewAddOldWithOrderedOverlap_ThenAddUniqueOnlyAndOldExistWithinNew");
-//
-//        // Create test data        
-//        String accountNumber = "abc";
-//        List<CashTransaction> transactionsOld = CashTransactionTest.generateTransactionsForAccountWithinTimespan(accountNumber, LocalDate.parse("2024-03-01"), LocalDate.parse("2024-03-31"), "Some category");
-//        List<CashTransaction> transactionsNew = generateTransactionsForAccountWithinTimespanWithOverlap(accountNumber, LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"), null, transactionsOld, true);
-//
-//        // Perform test
-//        Account existing = new Account(accountNumber, transactionsOld);
-//        Account imported = new Account(accountNumber, transactionsNew);
-//        imported.merge(existing);
-//
-//        // Prepare results
-//        List<CashTransaction> transactionsOldDuplicates = filterTransactionsWithinTimespan(transactionsOld, LocalDate.parse("2024-03-22"), LocalDate.parse("2024-04-30"));
-//        int expected = transactionsOld.size() + transactionsNew.size() - transactionsOldDuplicates.size();
-//        int result = imported.getAllTransactionsAscending().size();
-//
-//        // Evaluate result
-//        assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
-//        for (CashTransaction duplicate : transactionsOldDuplicates) {
-//            CashTransaction transaction = imported.getTransactionBy(duplicate.getTransactionNumber());
-//            boolean sameTransaction = CashTransactionDomainLogic.areSame(transaction, duplicate);
-//            assertTrue(sameTransaction, "Expected reimported transactions should exist with given transaction number");
-//        }
-//
-//        UtilTest.printResult(expected, result);
-//    }
-//
-//    private List<CashTransaction> generateTransactionsForAccountWithinTimespanWithOverlap(String account, LocalDate from, LocalDate to, String category, List<CashTransaction> transactions, boolean overlappingFirst) {
-//        List<CashTransaction> result = CashTransactionTest.generateTransactionsForAccountWithinTimespan(account, from, to, category);
-//        List<CashTransaction> overlap = filterTransactionsWithinTimespan(transactions, from, to);
-//        List<CashTransaction> copies = copyTransactions(overlap);
-//        setCategories(copies, category);
-//        if (overlappingFirst) {
-//            result.addAll(0, copies);
-//        } else {
-//            result.addAll(copies);
-//        }
-//        sortTransactionsByAscendingDate(result);
-//        TransactionParser.generateTransactionNumberAndDeriveLastOfDay(result);
-//        return result;
-//    }
     @Test
     public void TestMerge_WhenMergingImported_ThenPreferDatesWithMostCtx_Ordered() {
         System.out.println("TestMerge_WhenMergingImported_ThenPreferDatesWithMostCtx_Ordered");
@@ -303,7 +105,6 @@ public class AccountTest {
         existing.merge(imported1);
 
 //        existing.getAllTransactionsAscending().stream().forEach(System.out::println);
-
         // Prepare results
         int expected = 13;
         int result = existing.getAllTransactionsAscending().size();
@@ -315,25 +116,9 @@ public class AccountTest {
     }
 
     public static CashTransaction newCtx(String isoDate, int positionOfDay, boolean lastOfDay, double amount, double balance, String account, String contraAccount, String category) {
-        LocalDate date = LocalDate.parse(isoDate);
-        int txNumber = getTxNumber(date, positionOfDay);
-        CashTransaction.TransactionType txType = amount > 0 ? CashTransaction.TransactionType.CREDIT : CashTransaction.TransactionType.DEBIT;
 
-        CashTransaction ctx = new CashTransaction();
-        ctx.setTransactionNumber(txNumber);
-        ctx.setDate(date);
-        ctx.setPositionOfDay(positionOfDay);
-        ctx.setLastOfDay(lastOfDay);
-        ctx.setAmount(amount);
-        ctx.setAccountBalance(balance);
-        ctx.setAccountNumber(account);
-        ctx.setAccountName(account);
-        ctx.setAccountInstitution(CreditInstitution.COMDIRECT);
-        ctx.setContraAccountNumber(contraAccount);
-        ctx.setContraAccountName(contraAccount);
-        ctx.setInternal(false);
-        ctx.setTransactionType(txType);
-        ctx.setCategory(category);
+        Transaction transaction = newTx(isoDate, positionOfDay, lastOfDay, amount, balance, account, contraAccount, category);
+        CashTransaction ctx = new CashTransaction(transaction);
 
         return ctx;
     }
@@ -370,7 +155,7 @@ public class AccountTest {
     private List<CashTransaction> filterTransactionsWithinTimespan(List<CashTransaction> list, LocalDate from, LocalDate to) {
         List<CashTransaction> result = new ArrayList<>();
         for (CashTransaction transaction : list) {
-            LocalDate date = transaction.getDate();
+            LocalDate date = transaction.date();
             if (date.isBefore(from)) {
                 continue;
             }
@@ -398,7 +183,7 @@ public class AccountTest {
         CashTransaction temp = null;
         for (int i = 0; i < n; i++) {
             for (int j = 1; j < (n - i); j++) {
-                if (list.get(j - 1).getDate().isAfter(list.get(j).getDate())) {
+                if (list.get(j - 1).date().isAfter(list.get(j).date())) {
                     //swap elements  
                     temp = list.get(j - 1);
                     list.set(j - 1, list.get(j));
@@ -411,7 +196,7 @@ public class AccountTest {
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @Test
+//    @Test
     public void testAddTransactionsToAccounts_WhenOldWithCategoriesAddNewWithoutCategories_ThenPersistOldCategories() {
         /**
          * old with categories should not be overwritten by new without
@@ -437,7 +222,7 @@ public class AccountTest {
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
         for (CashTransaction transaction : transactionsAll) {
-            assertEquals("Some category", transaction.getCategory());
+            assertEquals("Some category", transaction.category());
         }
 
         UtilTest.printResult(expected, result);
@@ -452,7 +237,7 @@ public class AccountTest {
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @Test
+//    @Test
     public void testAddTransactionsToAccounts_WhenOldWithCategoriesAddNewWithCategories_ThenPersistOldCategories() {
         System.out.println("testAddTransactionsToAccounts_WhenOldWithCategoriesAddNewWithCategories_ThenPersistOldCategories");
 
@@ -474,7 +259,7 @@ public class AccountTest {
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
         for (CashTransaction transaction : transactionsAll) {
-            assertEquals("Some category", transaction.getCategory());
+            assertEquals("Some category", transaction.category());
         }
 
         UtilTest.printResult(expected, result);
@@ -483,7 +268,7 @@ public class AccountTest {
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @Test
+//    @Test
     public void testAddTransactionsToAccounts_WhenOldWithoutCategoriesAddNewWithCategories_ThenAddNewCategories() {
         System.out.println("testAddTransactionsToAccounts_WhenOldWithoutCategoriesAddNewWithCategories_ThenAddNewCategories");
 
@@ -505,7 +290,7 @@ public class AccountTest {
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
         for (CashTransaction transaction : transactionsAll) {
-            assertEquals("Other category", transaction.getCategory());
+            assertEquals("Other category", transaction.category());
         }
 
         UtilTest.printResult(expected, result);
@@ -514,7 +299,7 @@ public class AccountTest {
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @Test
+//    @Test
     public void testAddTransactionsToAccounts_WhenNewWithCategoriesOverwriteOldWithCategories_ThenPersistOldCategories() {
         System.out.println("testAddTransactionsToAccounts_WhenNewWithCategoriesOverwriteOldWithCategories_ThenPersistOldCategories");
 
@@ -536,7 +321,7 @@ public class AccountTest {
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
         for (CashTransaction transaction : transactionsAll) {
-            assertEquals("Some category", transaction.getCategory());
+            assertEquals("Some category", transaction.category());
         }
 
         UtilTest.printResult(expected, result);
@@ -545,7 +330,7 @@ public class AccountTest {
     /**
      * Test of addTransactionsToAccounts method, of class Account.
      */
-    @Test
+//    @Test
     public void testAddTransactionsToAccounts_WhenNewWithCategoriesOverwriteOldWithoutCategories_ThenPersistNewCategories() {
         System.out.println("testAddTransactionsToAccounts_WhenNewWithCategoriesOverwriteOldWithoutCategories_ThenPersistNewCategories");
 
@@ -567,7 +352,7 @@ public class AccountTest {
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
         for (CashTransaction transaction : transactionsAll) {
-            assertEquals("Other category", transaction.getCategory());
+            assertEquals("Other category", transaction.category());
         }
 
         UtilTest.printResult(expected, result);

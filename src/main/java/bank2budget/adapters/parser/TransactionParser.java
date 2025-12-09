@@ -1,11 +1,12 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.Launcher;
-import bank2budget.core.CashTransaction;
+import bank2budget.core.Transaction;
 import bank2budget.core.Util;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -47,13 +48,13 @@ public abstract class TransactionParser {
         this.parserConfig = config;
     }
 
-    public List<CashTransaction> parse() {
+    public List<Transaction> parse() {
         //ANSI files are  read correctly, but now UTF-8 files are not
         try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(parserConfig.getFile()), parserConfig.getCharset()), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
 
-            List<CashTransaction> transactions = parseRecordsWith(parser);
+            List<Transaction> transactions = parseRecordsWith(parser);
             if (Launcher.log_transactions) {
-                for (CashTransaction t : transactions) {
+                for (var t : transactions) {
                     System.out.println(t.toString());
                 }
             }
@@ -71,7 +72,7 @@ public abstract class TransactionParser {
      */
     protected abstract CSVFormat getCsvFormat();
 
-    protected List<CashTransaction> parseRecordsWith(CSVParser parser) throws IOException {
+    protected List<Transaction> parseRecordsWith(CSVParser parser) throws IOException {
         List<RawCashTransaction> rawTransactions = new ArrayList<>();
         List<CSVRecord> records = parser.getRecords();
         List<CSVRecord> transactionRecords = getTransactionRecordsFrom(records);
@@ -88,7 +89,7 @@ public abstract class TransactionParser {
             }
         }
         generateTransactionNumberAndDeriveLastOfDay(rawTransactions);
-        List<CashTransaction> transactions = rawTransactions.stream().map(RawCashTransaction::toCashTransaction).toList();
+        var transactions = rawTransactions.stream().map(RawCashTransaction::toTransaction).toList();
         return transactions;
     }
 
@@ -183,13 +184,22 @@ public abstract class TransactionParser {
         generateTransactionNumberAndDeriveLastOfDay(transactions, true);
     }
 
-    protected double getDoubleFrom(String numberString) {
+//    protected double getDoubleFrom(String numberString) {
+//        String noEur = numberString.replace("EUR", "");
+//        String noPlus = noEur.replace("+", "");
+//        String noPlusAndSpace = noPlus.replace(" ", "");
+//        String noPlusSpaceAndDot = noPlusAndSpace.replace(".", "");
+//        String cleanNumberString = noPlusSpaceAndDot.replace(",", ".");
+//        return Double.parseDouble(cleanNumberString);
+//    }
+
+    protected BigDecimal bigDecimalFromString(String numberString) {
         String noEur = numberString.replace("EUR", "");
         String noPlus = noEur.replace("+", "");
         String noPlusAndSpace = noPlus.replace(" ", "");
         String noPlusSpaceAndDot = noPlusAndSpace.replace(".", "");
         String cleanNumberString = noPlusSpaceAndDot.replace(",", ".");
-        return Double.parseDouble(cleanNumberString);
+        return new BigDecimal(cleanNumberString);
     }
 
     protected static LocalDate parseDateFrom(String date) throws ParseException {

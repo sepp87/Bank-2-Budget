@@ -29,6 +29,8 @@ import bank2budget.ports.AnalyticsExportPort;
  */
 public class App {
 
+    public static boolean GO_RECORD = false;
+    
     private final CsvCleanupService csvCleanupService;
     private final AccountService accountService;
     private final AnalyticsExportPort analyticsExportService;

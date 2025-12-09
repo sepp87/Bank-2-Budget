@@ -1,7 +1,5 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.List;
 import org.apache.commons.csv.CSVFormat;
@@ -35,8 +33,8 @@ public class UnifiedCsvParser extends TransactionParser {
         transaction.accountNumber = (record.get("accountNumber"));
         transaction.contraAccountName = (record.get("contraAccountName"));
         transaction.contraAccountNumber = (record.get("contraAccountNumber"));
-        transaction.amount =BigDecimal.valueOf(getDoubleFrom(record.get("amount")));
-        transaction.accountBalance = BigDecimal.valueOf(getDoubleFrom(record.get("accountBalance")));
+        transaction.amount = bigDecimalFromString(record.get("amount"));
+        transaction.accountBalance = bigDecimalFromString(record.get("accountBalance"));
         transaction.transactionNumber = (Integer.parseInt(record.get("transactionNumber")));
         transaction.description = (record.get("description"));
         transaction.date = parseDateFrom(record.get("date"));

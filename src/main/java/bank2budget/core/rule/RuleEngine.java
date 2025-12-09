@@ -36,13 +36,13 @@ public class RuleEngine<T> {
     public void overwriteAccountNames(List<CashTransaction> transactions) {
         for (CashTransaction t : transactions) {
 
-            String accountNumber = t.getAccountNumber();
+            String accountNumber = t.accountNumber();
             String accountName = getAccountNameFrom(accountNumber);
             if (accountName != null) {
                 t.setAccountName(accountName);
             }
 
-            String contraAccountNumber = t.getContraAccountNumber();
+            String contraAccountNumber = t.contraAccountNumber();
             String contraAccountName = getAccountNameFrom(contraAccountNumber);
             if (contraAccountName != null) {
                 t.setContraAccountName(contraAccountName);
@@ -59,18 +59,6 @@ public class RuleEngine<T> {
             result = otherAccounts.get(accountNumber);
         }
         return result;
-    }
-
-    // add missing account numbers
-    public void addMissingAccountNumbers(List<CashTransaction> transactions) {
-        for (CashTransaction t : transactions) {
-            if (t.getAccountNumber() == null) {
-                t.setAccountNumber(getAccountNumberFrom(t.getAccountName()));
-            }
-            if (t.getContraAccountNumber() == null) {
-                t.setContraAccountNumber(getAccountNumberFrom(t.getContraAccountName()));
-            }
-        }
     }
 
     private String getAccountNumberFrom(String accountName) {
@@ -99,8 +87,8 @@ public class RuleEngine<T> {
     // determine internal transactions
     public void determineInternalTransactions(List<CashTransaction> transactions) {
         for (CashTransaction t : transactions) {
-            boolean internal = myAccounts.containsKey(t.getAccountNumber())
-                    && myAccounts.containsKey(t.getContraAccountNumber());
+            boolean internal = myAccounts.containsKey(t.accountNumber())
+                    && myAccounts.containsKey(t.contraAccountNumber());
             t.setInternal(internal);
         }
     }

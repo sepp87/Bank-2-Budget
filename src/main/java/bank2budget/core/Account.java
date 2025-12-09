@@ -12,14 +12,20 @@ import java.util.TreeMap;
  */
 public class Account {
 
-
     private final String accountNumber;
     private final TreeMap<Integer, CashTransaction> allTransactionsIndex = new TreeMap<>();
+
+    public Account(String accountNumber, List<Transaction> transactions, String dummy) {
+        this.accountNumber = accountNumber;
+        for (var t : transactions) {
+            allTransactionsIndex.put(t.transactionNumber(), new CashTransaction(t));
+        }
+    }
 
     public Account(String accountNumber, List<CashTransaction> transactions) {
         this.accountNumber = accountNumber;
         for (CashTransaction t : transactions) {
-            allTransactionsIndex.put(t.getTransactionNumber(), t);
+            allTransactionsIndex.put(t.transactionNumber(), t);
         }
     }
 
@@ -39,7 +45,7 @@ public class Account {
      */
     public LocalDate getOldestTransactionDate() {
         // By default, TreeMap sorts all its entries according to their natural ordering
-        return allTransactionsIndex.firstEntry().getValue().getDate();
+        return allTransactionsIndex.firstEntry().getValue().date();
     }
 
     /**
@@ -48,7 +54,7 @@ public class Account {
      */
     public LocalDate getNewestTransactionDate() {
         // By default, TreeMap sorts all its entries according to their natural ordering
-        return allTransactionsIndex.lastEntry().getValue().getDate();
+        return allTransactionsIndex.lastEntry().getValue().date();
     }
 
     public void merge(Account incoming) {
@@ -109,31 +115,31 @@ public class Account {
         for (LocalDate date : range) {
             result.put(date, new ArrayList<>());
         }
-        transactions.stream().forEach(e -> result.get(e.getDate()).add(e));
+        transactions.stream().forEach(e -> result.get(e.date()).add(e));
         return result;
     }
 
     private void addTransactions(List<CashTransaction> transactions) {
-        for (CashTransaction transaction : transactions) {
-            allTransactionsIndex.put(transaction.getTransactionNumber(), transaction);
+        for (var transaction : transactions) {
+            allTransactionsIndex.put(transaction.transactionNumber(), transaction);
         }
     }
 
     private void removeTransactions(List<CashTransaction> transactions) {
-        for (CashTransaction transaction : transactions) {
-            int number = transaction.getTransactionNumber();
+        for (var transaction : transactions) {
+            int number = transaction.transactionNumber();
             allTransactionsIndex.remove(number);
         }
     }
 
     private void enrichCategories(List<CashTransaction> transactions, boolean overwriteCategories) {
-        for (CashTransaction incoming : transactions) {
-            int number = incoming.getTransactionNumber();
+        for (var incoming : transactions) {
+            int number = incoming.transactionNumber();
             if (allTransactionsIndex.containsKey(number)) {
                 CashTransaction existing = allTransactionsIndex.get(number);
                 boolean isSame = CashTransactionDomainLogic.areSame(incoming, existing);
-                if (isSame && incoming.getCategory() != null && (existing.getCategory() == null || overwriteCategories)) {
-                    existing.setCategory(incoming.getCategory());
+                if (isSame && incoming.category() != null && (existing.category() == null || overwriteCategories)) {
+                    existing.setCategory(incoming.category());
 //                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});
                 }
 //                else {
@@ -158,6 +164,15 @@ public class Account {
         List<CashTransaction> allTransactions = new ArrayList<>();
         allTransactions.addAll(allTransactionsIndex.values());
         return allTransactions;
+    }
+
+    /**
+     *
+     * @return list containing all transactions of this account, sorted in
+     * ascending order, starting from oldest to most current
+     */
+    public List<Transaction> transactionsAscending() {
+        return allTransactionsIndex.values().stream().map(CashTransaction::getTransaction).toList();
     }
 
     public String getAccountNumber() {

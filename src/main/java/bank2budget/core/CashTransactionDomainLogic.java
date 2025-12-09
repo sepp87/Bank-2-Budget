@@ -24,19 +24,20 @@ public class CashTransactionDomainLogic {
      */
     public static boolean areSame(CashTransaction a, CashTransaction b) {
         Set<Boolean> result = new HashSet<>();
-        result.add(Util.compareMoney(a.getAmount(), b.getAmount()));
-        result.add(a.getTransactionNumber() == b.getTransactionNumber());
-        result.add((a.getDate() == null ? b.getDate() == null : a.getDate().equals(b.getDate())));
-        result.add(Util.compareMoney(a.getAccountBalance(), b.getAccountBalance()));
-        result.add((a.getAccountNumber() == null ? b.getAccountNumber() == null : a.getAccountNumber().equals(b.getAccountNumber())));
-        result.add(a.getAccountName() == null ? b.getAccountName() == null : a.getAccountName().equals(b.getAccountName()));
-        result.add(a.getAccountInstitution() == b.getAccountInstitution());
-        result.add(a.getContraAccountNumber() == null ? b.getContraAccountNumber() == null : a.getContraAccountNumber().equals(b.getContraAccountNumber()));
-        result.add(a.getContraAccountName() == null ? b.getContraAccountName() == null : a.getContraAccountName().equals(b.getContraAccountName()));
-        result.add(Objects.equals(a.isInternal(), b.isInternal()));
-        result.add(a.getPositionOfDay() == b.getPositionOfDay());
-        result.add(a.getTransactionType() == b.getTransactionType());
-        result.add(a.getDescription() == null ? b.getDescription() == null : a.getDescription().equals(b.getDescription()));
+        
+        result.add(a.amount().compareTo(b.amount()) == 0);
+        result.add(a.transactionNumber() == b.transactionNumber());
+        result.add((a.date() == null ? b.date() == null : a.date().equals(b.date())));
+        result.add(a.accountBalance().compareTo(b.accountBalance()) == 0);
+        result.add((a.accountNumber() == null ? b.accountNumber() == null : a.accountNumber().equals(b.accountNumber())));
+        result.add(a.accountName()== null ? b.accountName() == null : a.accountName().equals(b.accountName()));
+        result.add(a.accountInstitution()== b.accountInstitution());
+        result.add(a.contraAccountNumber()== null ? b.contraAccountNumber() == null : a.contraAccountNumber().equals(b.contraAccountNumber()));
+        result.add(a.contraAccountName() == null ? b.contraAccountName() == null : a.contraAccountName().equals(b.contraAccountName()));
+        result.add(Objects.equals(a.internal(), b.internal()));
+        result.add(a.positionOfDay()== b.positionOfDay());
+        result.add(a.transactionType()== b.transactionType());
+        result.add(a.description()== null ? b.description() == null : a.description().equals(b.description()));
 
 //        System.out.println(Util.compareMoney(a.getAmount(), b.getAmount()));
 //        System.out.println(a.getTransactionNumber() == b.getTransactionNumber());
@@ -54,22 +55,6 @@ public class CashTransactionDomainLogic {
         return !result.contains(false);
     }
 
-    public static List<CashTransaction> sortAscending(List<CashTransaction> transactions) {
-        int n = transactions.size();
-        CashTransaction temp = null;
-        for (int i = 0; i < n; i++) {
-            for (int j = 1; j < (n - i); j++) {
-                if (transactions.get(j - 1).getTransactionNumber() > transactions.get(j).getTransactionNumber()) {
-                    //swap elements  
-                    temp = transactions.get(j - 1);
-                    transactions.set(j - 1, transactions.get(j));
-                    transactions.set(j, temp);
-                }
-            }
-        }
-        return transactions;
-    }
-
     /**
      *
      * @param transactions
@@ -78,7 +63,7 @@ public class CashTransactionDomainLogic {
      * @return all transactions outside the given time frame, transactions on
      * boundary dates (from/to) are included
      */
-    public static List<CashTransaction> filterByTimespanInverted(List<CashTransaction> transactions, LocalDate from, LocalDate to) {
+    public static <T extends CashTransaction> List<T> filterByTimespanInverted(List<T> transactions, LocalDate from, LocalDate to) {
         return filterByTimespan(transactions, from, to, true);
     }
 
@@ -90,16 +75,16 @@ public class CashTransactionDomainLogic {
      * @return all transactions within the given time frame, transactions on
      * boundary dates (from/to) are included
      */
-    public static List<CashTransaction> filterByTimespan(List<CashTransaction> transactions, LocalDate from, LocalDate to) {
+    public static <T extends CashTransaction> List<T> filterByTimespan(List<T> transactions, LocalDate from, LocalDate to) {
         return filterByTimespan(transactions, from, to, false);
     }
 
-    private static List<CashTransaction> filterByTimespan(List<CashTransaction> transactions, LocalDate from, LocalDate to, boolean inverted) {
-        List<CashTransaction> result = new ArrayList<>();
+    private static <T extends CashTransaction> List<T> filterByTimespan(List<T> transactions, LocalDate from, LocalDate to, boolean inverted) {
+        List<T> result = new ArrayList<>();
         from = from.minusDays(1);
         to = to.plusDays(1);
-        for (CashTransaction transaction : transactions) {
-            LocalDate date = transaction.getDate();
+        for (var transaction : transactions) {
+            LocalDate date = transaction.date();
             boolean withinTimespan = date.isAfter(from) && date.isBefore(to);
             // Adding or excluding transactions based on 'inverted' flag and whether they are within the time span
             if ((withinTimespan && !inverted) || (!withinTimespan && inverted)) {
@@ -115,40 +100,40 @@ public class CashTransactionDomainLogic {
      * @param list2 sorted list in ascending order by date
      * @return
      */
-    public static LocalDate[] findOverlap(List<CashTransaction> list1, List<CashTransaction> list2) {
+    public static LocalDate[] findOverlap(List<? extends CashTransaction> list1, List<? extends CashTransaction> list2) {
         List<LocalDate> dates1 = getDatesFrom(list1);
         List<LocalDate> dates2 = getDatesFrom(list2);
         return Util.findOverlap(dates1, dates2);
     }
 
-    private static List<LocalDate> getDatesFrom(List<CashTransaction> list) {
+    private static List<LocalDate> getDatesFrom(List<? extends CashTransaction> list) {
         List<LocalDate> result = new ArrayList<>();
         for (CashTransaction transaction : list) {
-            result.add(transaction.getDate());
+            result.add(transaction.date());
         }
         return result;
     }
 
-    public static Map<String, List<CashTransaction>> groupByCategory(List<CashTransaction> transactions) {
-        Map<String, List<CashTransaction>> grouped = new TreeMap<>();
+    public static Map<String, List<Transaction>> groupByCategory(List<Transaction> transactions) {
+        Map<String, List<Transaction>> grouped = new TreeMap<>();
         for (var transaction : transactions) {
-            grouped.computeIfAbsent(transaction.getCategory(), k -> new ArrayList<>()).add(transaction);
+            grouped.computeIfAbsent(transaction.category(), k -> new ArrayList<>()).add(transaction);
         }
         return grouped;
     }
 
-    public static List<CashTransaction> categorized(List<CashTransaction> transactions) {
+    public static List<Transaction> categorized(List<Transaction> transactions) {
         return filterByCategorized(transactions, true);
     }
 
-    public static List<CashTransaction> uncategorized(List<CashTransaction> transactions) {
+    public static List<Transaction> uncategorized(List<Transaction> transactions) {
         return filterByCategorized(transactions, false);
     }
 
-    private static List<CashTransaction> filterByCategorized(List<CashTransaction> transactions, boolean wantCategorized) {
-        List<CashTransaction> result = new ArrayList<>();
+    private static List<Transaction> filterByCategorized(List<Transaction> transactions, boolean wantCategorized) {
+        List<Transaction> result = new ArrayList<>();
         for (var transaction : transactions) {
-            String category = transaction.getCategory();
+            String category = transaction.category();
             boolean isCategorized = category != null && !category.isBlank();
 
             if (wantCategorized == isCategorized) {

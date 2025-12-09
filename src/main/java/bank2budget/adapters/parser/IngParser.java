@@ -1,6 +1,5 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
@@ -31,18 +30,6 @@ public class IngParser extends TransactionParser {
         return allRecords.subList(1, allRecords.size());
     }
 
-    private void parseAmountFrom(CSVRecord record, CashTransaction transaction) {
-        String plusOrMinus = record.get("Af Bij").equals("Af") ? "-" : "+";
-        String amountString = plusOrMinus + record.get("Bedrag (EUR)");
-        double amount = getDoubleFrom(amountString);
-        transaction.setAmount(amount);
-    }
-
-    private void calculateBalanceAfter(CashTransaction transaction) {
-        currentBalance = currentBalance.add(BigDecimal.valueOf(transaction.getAmount()));
-        transaction.setAccountBalance(currentBalance.doubleValue());
-    }
-
     @Override
     public RawCashTransaction parseCashTransactionFromNEW(CSVRecord record) throws ParseException {
         RawCashTransaction transaction = new RawCashTransaction();
@@ -52,7 +39,7 @@ public class IngParser extends TransactionParser {
         transaction.contraAccountName = (record.get("Naam / Omschrijving"));
         transaction.contraAccountNumber = (record.get("Tegenrekening"));
         if (parserConfig.getDelimiter() == ';') {
-            transaction.accountBalance = BigDecimal.valueOf(getDoubleFrom(record.get("Saldo na mutatie")));
+            transaction.accountBalance = bigDecimalFromString(record.get("Saldo na mutatie"));
         } else {
             calculateBalanceAfterNEW(transaction);
         }
@@ -63,7 +50,7 @@ public class IngParser extends TransactionParser {
     private BigDecimal parseAmountFrom(CSVRecord record) {
         String plusOrMinus = record.get("Af Bij").equals("Af") ? "-" : "+";
         String amountString = plusOrMinus + record.get("Bedrag (EUR)");
-        return BigDecimal.valueOf(getDoubleFrom(amountString));
+        return bigDecimalFromString(amountString);
     }
 
     private void calculateBalanceAfterNEW(RawCashTransaction transaction) {

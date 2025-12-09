@@ -1,6 +1,5 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
@@ -53,8 +52,8 @@ public class GlsParser2022 extends TransactionParser {
         transaction.accountNumber = (record.get("IBAN Auftragskonto"));
         transaction.contraAccountName = (record.get("Name Zahlungsbeteiligter"));
         transaction.contraAccountNumber = (record.get("IBAN Zahlungsbeteiligter"));
-        transaction.amount =BigDecimal.valueOf(getDoubleFrom(record.get("Betrag")));
-        transaction.accountBalance = BigDecimal.valueOf(getDoubleFrom(record.get("Saldo nach Buchung")));
+        transaction.amount = bigDecimalFromString(record.get("Betrag"));
+        transaction.accountBalance = bigDecimalFromString(record.get("Saldo nach Buchung"));
         transaction.description = (record.get("Verwendungszweck"));
         transaction.date = parseDateFrom(record.get("Buchungstag"));
         return transaction;

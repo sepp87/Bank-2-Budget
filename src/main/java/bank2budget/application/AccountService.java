@@ -142,13 +142,13 @@ public class AccountService {
             List<CashTransaction> transactions = a.getAllTransactionsAscending();
             CashTransaction newest = null;
             for (CashTransaction transaction : transactions) {
-                if (transaction.getDate().isAfter(date)) {
+                if (transaction.date().isAfter(date)) {
                     break;
                 }
                 newest = transaction;
             }
             if (newest != null) {
-                result = result.add(BigDecimal.valueOf(newest.getAccountBalance()));
+                result = result.add(newest.accountBalance());
             }
         }
         return result;

@@ -5,6 +5,7 @@ import bank2budget.adapters.reader.FileUtil;
 import bank2budget.adapters.reader.TransactionReaderFactory;
 import bank2budget.adapters.writer.TransactionWriterFactory;
 import bank2budget.core.CashTransaction;
+import bank2budget.core.Transaction;
 import bank2budget.core.rule.RuleEngine;
 import java.nio.file.Path;
 import java.util.List;
@@ -36,13 +37,14 @@ public class CsvCleanupService {
             String base = source.substring(0, source.length() - 4);
             Path target = done.resolve(base + " cleaned.csv");
 
-            List<CashTransaction> transactions = TransactionReaderFactory.parse(csv.toFile()).getTransactions();
-            
-            ruleEngine.overwriteAccountNames(transactions);
-            ruleEngine.determineInternalTransactions(transactions);
-            ruleEngine.applyRules(transactions);
-            
-            TransactionWriterFactory.create(target.toFile(), decimalSeparator).write(transactions);
+            var transactions = TransactionReaderFactory.parse(csv.toFile()).getTransactions();
+            List<CashTransaction> ctx = transactions.stream().map(CashTransaction::new).toList();
+
+            ruleEngine.overwriteAccountNames(ctx);
+            ruleEngine.determineInternalTransactions(ctx);
+            ruleEngine.applyRules(ctx);
+
+            TransactionWriterFactory.create(target.toFile(), decimalSeparator).write(ctx.stream().map(CashTransaction::getTransaction).toList());
         }
     }
 

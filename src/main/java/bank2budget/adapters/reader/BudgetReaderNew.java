@@ -33,7 +33,7 @@ public class BudgetReaderNew {
     public BudgetReaderNew(Path budgetFile) {
         // at this point the account is still unknown
         this.budgetFile = budgetFile;
-        budget = new Budget(1);
+        budget = new Budget();
     }
 
     public Budget read() {

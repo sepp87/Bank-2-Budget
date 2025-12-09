@@ -1,6 +1,6 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
+import bank2budget.core.Transaction;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -50,7 +50,7 @@ public class ComdirectParser extends TransactionParser {
     }
 
     @Override
-    protected List<CashTransaction> parseRecordsWith(CSVParser parser) throws IOException {
+    protected List<Transaction> parseRecordsWith(CSVParser parser) throws IOException {
         List<RawCashTransaction> rtx = new ArrayList<>();
         List<CSVRecord> records = parser.getRecords();
         List<Batch> batches = new ArrayList<>();
@@ -63,7 +63,7 @@ public class ComdirectParser extends TransactionParser {
                 String startingBalance = record.get(1);
                 Batch batch = new Batch();
                 batch.accountName = getAccountNameFrom(titleRecord);
-                batch.currentBalance = BigDecimal.valueOf(getDoubleFrom(startingBalance));
+                batch.currentBalance = bigDecimalFromString(startingBalance);
                 batch.transactionRecords = records.subList(batchStart, batchEnd);
                 batches.add(batch);
                 batchStart = getNextBatchStart(i);
@@ -74,7 +74,7 @@ public class ComdirectParser extends TransactionParser {
             Collections.reverse(batch.transactionRecords);
             rtx.addAll(batch.parseNEW());
         }
-        return rtx.stream().map(RawCashTransaction::toCashTransaction).toList();
+        return rtx.stream().map(RawCashTransaction::toTransaction).toList();
     }
 
     private boolean isStartingBalanceRecord(CSVRecord record) {
@@ -117,11 +117,11 @@ public class ComdirectParser extends TransactionParser {
             RawCashTransaction transaction = new RawCashTransaction();
             transaction.accountName = accountName;
             if (accountName.equals("Visa-Karte (Kreditkarte)")) {
-                transaction.amount = BigDecimal.valueOf(getDoubleFrom(record.get(5)));
+                transaction.amount = bigDecimalFromString(record.get(5));
                 transaction.description = record.get(4);
 
             } else {
-                transaction.amount = BigDecimal.valueOf(getDoubleFrom(record.get("Umsatz in EUR")));
+                transaction.amount = bigDecimalFromString(record.get("Umsatz in EUR"));
                 transaction.description = (record.get("Buchungstext"));
             }
             transaction.date = parseDateFrom(record.get("Buchungstag"));

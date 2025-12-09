@@ -1,10 +1,9 @@
 package bank2budget.adapters.repository;
 
-import bank2budget.adapters.repository.SqliteUtil;
 import bank2budget.core.Account;
-import bank2budget.Launcher;
 import bank2budget.adapters.writer.TransactionWriter;
-import bank2budget.core.CashTransaction;
+import bank2budget.core.Transaction;
+//import bank2budget.core.CashTransaction;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -46,7 +45,7 @@ public class TransactionWriterForSqlite extends TransactionWriter {
         success &= SqliteUtil.clearTable(connection, TRANSACTIONS_TABLE);
 
         for (Account account : accounts) {
-            success &= insertTransactions(connection, account.getAllTransactionsAscending());
+            success &= insertTransactions(connection, account.transactionsAscending());
         }
 
         try {
@@ -83,7 +82,7 @@ public class TransactionWriterForSqlite extends TransactionWriter {
         String result = "";
         for (String column : HEADER) {
             try {
-                Field propertyField = CashTransaction.class.getDeclaredField(column);
+                Field propertyField = Transaction.class.getDeclaredField(column);
                 propertyField.setAccessible(true);
                 Class<?> type = propertyField.getType();
                 COLUMN_TYPES.put(column, type);
@@ -112,7 +111,7 @@ public class TransactionWriterForSqlite extends TransactionWriter {
         }
     }
 
-    private static boolean insertTransactions(Connection connection, Collection<CashTransaction> transactions) {
+    private static boolean insertTransactions(Connection connection, Collection<Transaction> transactions) {
         String columns = getColumns();
         String placeholders = SqliteUtil.getPlaceholders(HEADER.length);
         String insertTransactions = "INSERT INTO " + TRANSACTIONS_TABLE + " (" + columns + ") "
@@ -120,7 +119,7 @@ public class TransactionWriterForSqlite extends TransactionWriter {
 
         try (PreparedStatement statement = connection.prepareStatement(insertTransactions)) {
 
-            for (CashTransaction transaction : transactions) {
+            for (var transaction : transactions) {
                 Object[] values = TransactionWriter.getObjectArrayFrom(transaction);
                 int i = 0;
                 for (String column : HEADER) {

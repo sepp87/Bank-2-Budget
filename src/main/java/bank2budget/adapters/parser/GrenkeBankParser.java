@@ -1,6 +1,5 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
 import java.text.ParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;

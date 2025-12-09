@@ -102,6 +102,14 @@ public class TransactionBuilder {
 
     public Transaction build() {
 
+        if (amount == null) {
+            amount = BigDecimal.ZERO;
+        }
+
+        if (accountBalance == null) {
+            accountBalance = BigDecimal.ZERO;
+        }
+
         Transaction.TransactionType transactionType = amount.compareTo(BigDecimal.ZERO) > 0
                 ? Transaction.TransactionType.CREDIT : Transaction.TransactionType.DEBIT;
 

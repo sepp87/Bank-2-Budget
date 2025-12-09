@@ -1,6 +1,5 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.List;

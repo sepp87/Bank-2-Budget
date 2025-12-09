@@ -20,7 +20,7 @@ public class AnalyticsExportService implements AnalyticsExportPort {
 
     public void exportAccounts(Collection<Account> accounts) {
         for (Account account : accounts) {
-            db.insertTransactions(account.getAllTransactionsAscending());
+            db.insertTransactions(account.transactionsAscending());
         }
     }
 

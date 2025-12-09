@@ -49,7 +49,7 @@ public class SparkasseParser extends TransactionParser {
             if (isNotProcessedByBank(record)) {
                 continue;
             }
-            BigDecimal amount = BigDecimal.valueOf(getDoubleFrom(record.get("Betrag")));
+            BigDecimal amount = bigDecimalFromString(record.get("Betrag"));
             delta = delta.min(amount);
         }
         return delta;
@@ -79,7 +79,7 @@ public class SparkasseParser extends TransactionParser {
         transaction.contraAccountNumber = (record.get("Auftragskonto"));
         transaction.contraAccountName = (record.get("Beguenstigter/Zahlungspflichtiger"));
         transaction.contraAccountNumber = (getContraAccountNumberFrom(record));
-        transaction.amount = BigDecimal.valueOf(getDoubleFrom(record.get("Betrag")));
+        transaction.amount = bigDecimalFromString(record.get("Betrag"));
         transaction.description = (record.get("Verwendungszweck"));
         transaction.date = parseDateFrom(record.get("Buchungstag"));
         calculateBalanceAfterNEW(transaction);

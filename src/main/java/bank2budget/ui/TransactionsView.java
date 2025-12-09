@@ -40,10 +40,10 @@ public class TransactionsView extends TableView<CashTransaction> {
         this.getSelectionModel().setCellSelectionEnabled(true);
         this.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        TableColumn<CashTransaction, Integer> transactionNumberColumn = buildColumn("Transaction Number", CashTransaction::getTransactionNumber);
-        TableColumn<CashTransaction, String> descriptionColumn = buildColumn("Description", CashTransaction::getDescription);
-        TableColumn<CashTransaction, String> notesColumn = buildEditableColumn("Notes", CashTransaction::getNotes, CashTransaction::setNotes);
-        TableColumn<CashTransaction, String> contraAccountNameColumn = buildColumn("Contra Account Name", CashTransaction::getContraAccountName);
+        TableColumn<CashTransaction, Integer> transactionNumberColumn = buildColumn("Transaction Number", CashTransaction::transactionNumber);
+        TableColumn<CashTransaction, String> descriptionColumn = buildColumn("Description", CashTransaction::description);
+        TableColumn<CashTransaction, String> notesColumn = buildEditableColumn("Notes", CashTransaction::notes, CashTransaction::setNotes);
+        TableColumn<CashTransaction, String> contraAccountNameColumn = buildColumn("Contra Account Name", CashTransaction::contraAccountName);
         
         descriptionColumn.setPrefWidth(240);
         notesColumn.setPrefWidth(240);
@@ -51,12 +51,12 @@ public class TransactionsView extends TableView<CashTransaction> {
         
         reloadCategorySuggestions(transactions);
 
-        this.getColumns().add(buildAutoCompleteColumn("Category", CashTransaction::getCategory, CashTransaction::setCategory, categorySuggestions));
-        this.getColumns().add(buildColumn("Amount", CashTransaction::getAmount));
+        this.getColumns().add(buildAutoCompleteColumn("Category", CashTransaction::category, CashTransaction::setCategory, categorySuggestions));
+        this.getColumns().add(buildColumn("Amount", CashTransaction::amount));
         this.getColumns().add(transactionNumberColumn);
-        this.getColumns().add(buildColumn("Date", CashTransaction::getDate));
-        this.getColumns().add(buildColumn("Account Balance", CashTransaction::getAccountBalance));
-        this.getColumns().add(buildColumn("Account Name", CashTransaction::getAccountName));
+        this.getColumns().add(buildColumn("Date", CashTransaction::date));
+        this.getColumns().add(buildColumn("Account Balance", CashTransaction::accountBalance));
+        this.getColumns().add(buildColumn("Account Name", CashTransaction::accountName));
         this.getColumns().add(contraAccountNameColumn);
         this.getColumns().add(descriptionColumn);
         this.getColumns().add(notesColumn);
@@ -83,7 +83,7 @@ public class TransactionsView extends TableView<CashTransaction> {
         categorySuggestions.clear();
         Set<String> availableCategories = new HashSet<>();
         for (CashTransaction t : transactions) {
-            availableCategories.add(t.getCategory());
+            availableCategories.add(t.category());
         }
         categorySuggestions.addAll(availableCategories);
     }

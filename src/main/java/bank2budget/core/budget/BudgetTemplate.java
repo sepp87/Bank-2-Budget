@@ -1,6 +1,10 @@
 package bank2budget.core.budget;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,14 +33,25 @@ public class BudgetTemplate {
         }
         return 1;
     }
-    
+
     public int firstOfMonth() {
         return firstOfMonth;
     }
-    
+
     public Map<String, BigDecimal> operatingCategories() {
         return Map.copyOf(operatingCategories);
     }
-    
+
+    public BudgetMonth createBlank(LocalDate first) {
+        List<BudgetMonthCategory> categories = new ArrayList<>();
+        for (var entry : operatingCategories.entrySet()) {
+            String name = entry.getKey();
+            BigDecimal budgeted = entry.getValue();
+            BigDecimal zero = BigDecimal.ZERO;
+            var category = new BudgetMonthCategory(first, name, budgeted, zero, zero, zero, zero, Collections.emptyList());
+            categories.add(category);
+        }
+        return new BudgetMonth(first, categories);
+    }
 
 }

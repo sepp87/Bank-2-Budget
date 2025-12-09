@@ -1,6 +1,5 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
@@ -39,25 +38,25 @@ public class DkbParser extends TransactionParser {
     public List<CSVRecord> getTransactionRecordsFrom(List<CSVRecord> allRecords) { // and set current balance to calculateBalanceAfter(CashTransaction transaction)
         List<CSVRecord> transactionRecords = allRecords.subList(5, allRecords.size());
         Collections.reverse(transactionRecords);
-        currentBalance = BigDecimal.valueOf(getStartingBalanceFrom(allRecords));
+        currentBalance = getStartingBalanceFrom(allRecords);
         CSVRecord accountNumberRecord = allRecords.get(0);
         accountNumber = getAccountNumberFrom(accountNumberRecord);
         return transactionRecords;
     }
 
-    private double getStartingBalanceFrom(List<CSVRecord> allRecords) {
+    private BigDecimal getStartingBalanceFrom(List<CSVRecord> allRecords) {
         List<CSVRecord> transactionRecords = allRecords.subList(5, allRecords.size());
         CSVRecord closingBalanceRecord = allRecords.get(3);
-        double balance = getBalanceFrom(closingBalanceRecord);
+        BigDecimal balance = getBalanceFrom(closingBalanceRecord);
         for (CSVRecord record : transactionRecords) {
-            balance = balance - getDoubleFrom(record.get("Betrag (EUR)"));
+            balance = balance.subtract(bigDecimalFromString(record.get("Betrag (EUR)")));
         }
         return balance;
     }
 
-    private double getBalanceFrom(CSVRecord closingBalanceRecord) {
+    private BigDecimal getBalanceFrom(CSVRecord closingBalanceRecord) {
         String numberString = closingBalanceRecord.get(1).replace(" EUR", "");
-        return getDoubleFrom(numberString);
+        return bigDecimalFromString(numberString);
     }
 
     private String getAccountNumberFrom(CSVRecord record) {
@@ -70,7 +69,7 @@ public class DkbParser extends TransactionParser {
         transaction.accountNumber = (accountNumber);
         transaction.contraAccountName = (record.get("Auftraggeber / Begünstigter"));
         transaction.contraAccountNumber = (record.get("Kontonummer"));
-        transaction.amount = BigDecimal.valueOf(getDoubleFrom(record.get("Betrag (EUR)")));
+        transaction.amount = bigDecimalFromString(record.get("Betrag (EUR)"));
         transaction.description = (record.get("Verwendungszweck"));
         transaction.date = parseDateFrom(record.get("Buchungstag"));
         calculateBalanceAfterNEW(transaction);

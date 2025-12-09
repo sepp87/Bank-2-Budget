@@ -2,10 +2,12 @@ package bank2budget.adapters.reader;
 
 import bank2budget.core.CashTransaction;
 import bank2budget.core.CreditInstitution;
-import bank2budget.adapters.parser.TransactionParser;
 import bank2budget.core.Account;
+import bank2budget.core.Transaction;
+import bank2budget.core.TransactionBuilder;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -52,8 +54,8 @@ public class AccountReader {
             for (int i = 0; i < sheetCount; i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 String accountNumber = sheet.getSheetName();
-                List<CashTransaction> transactions = getAllCashTransactionsFrom(sheet);
-                accountMap.put(accountNumber, new Account(accountNumber, transactions));
+                List<Transaction> transactions = transactionsFromSheet(sheet);
+                accountMap.put(accountNumber, new Account(accountNumber, transactions, null));
             }
 
             return accountMap;
@@ -75,8 +77,8 @@ public class AccountReader {
         return list;
     }
 
-    private static List<CashTransaction> getAllCashTransactionsFrom(Sheet sheet) {
-        List<CashTransaction> transactions = new ArrayList<>();
+    private static List<Transaction> transactionsFromSheet(Sheet sheet) {
+        List<Transaction> transactions = new ArrayList<>();
         int last = sheet.getLastRowNum();
         header = getHeaderFrom(sheet);
 
@@ -89,10 +91,9 @@ public class AccountReader {
                 continue;
             }
 
-            CashTransaction transaction = getCashTransactionFrom(row);
+            Transaction transaction = transactionFromRow(row);
             transactions.add(transaction);
         }
-//        TransactionParser.deriveLastOfDay(transactions);
         return transactions;
     }
 
@@ -102,8 +103,8 @@ public class AccountReader {
         return row.getCell(dateColumn) == null || row.getCell(dateColumn).getStringCellValue().equals("");
     }
 
-    private static CashTransaction getCashTransactionFrom(Row row) {
-        CashTransaction transaction = new CashTransaction();
+    private static Transaction transactionFromRow(Row row) {
+        TransactionBuilder builder = new TransactionBuilder();
 
         int i = 0;
         for (String column : header) {
@@ -111,55 +112,55 @@ public class AccountReader {
             if (cell != null) {
                 switch (column) {
                     case "category": // String
-                        transaction.setCategory(getStringValue(cell));
+                        builder.category((getStringValue(cell)));
                         break;
                     case "amount": // Numeric
-                        transaction.setAmount(cell.getNumericCellValue());
+                        builder.amount(BigDecimal.valueOf(cell.getNumericCellValue()));
                         break;
                     case "transactionNumber": // Numeric
                         int transactionNumber = (int) cell.getNumericCellValue();
-                        transaction.setTransactionNumber(transactionNumber);
+                        builder.transactionNumber(transactionNumber);
                         int positionOfDay = Integer.parseInt(String.valueOf(transactionNumber).substring(6)); // YYMMDDXXX
-                        transaction.setPositionOfDay(positionOfDay);
+                        builder.positionOfDay(positionOfDay);
                         break;
                     case "lastOfDay": // Boolean
                         boolean lastOfDay = cell.getBooleanCellValue();
-                        transaction.setLastOfDay(lastOfDay);
+                        builder.lastOfDay(lastOfDay);
                         break;
                     case "date": // String
-                        transaction.setDate(LocalDate.parse(getStringValue(cell)));
+                        builder.date(LocalDate.parse(getStringValue(cell)));
                         break;
                     case "accountBalance": // Numeric
-                        transaction.setAccountBalance(cell.getNumericCellValue());
+                        builder.accountBalance(BigDecimal.valueOf(cell.getNumericCellValue()));
                         break;
                     case "accountInstitution": // String to Enum
-                        transaction.setAccountInstitution(CreditInstitution.valueOf(getStringValue(cell)));
+                        builder.accountInstitution(CreditInstitution.valueOf(getStringValue(cell)));
                         break;
                     case "accountNumber": // String
-                        transaction.setAccountNumber(getStringValue(cell));
+                        builder.accountNumber(getStringValue(cell));
                         break;
                     case "accountName": // String
-                        transaction.setAccountName(getStringValue(cell));
+                        builder.accountName(getStringValue(cell));
                         break;
                     case "contraAccountNumber": // String
-                        transaction.setContraAccountNumber(getStringValue(cell));
+                        builder.contraAccountNumber(getStringValue(cell));
                         break;
                     case "contraAccountName": // String
-                        transaction.setContraAccountName(getStringValue(cell));
+                        builder.contraAccountName(getStringValue(cell));
                         break;
                     case "description": // String
-                        transaction.setDescription(getStringValue(cell));
+                        builder.description(getStringValue(cell));
                         break;
                     case "notes": // String
-                        transaction.setNotes(getStringValue(cell));
+                        builder.notes(getStringValue(cell));
                         break;
                 }
             }
             i++;
         }
-        return transaction;
+        return builder.build();
     }
-    
+
     private static String getStringValue(Cell cell) {
         String value = cell.getStringCellValue();
         return value.isBlank() ? null : value;

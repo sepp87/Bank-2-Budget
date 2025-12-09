@@ -30,8 +30,8 @@ public class BudgetService {
         this.calculator = calculator;
         this.template = template;
 
-        List<BudgetMonth> updated = calculator.createUpdated(template, newBudget, accountService.getAccounts());
-        List<BudgetMonth> replaced = newBudget.replace(updated);
+        List<BudgetMonth> created = calculator.create(template, newBudget, accountService.getAccounts());
+        List<BudgetMonth> replaced = newBudget.replace(created);
         
     }
 

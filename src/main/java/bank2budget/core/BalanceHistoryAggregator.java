@@ -1,5 +1,6 @@
 package bank2budget.core;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.NavigableMap;
@@ -12,7 +13,7 @@ import java.util.TreeMap;
 public class BalanceHistoryAggregator {
 
     public static BalanceHistory combine(Collection<BalanceHistory> histories) {
-        NavigableMap<LocalDate, Double> balances = new TreeMap<>();
+        NavigableMap<LocalDate, BigDecimal> balances = new TreeMap<>();
 
         LocalDate oldest = null;
         LocalDate newest = null;
@@ -28,9 +29,9 @@ public class BalanceHistoryAggregator {
         LocalDate date = oldest;
         LocalDate limit = newest.plusDays(1);
         while (date.isBefore(limit)) {
-            balances.put(date, 0.);
+            balances.put(date, BigDecimal.ZERO);
             for (BalanceHistory history : histories) {
-                Double balance = history.getBalanceOn(date);
+                BigDecimal balance = history.getBalanceOn(date);
                 if (balance != null) {
                     balances.merge(date, balance, BalanceHistoryAggregator::add);
                 }
@@ -41,8 +42,8 @@ public class BalanceHistoryAggregator {
         return new BalanceHistory(null, balances);
     }
 
-    private static double add(double a, double b) {
-        return a + b;
+    private static BigDecimal add(BigDecimal a, BigDecimal b) {
+        return a.add(b);
     }
 
 }

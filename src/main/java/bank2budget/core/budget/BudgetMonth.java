@@ -11,28 +11,28 @@ import java.util.TreeMap;
  *
  * @author joostmeulenkamp
  */
-public class BudgetMonth<T> {
+public class BudgetMonth {
 
     private final LocalDate firstOfMonth;
-    private final Map<String, BudgetMonthCategory<T>> operatingCategories = new TreeMap<>();
-    private final BudgetMonthCategory<T> unappliedIncome;
-    private final BudgetMonthCategory<T> unappliedExpenses;
+    private final Map<String, BudgetMonthCategory> operatingCategories = new TreeMap<>();
+    private final BudgetMonthCategory unappliedIncome;
+    private final BudgetMonthCategory unappliedExpenses;
 
     public BudgetMonth(
             LocalDate firstOfMonth,
-            List<BudgetMonthCategory<T>> categories,
-            BudgetMonthCategory<T> unappliedIncome,
-            BudgetMonthCategory<T> unappliedExpenses) {
+            List<BudgetMonthCategory> operating,
+            BudgetMonthCategory unappliedIncome,
+            BudgetMonthCategory unappliedExpenses) {
 
         this.firstOfMonth = firstOfMonth;
-        for (var category : categories) {
+        for (var category : operating) {
             this.operatingCategories.put(category.name(), category);
         }
         this.unappliedIncome = unappliedIncome;
         this.unappliedExpenses = unappliedExpenses;
     }
 
-    public BudgetMonth(LocalDate firstOfMonth, List<BudgetMonthCategory<T>> operating) {
+    public BudgetMonth(LocalDate firstOfMonth, List<BudgetMonthCategory> operating) {
         this(firstOfMonth);
         for (var category : operating) {
             operatingCategories.put(category.name(), category);
@@ -50,11 +50,11 @@ public class BudgetMonth<T> {
         return firstOfMonth;
     }
 
-    public BudgetMonthCategory<T> unappliedIncome() {
+    public BudgetMonthCategory unappliedIncome() {
         return unappliedIncome;
     }
 
-    public BudgetMonthCategory<T> unappliedExpenses() {
+    public BudgetMonthCategory unappliedExpenses() {
         return unappliedExpenses;
     }
 
@@ -63,7 +63,7 @@ public class BudgetMonth<T> {
      * @return User-defined categories. Categories involved in day-to-day
      * revenue/expense activity.
      */
-    public List<BudgetMonthCategory<T>> operatingCategories() {
+    public List<BudgetMonthCategory> operatingCategories() {
         return operatingCategories.values().stream().toList();
     }
 
@@ -73,11 +73,11 @@ public class BudgetMonth<T> {
      * categories used for internal reconciliation, holding unapplied or
      * temporary amounts.
      */
-    public List<BudgetMonthCategory<T>> controlCategories() {
+    public List<BudgetMonthCategory> controlCategories() {
         return List.of(unappliedIncome, unappliedExpenses);
     }
 
-    public BudgetMonthCategory<T> operatingCategory(String name) {
+    public BudgetMonthCategory operatingCategory(String name) {
         return operatingCategories.get(name);
     }
 

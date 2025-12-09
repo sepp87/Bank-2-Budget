@@ -1,8 +1,8 @@
 package bank2budget.adapters.repository;
 
-import bank2budget.core.CashTransaction;
 import bank2budget.core.MonthlyBudget;
 import bank2budget.core.MultiAccountBudget;
+import bank2budget.core.Transaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -80,7 +80,7 @@ public class AnalyticsDatabase {
         }
     }
 
-    public void insertTransactions(Collection<CashTransaction> transactions) {
+    public void insertTransactions(Collection<Transaction> transactions) {
         String sql = """
             INSERT OR REPLACE INTO transactions
             (accountNumber, transactionNumber, date, amount, balanceAfter,
@@ -92,21 +92,21 @@ public class AnalyticsDatabase {
         try (Connection c = SqliteUtil.getConnection(dbPath); PreparedStatement ps = c.prepareStatement(sql)) {
             c.setAutoCommit(false);
 
-            for (CashTransaction t : transactions) {
-                ps.setString(1, t.getAccountNumber());
-                ps.setInt(2, t.getTransactionNumber());
-                ps.setString(3, t.getDate().toString());
-                ps.setDouble(4, t.getAmount());
-                ps.setObject(5, t.getAccountBalance());
-                ps.setString(6, t.getTransactionType() != null ? t.getTransactionType().name() : null);
-                ps.setString(7, t.getDescription());
-                ps.setString(8, t.getContraAccountName());
-                ps.setString(9, t.getContraAccountNumber());
-                ps.setInt(10, t.isInternal() ? 1 : 0);
-                ps.setString(11, t.getCategory());
-                ps.setInt(12, t.isLastOfDay() ? 1 : 0);
-                ps.setInt(13, t.getPositionOfDay());
-                ps.setString(14, t.getNotes());
+            for (var t : transactions) {
+                ps.setString(1, t.accountNumber());
+                ps.setInt(2, t.transactionNumber());
+                ps.setString(3, t.date().toString());
+                ps.setDouble(4, t.amount().doubleValue());
+                ps.setObject(5, t.accountBalance());
+                ps.setString(6, t.transactionType() != null ? t.transactionType().name() : null);
+                ps.setString(7, t.description());
+                ps.setString(8, t.contraAccountName());
+                ps.setString(9, t.contraAccountNumber());
+                ps.setInt(10, t.internal() ? 1 : 0);
+                ps.setString(11, t.category());
+                ps.setInt(12, t.lastOfDay() ? 1 : 0);
+                ps.setInt(13, t.positionOfDay());
+                ps.setString(14, t.notes());
                 ps.addBatch();
             }
 
@@ -545,7 +545,7 @@ public class AnalyticsDatabase {
         """;
     }
 
-    public List<CashTransaction> getAllTransactions() {
+    public List<Transaction> getAllTransactions() {
         // optional: implement later when you want to pull data back into the app
         return List.of();
     }

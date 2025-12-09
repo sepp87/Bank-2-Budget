@@ -2,6 +2,8 @@ package bank2budget.adapters.parser;
 
 import bank2budget.core.CashTransaction;
 import bank2budget.core.CreditInstitution;
+import bank2budget.core.Transaction;
+import bank2budget.core.TransactionBuilder;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -31,20 +33,26 @@ public class RawCashTransaction {
     public String notes;
     
     public CashTransaction toCashTransaction() {
-        CashTransaction transaction = new CashTransaction();
-        transaction.setTransactionNumber(transactionNumber);
-        transaction.setLastOfDay(lastOfDay);
-        transaction.setPositionOfDay(positionOfDay);
-        transaction.setDate(date);
-        transaction.setAmount(amount.doubleValue());
-        transaction.setAccountBalance(accountBalance.doubleValue());
-        transaction.setAccountNumber(accountNumber);
-        transaction.setAccountName(accountName);
-        transaction.setAccountInstitution(accountInstitution);
-        transaction.setContraAccountNumber(contraAccountNumber);
-        transaction.setContraAccountName(contraAccountName);
-        transaction.setCategory(category);
-        transaction.setNotes(notes);
-        return transaction;
+        Transaction transaction = toTransaction();
+        return new CashTransaction(transaction);
+    }
+    
+    public Transaction toTransaction() {
+        TransactionBuilder builder = new TransactionBuilder()
+                .transactionNumber(positionOfDay)
+                .lastOfDay(lastOfDay)
+                .positionOfDay(positionOfDay)
+                .date(date)
+                .amount(amount)
+                .accountBalance(accountBalance)
+                .accountNumber(accountNumber)
+                .accountName(accountName)
+                .accountInstitution(accountInstitution)
+                .contraAccountNumber(contraAccountNumber)
+                .contraAccountName(contraAccountName)
+                .description(description)
+                .category(category)
+                .notes(notes);
+        return builder.build();
     }
 }

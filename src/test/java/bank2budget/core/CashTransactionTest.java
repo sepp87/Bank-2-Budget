@@ -2,8 +2,8 @@ package bank2budget.core;
 
 import bank2budget.adapters.parser.RawCashTransaction;
 import bank2budget.core.CashTransaction;
-import bank2budget.core.CashTransaction.TransactionType;
 import bank2budget.adapters.parser.TransactionParser;
+import bank2budget.core.Transaction.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -32,11 +32,10 @@ public class CashTransactionTest {
     public void testSetAmount_WhenAmountNegative_ThenTransactionTypeDebit() {
         System.out.println("testSetAmount_WhenAmountNegative_ThenTransactionTypeDebit");
 
-        CashTransaction transaction = new CashTransaction();
-        transaction.setAmount(-10.);
+        CashTransaction transaction = new CashTransaction(new TransactionBuilder().amount(BigDecimal.valueOf(-10.)).build());
 
         TransactionType expected = TransactionType.DEBIT;
-        TransactionType result = transaction.getTransactionType();
+        TransactionType result = transaction.transactionType();
         assertEquals(expected, result);
 
         UtilTest.printResult(expected, result);
@@ -49,11 +48,10 @@ public class CashTransactionTest {
     public void testSetAmount_WhenAmountPositive_ThenTransactionTypeCredit() {
         System.out.println("testSetAmount_WhenAmountPositive_ThenTransactionTypeCredit");
 
-        CashTransaction transaction = new CashTransaction();
-        transaction.setAmount(10.);
+        CashTransaction transaction = new CashTransaction(new TransactionBuilder().amount(BigDecimal.valueOf(10.)).build());
 
         TransactionType expected = TransactionType.CREDIT;
-        TransactionType result = transaction.getTransactionType();
+        TransactionType result = transaction.transactionType();
         assertEquals(expected, result);
 
         UtilTest.printResult(expected, result);

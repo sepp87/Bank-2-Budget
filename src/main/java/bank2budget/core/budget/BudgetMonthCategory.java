@@ -1,6 +1,6 @@
 package bank2budget.core.budget;
 
-import bank2budget.core.CashTransaction;
+import bank2budget.core.Transaction;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @author joostmeulenkamp
  */
-public record BudgetMonthCategory<T>(
+public record BudgetMonthCategory(
         LocalDate firstOfMonth,
         String name,
         BigDecimal budgeted,
@@ -17,7 +17,7 @@ public record BudgetMonthCategory<T>(
         BigDecimal opening,
         BigDecimal closing,
         BigDecimal adjustments,
-        List<T> transactions) {
+        List<Transaction> transactions) {
 
     private final static String UNAPPLIED_INCOME = "UNAPPLIED INCOME";
     private final static String UNAPPLIED_EXPENSES = "UNAPPLIED EXPENSES";
@@ -38,24 +38,24 @@ public record BudgetMonthCategory<T>(
         return !isIncome();
     }
 
-    public static <T> BudgetMonthCategory<T> createUnappliedIncome(
+    public static BudgetMonthCategory createUnappliedIncome(
             LocalDate firstOfMonth,
             BigDecimal actual,
             BigDecimal opening,
             BigDecimal closing,
-            List<T> transactions) {
+            List<Transaction> transactions) {
 
-        return new BudgetMonthCategory<>(firstOfMonth, UNAPPLIED_INCOME, BigDecimal.ZERO, actual, opening, closing, BigDecimal.ZERO, transactions);
+        return new BudgetMonthCategory(firstOfMonth, UNAPPLIED_INCOME, BigDecimal.ZERO, actual, opening, closing, BigDecimal.ZERO, transactions);
     }
 
-    public static <T> BudgetMonthCategory<T> createUnappliedExpenses(
+    public static BudgetMonthCategory createUnappliedExpenses(
             LocalDate firstOfMonth,
             BigDecimal actual,
             BigDecimal opening,
             BigDecimal closing,
-            List<T> transactions) {
+            List<Transaction> transactions) {
 
-        return new BudgetMonthCategory<>(firstOfMonth, UNAPPLIED_EXPENSES, BigDecimal.ZERO, actual, opening, closing, BigDecimal.ZERO, transactions);
+        return new BudgetMonthCategory(firstOfMonth, UNAPPLIED_EXPENSES, BigDecimal.ZERO, actual, opening, closing, BigDecimal.ZERO, transactions);
     }
 
 }

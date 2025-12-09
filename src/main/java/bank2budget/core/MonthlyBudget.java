@@ -216,7 +216,7 @@ public class MonthlyBudget {
 
     private void setInitialBalanceAsUnassignedItem() {
         // get initial balance from first transaction
-        double initialBalance = transactions.getFirst().getAccountBalanceBefore();
+        double initialBalance = transactions.getFirst().accountBalanceBefore().doubleValue();
         if (initialBalance > 0) {
             unassignedIncomeRemainderLastMonth = initialBalance;
         } else {
@@ -226,9 +226,9 @@ public class MonthlyBudget {
 
     private void calculateExpenses() {
         for (CashTransaction transaction : transactions) {
-            double expense = transaction.getAmount();
-            if (transaction.getCategory() != null) {
-                addExpenseToCategory(expense, transaction.getCategory());
+            double expense = transaction.amount().doubleValue();
+            if (transaction.category() != null) {
+                addExpenseToCategory(expense, transaction.category());
             } else {
                 if (expense < 0) {
                     unassignedExpenses += expense;

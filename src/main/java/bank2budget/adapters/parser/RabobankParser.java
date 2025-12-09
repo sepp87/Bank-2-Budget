@@ -1,7 +1,5 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.List;
 import org.apache.commons.csv.CSVFormat;
@@ -37,8 +35,8 @@ public class RabobankParser extends TransactionParser {
         transaction.accountNumber = (record.get("IBAN/BBAN"));
         transaction.contraAccountName = (record.get("Naam tegenpartij"));
         transaction.contraAccountNumber = (record.get("Tegenrekening IBAN/BBAN"));
-        transaction.amount = BigDecimal.valueOf(getDoubleFrom(record.get("Bedrag")));
-        transaction.accountBalance = BigDecimal.valueOf(getDoubleFrom(record.get("Saldo na trn")));
+        transaction.amount = bigDecimalFromString(record.get("Bedrag"));
+        transaction.accountBalance = bigDecimalFromString(record.get("Saldo na trn"));
         transaction.description = (record.get("Omschrijving-1"));
         transaction.date = parseDateFrom(record.get("Datum"));
         return transaction;

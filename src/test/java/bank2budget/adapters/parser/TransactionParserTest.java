@@ -1,14 +1,10 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.adapters.parser.TransactionParser;
-import bank2budget.core.Account;
-import bank2budget.core.AccountTest;
-import bank2budget.core.CashTransaction;
 import bank2budget.core.CashTransactionTest;
 import bank2budget.core.UtilTest;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

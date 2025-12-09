@@ -1,6 +1,6 @@
 package bank2budget.adapters.writer;
 
-import bank2budget.core.CashTransaction;
+import bank2budget.core.Transaction;
 import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,19 +30,19 @@ public abstract class TransactionWriter {
         "notes"
     };
 
-    public static Object[] getObjectArrayFrom(CashTransaction transaction) {
+    public static Object[] getObjectArrayFrom(Transaction transaction) {
         Object[] values = new Object[HEADER.length];
         try {
             int i = 0;
             for (String column : HEADER) {
-                Field propertyField = CashTransaction.class.getDeclaredField(column);
+                Field propertyField = Transaction.class.getDeclaredField(column);
                 propertyField.setAccessible(true);
                 Object value = propertyField.get(transaction);
                 values[i] = value;
                 i++;
             }
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-            Logger.getLogger(CashTransaction.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TransactionWriter.class.getName()).log(Level.SEVERE, null, ex);
         }
         return values;
     }

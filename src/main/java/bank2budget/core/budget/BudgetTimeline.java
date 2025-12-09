@@ -2,76 +2,76 @@ package bank2budget.core.budget;
 
 import bank2budget.core.Account;
 import bank2budget.core.AccountDomainLogic;
-import bank2budget.core.CashTransaction;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
  *
  * @author joostmeulenkamp
  */
-class BudgetTimeline {
+public class BudgetTimeline {
 
     private final BudgetTemplate template;
     private final Budget budget;
     private final Collection<Account> accounts;
-    private final TreeMap<LocalDate, List<CashTransaction>> byMonth = new TreeMap<>();
 
-    BudgetTimeline(BudgetTemplate template, Budget budget, Collection<Account> accounts) {
+    private final TreeSet<LocalDate> firstsForGrouping = new TreeSet<>();
+    private final TreeSet<LocalDate> firstsBeforeBudget = new TreeSet<>();
+    private final TreeSet<LocalDate> firstsOfBudget = new TreeSet<>();
+    private final TreeSet<LocalDate> firstsAfterBudget = new TreeSet<>();
+
+    public BudgetTimeline(BudgetTemplate template, Budget budget, Collection<Account> accounts) {
         this.template = template;
         this.budget = budget;
         this.accounts = accounts;
+
+        calculateFirsts();
     }
 
-    private void groupByMonths() {
-
-        List<CashTransaction> transactions = new ArrayList<>(); // sorted ascending
-        List<CashTransaction> toGroup = List.copyOf(transactions); // sorted ascending
-
-        TreeSet<LocalDate> allFirsts = firsts();
-        Iterator<LocalDate> iterator = allFirsts.iterator();
-        while (iterator.hasNext()) {
-            LocalDate first = iterator.next();
-            LocalDate nextFirst = allFirsts.higher(first);
-
-            if (nextFirst == null) {
-                break;
-            }
-
-            while (!toGroup.isEmpty()) {
-                var tx = toGroup.getFirst();
-                LocalDate date = tx.getDate();
-                if (date.isBefore(nextFirst)) {
-                    byMonth.computeIfAbsent(first, k -> new ArrayList<>()).add(tx);
-                    toGroup.removeFirst();
-                } else {
-                    break;
-                }
-            }
-        }
+    public TreeSet<LocalDate> firstsForGrouping() {
+        return firstsForGrouping;
     }
 
-    private TreeSet<LocalDate> firsts() {
-        TreeSet<LocalDate> result = new TreeSet<>(); // contains all first
-        result.addAll(budget.monthKeys());
-        if (result.isEmpty()) {
+    public TreeSet<LocalDate> firstsBeforeBudget() {
+        return firstsBeforeBudget;
+    }
+
+    public TreeSet<LocalDate> firstsOfBudget() {
+        return firstsOfBudget;
+    }
+
+    public TreeSet<LocalDate> firstsAfterBudget() {
+        return firstsAfterBudget;
+    }
+
+    private void calculateFirsts() {
+        firstsOfBudget.addAll(budget.monthKeys());
+        if (firstsOfBudget.isEmpty()) {
             LocalDate newest = AccountDomainLogic.getNewestTransactionDate(accounts);
-            result.addAll(firstsTill(newest, true));
+            var firstsBefore = firstsTill(newest, true);
+            var lastFirst = firstsBefore.removeLast(); // virtual last first needed for grouping only
+            firstsBeforeBudget.addAll(firstsBefore);
+            firstsForGrouping.addAll(firstsBefore);
+            firstsForGrouping.add(lastFirst);
 
         } else {
-            LocalDate firstOfBudget = result.first();
-            LocalDate lastFirstOfBudget = result.last();
+            LocalDate firstOfBudget = firstsOfBudget.first();
+            LocalDate lastFirstOfBudget = firstsOfBudget.last();
 
-            result.addAll(firstsBeforeBudget(firstOfBudget));
-            result.addAll(firstsAfterBudget(lastFirstOfBudget));
+            var firstsBefore = firstsBeforeBudget(firstOfBudget);
+            firstsBefore.removeLast(); // virtual last is part of firstOfBudget
+            firstsBeforeBudget.addAll(firstsBefore);
+
+            var firstsAfter = firstsAfterBudget(lastFirstOfBudget);
+            var lastFirst = firstsAfter.removeLast(); // virtual last first needed for grouping only
+            firstsAfterBudget.addAll(firstsAfter);
+
+            firstsForGrouping.addAll(firstsBeforeBudget);
+            firstsForGrouping.addAll(firstsOfBudget);
+            firstsForGrouping.addAll(firstsAfterBudget);
+            firstsForGrouping.add(lastFirst);
         }
-
-        return result;
     }
 
     private TreeSet<LocalDate> firstsBeforeBudget(LocalDate firstOfBudget) {
@@ -87,7 +87,7 @@ class BudgetTimeline {
         }
 
         TreeSet<LocalDate> result = new TreeSet<>();
-        while (first.isBefore(boundary)) {
+        while (!first.isAfter(boundary)) {
             result.add(first);
             first = first.plusMonths(1);
         }
@@ -107,7 +107,7 @@ class BudgetTimeline {
         }
 
         TreeSet<LocalDate> result = new TreeSet<>();
-        while (first.isBefore(newest)) {
+        while (!first.isAfter(newest)) {
             result.add(first);
             first = first.plusMonths(1);
         }
@@ -115,5 +115,4 @@ class BudgetTimeline {
 
         return result;
     }
-
 }

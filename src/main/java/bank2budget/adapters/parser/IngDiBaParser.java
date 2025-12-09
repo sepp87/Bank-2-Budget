@@ -1,6 +1,5 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
@@ -35,7 +34,7 @@ public class IngDiBaParser extends TransactionParser {
         return accountNumberRecord.get(1).replace(" ", "");
     }
 
-    private void parseContraAccountNumberFrom(CSVRecord record, CashTransaction transaction) {
+    private void parseContraAccountNumberFrom(CSVRecord record) {
         // TODO filter CONTRA_ACCOUNT_NUMBER from record
     }
 
@@ -44,8 +43,8 @@ public class IngDiBaParser extends TransactionParser {
         RawCashTransaction transaction = new RawCashTransaction();
         transaction.accountNumber = (accountNumber);
         transaction.contraAccountName = (record.get("CONTRA_ACCOUNT_NAME"));
-        transaction.amount = BigDecimal.valueOf(getDoubleFrom(record.get("AMOUNT")));
-        transaction.accountBalance = BigDecimal.valueOf(getDoubleFrom(record.get("ACCOUNT_BALANCE")));
+        transaction.amount = bigDecimalFromString(record.get("AMOUNT"));
+        transaction.accountBalance = bigDecimalFromString(record.get("ACCOUNT_BALANCE"));
         transaction.description = (record.get("DESCRIPTION"));
         transaction.date = parseDateFrom(record.get("DATE"));
         return transaction;

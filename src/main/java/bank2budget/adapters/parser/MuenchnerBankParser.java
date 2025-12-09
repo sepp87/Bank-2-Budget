@@ -1,6 +1,5 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
@@ -91,18 +90,13 @@ public class MuenchnerBankParser extends TransactionParser {
     }
 
     protected BigDecimal getExplicitAmountFrom(CSVRecord record) {
-        BigDecimal amount = BigDecimal.valueOf(getDoubleFrom(record.get("Umsatz")));
+        BigDecimal amount = bigDecimalFromString(record.get("Umsatz"));
         BigDecimal explicitAmount = isDebit(record) ? amount.negate() : amount;
         return explicitAmount;
     }
 
     protected boolean isDebit(CSVRecord record) {
         return record.get("Soll/Haben").equals("S");
-    }
-
-    protected void calculateBalanceAfter(CashTransaction transaction) {
-        currentBalance = currentBalance.add(BigDecimal.valueOf(transaction.getAmount()));
-        transaction.setAccountBalance(currentBalance.doubleValue());
     }
 
     private String filterContraAccountNumberFromDescription(String description) {
