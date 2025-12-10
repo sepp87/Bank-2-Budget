@@ -1,6 +1,6 @@
 package bank2budget.adapters.repository;
 
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 import bank2budget.core.budget.BudgetMonth;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -79,7 +79,7 @@ public class AnalyticsDatabase {
         }
     }
 
-    public void insertTransactions(Collection<Transaction> transactions) {
+    public void insertTransactions(Collection<CashTransaction> transactions) {
         String sql = """
             INSERT OR REPLACE INTO transactions
             (accountNumber, transactionNumber, date, amount, balanceAfter,
@@ -548,7 +548,7 @@ public class AnalyticsDatabase {
         """;
     }
 
-    public List<Transaction> getAllTransactions() {
+    public List<CashTransaction> getAllTransactions() {
         // optional: implement later when you want to pull data back into the app
         return List.of();
     }

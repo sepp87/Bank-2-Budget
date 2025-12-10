@@ -19,7 +19,7 @@ public class BalanceHistoryFactory {
         var allTransactions = account.transactionsAscending();
 
         // filter last of day
-        List<Transaction> lastOfDay = new ArrayList<>();
+        List<CashTransaction> lastOfDay = new ArrayList<>();
         for (var transaction : allTransactions) {
             if (transaction.lastOfDay()) {
                 lastOfDay.add(transaction);
@@ -27,7 +27,7 @@ public class BalanceHistoryFactory {
         }
 
         // generate initial balance
-        Transaction first = allTransactions.get(0);
+        CashTransaction first = allTransactions.get(0);
         LocalDate initialDate = first.date().minusDays(1);
         BigDecimal initialBalance = first.accountBalanceBefore();
         balances.put(initialDate, initialBalance);

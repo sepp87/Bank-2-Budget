@@ -69,7 +69,7 @@ public class AccountDomainLogic {
         BigDecimal result = BigDecimal.ZERO;
         for (Account a : accounts) {
             var transactions = a.transactionsAscending();
-            Transaction newest = null;
+            CashTransaction newest = null;
             for (var transaction : transactions) {
                 if (transaction.date().isAfter(date)) {
                     break;

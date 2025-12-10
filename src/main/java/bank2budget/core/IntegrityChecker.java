@@ -37,7 +37,7 @@ public class IntegrityChecker {
         return allValid;
     }
 
-    private static boolean compareBalanceBetween(Transaction transaction, Transaction next) {
+    private static boolean compareBalanceBetween(CashTransaction transaction, CashTransaction next) {
         boolean isSame = transaction.accountBalance().compareTo(next.accountBalanceBefore()) == 0;
         if (!isSame) {
             Logger.getLogger(IntegrityChecker.class.getName()).log(

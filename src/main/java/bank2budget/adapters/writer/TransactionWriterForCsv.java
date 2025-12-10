@@ -1,6 +1,6 @@
 package bank2budget.adapters.writer;
 
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,11 +26,11 @@ public class TransactionWriterForCsv extends TransactionWriter {
         this.decimalSeparator = decimalSeparator;
     }
     
-    public void write(Collection<Transaction> transactions) {
+    public void write(Collection<CashTransaction> transactions) {
         CSVFormat csvFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL).withQuote('"');
         try (CSVPrinter printer = new CSVPrinter(new FileWriter(target, StandardCharsets.UTF_8), csvFormat)) {
             printer.printRecord((Object[]) HEADER);
-            for (Transaction transaction : transactions) {
+            for (CashTransaction transaction : transactions) {
                 printer.printRecord((Object[]) getStringArrayFrom(transaction));
             }
         } catch (IOException ex) {
@@ -38,7 +38,7 @@ public class TransactionWriterForCsv extends TransactionWriter {
         }
     }
 
-    private String[] getStringArrayFrom(Transaction transaction) {
+    private String[] getStringArrayFrom(CashTransaction transaction) {
         Object[] values = getObjectArrayFrom(transaction);
         String[] stringValues = new String[values.length];
         int i = 0;

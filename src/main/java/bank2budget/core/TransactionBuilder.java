@@ -100,7 +100,7 @@ public class TransactionBuilder {
         return this;
     }
 
-    public Transaction build() {
+    public CashTransaction build() {
 
         if (amount == null) {
             amount = BigDecimal.ZERO;
@@ -110,10 +110,10 @@ public class TransactionBuilder {
             accountBalance = BigDecimal.ZERO;
         }
 
-        Transaction.TransactionType transactionType = amount.compareTo(BigDecimal.ZERO) > 0
-                ? Transaction.TransactionType.CREDIT : Transaction.TransactionType.DEBIT;
+        CashTransaction.TransactionType transactionType = amount.compareTo(BigDecimal.ZERO) > 0
+                ? CashTransaction.TransactionType.CREDIT : CashTransaction.TransactionType.DEBIT;
 
-        return new Transaction(
+        return new CashTransaction(
                 transactionNumber,
                 date,
                 positionOfDay,

@@ -2,7 +2,7 @@ package bank2budget.core.budget;
 
 import bank2budget.core.Account;
 import bank2budget.core.CashTransactionDomainLogic;
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,7 +69,7 @@ class BudgetRangeCalculator {
             BudgetMonth previous = previousFirst == null ? null : months.get(previousFirst); // previous (updated) month to calculate carryover
 
             BudgetMonth month = existingOrBlank(first);
-            List<Transaction> selected = byMonth.transactions(first);
+            List<CashTransaction> selected = byMonth.transactions(first);
 
             BudgetMonth updated = createMonth(previous, month, selected);
 
@@ -84,7 +84,7 @@ class BudgetRangeCalculator {
         return budget.month(first) != null ? budget.month(first) : template.createBlank(first);
     }
 
-    private BudgetMonth createMonth(BudgetMonth previous, BudgetMonth current, List<Transaction> transactions) {
+    private BudgetMonth createMonth(BudgetMonth previous, BudgetMonth current, List<CashTransaction> transactions) {
         
         var categorized = CashTransactionDomainLogic.categorized(transactions);
         var uncategorized = CashTransactionDomainLogic.uncategorized(transactions);

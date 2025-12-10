@@ -1,7 +1,7 @@
 package bank2budget.core.budget;
 
 import bank2budget.core.CashTransactionDomainLogic;
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -16,15 +16,15 @@ import java.util.Set;
  */
 public class CategoryCalculator {
 
-    public static BudgetMonthCategory createUnappliedIncome(BudgetMonth previousMonth, BudgetMonth currentMonth, List<Transaction> uncategorized) {
+    public static BudgetMonthCategory createUnappliedIncome(BudgetMonth previousMonth, BudgetMonth currentMonth, List<CashTransaction> uncategorized) {
         return createUnappliedCategory(previousMonth, currentMonth, uncategorized, true);
     }
 
-    public static BudgetMonthCategory createUnappliedExpenses(BudgetMonth previousMonth, BudgetMonth currentMonth, List<Transaction> uncategorized) {
+    public static BudgetMonthCategory createUnappliedExpenses(BudgetMonth previousMonth, BudgetMonth currentMonth, List<CashTransaction> uncategorized) {
         return createUnappliedCategory(previousMonth, currentMonth, uncategorized, false);
     }
 
-    private static BudgetMonthCategory createUnappliedCategory(BudgetMonth previousMonth, BudgetMonth currentMonth, List<Transaction> uncategorized, boolean wantUnappliedIncome) {
+    private static BudgetMonthCategory createUnappliedCategory(BudgetMonth previousMonth, BudgetMonth currentMonth, List<CashTransaction> uncategorized, boolean wantUnappliedIncome) {
 
         LocalDate firstOfMonth = currentMonth.firstOfMonth();
         BudgetMonthCategory current = wantUnappliedIncome ? currentMonth.unappliedIncome() : currentMonth.unappliedExpenses();
@@ -36,10 +36,10 @@ public class CategoryCalculator {
         BigDecimal actual = BigDecimal.ZERO;
         BigDecimal opening = previous != null ? previous.closing() : BigDecimal.ZERO;
         BigDecimal adjustments = current.adjustments();
-        List<Transaction> transactions = new ArrayList<>();
+        List<CashTransaction> transactions = new ArrayList<>();
 
         for (var transaction : uncategorized) {
-            boolean isIncome = transaction.transactionType() == Transaction.TransactionType.CREDIT;
+            boolean isIncome = transaction.transactionType() == CashTransaction.TransactionType.CREDIT;
             if (wantUnappliedIncome == isIncome) {
                 actual = actual.add(transaction.amount());
                 transactions.add(transaction);
@@ -54,7 +54,7 @@ public class CategoryCalculator {
         return unapplied;
     }
 
-    public static List<BudgetMonthCategory> createOperatingCategories(BudgetTemplate template, BudgetMonth previousMonth, BudgetMonth currentMonth, List<Transaction> categorized) {
+    public static List<BudgetMonthCategory> createOperatingCategories(BudgetTemplate template, BudgetMonth previousMonth, BudgetMonth currentMonth, List<CashTransaction> categorized) {
         List<BudgetMonthCategory> result = new ArrayList<>();
         var byCategory = CashTransactionDomainLogic.groupByCategory(categorized);
 
@@ -83,7 +83,7 @@ public class CategoryCalculator {
                 adjustments = BigDecimal.ZERO;
             }
 
-            List<Transaction> categoryTransactions = byCategory.getOrDefault(name, new ArrayList<>());
+            List<CashTransaction> categoryTransactions = byCategory.getOrDefault(name, new ArrayList<>());
             BigDecimal actual = getActual(categoryTransactions);
             BigDecimal closing = budgeted.add(actual).add(opening).add(adjustments);
             BudgetMonthCategory updated = new BudgetMonthCategory(firstOfMonth, name, budgeted, actual, opening, closing, adjustments, categoryTransactions);
@@ -92,7 +92,7 @@ public class CategoryCalculator {
         return result;
     }
 
-    private static Set<String> getCategories(BudgetTemplate template, BudgetMonth previousMonth, BudgetMonth currentMonth, Map<String, List<Transaction>> byCategory) {
+    private static Set<String> getCategories(BudgetTemplate template, BudgetMonth previousMonth, BudgetMonth currentMonth, Map<String, List<CashTransaction>> byCategory) {
         Set<String> categories = new HashSet<>();
         categories.addAll(byCategory.keySet());
         categories.addAll(template.operatingCategories().keySet());
@@ -106,7 +106,7 @@ public class CategoryCalculator {
         return categories;
     }
 
-    private static BigDecimal getActual(List<Transaction> transactions) {
+    private static BigDecimal getActual(List<CashTransaction> transactions) {
         BigDecimal result = BigDecimal.ZERO;
         for (var transaction : transactions) {
             result = result.add(transaction.amount());

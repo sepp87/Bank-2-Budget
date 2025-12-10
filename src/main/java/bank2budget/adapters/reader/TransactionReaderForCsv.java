@@ -2,7 +2,7 @@ package bank2budget.adapters.reader;
 
 import bank2budget.adapters.parser.TransactionParserFactory;
 import bank2budget.adapters.parser.TransactionParser;
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +18,7 @@ public class TransactionReaderForCsv {
     private final static Logger LOGGER = Logger.getLogger(TransactionReaderForCsv.class.getName());
 
     private final File file;
-    private final List<Transaction> transactions;
+    private final List<CashTransaction> transactions;
 
     public TransactionReaderForCsv(File file) {
         this.file = file;
@@ -26,11 +26,11 @@ public class TransactionReaderForCsv {
 //        System.out.println();
     }
 
-    public List<Transaction> getTransactions() {
+    public List<CashTransaction> getTransactions() {
         return List.copyOf(transactions);
     }
 
-    private List<Transaction> getTransactionsFromCsv(File csvFile) {
+    private List<CashTransaction> getTransactionsFromCsv(File csvFile) {
         try {
             TransactionParser parser = TransactionParserFactory.createTransactionParser(csvFile);
             var result = parser.parse();

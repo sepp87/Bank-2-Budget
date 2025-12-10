@@ -2,7 +2,7 @@ package bank2budget.adapters.repository;
 
 import bank2budget.core.Account;
 import bank2budget.adapters.writer.TransactionWriter;
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 //import bank2budget.core.CashTransaction;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
@@ -82,7 +82,7 @@ public class TransactionWriterForSqlite extends TransactionWriter {
         String result = "";
         for (String column : HEADER) {
             try {
-                Field propertyField = Transaction.class.getDeclaredField(column);
+                Field propertyField = CashTransaction.class.getDeclaredField(column);
                 propertyField.setAccessible(true);
                 Class<?> type = propertyField.getType();
                 COLUMN_TYPES.put(column, type);
@@ -111,7 +111,7 @@ public class TransactionWriterForSqlite extends TransactionWriter {
         }
     }
 
-    private static boolean insertTransactions(Connection connection, Collection<Transaction> transactions) {
+    private static boolean insertTransactions(Connection connection, Collection<CashTransaction> transactions) {
         String columns = getColumns();
         String placeholders = SqliteUtil.getPlaceholders(HEADER.length);
         String insertTransactions = "INSERT INTO " + TRANSACTIONS_TABLE + " (" + columns + ") "

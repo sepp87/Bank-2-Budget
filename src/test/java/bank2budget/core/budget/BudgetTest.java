@@ -3,7 +3,7 @@ package bank2budget.core.budget;
 import bank2budget.core.Account;
 import static bank2budget.core.CashTransactionTest.newTx;
 import bank2budget.core.UtilTest;
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +34,7 @@ public class BudgetTest {
 
         Budget budget = new Budget();
 
-        List<Transaction> transactions = List.of(
+        List<CashTransaction> transactions = List.of(
                 newTx("2024-01-01", 1, true, -10, -10, "abc", "xyz", "GROCERIES"), // <--- first month
                 newTx("2024-01-02", 1, true, -10, -20, "abc", "xyz", "GROCERIES"),
                 newTx("2024-01-03", 1, true, -10, -30, "abc", "xyz", "GROCERIES"),
@@ -61,15 +61,15 @@ public class BudgetTest {
     }
 
 
-    public static List<Account> groupTransactionsByAccount(List<Transaction> transactions) {
-        Map<String, List<Transaction>> temporary = new TreeMap<>();
-        for (Transaction transaction : transactions) {
+    public static List<Account> groupTransactionsByAccount(List<CashTransaction> transactions) {
+        Map<String, List<CashTransaction>> temporary = new TreeMap<>();
+        for (CashTransaction transaction : transactions) {
             String accountNumber = transaction.accountNumber();
             temporary.computeIfAbsent(accountNumber, k -> new ArrayList<>()).add(transaction);
         }
 
         List<Account> result = new ArrayList<>();
-        for (Map.Entry<String, List<Transaction>> entry : temporary.entrySet()) {
+        for (Map.Entry<String, List<CashTransaction>> entry : temporary.entrySet()) {
             Account account = new Account(entry.getKey(), entry.getValue());
             result.add(account);
         }

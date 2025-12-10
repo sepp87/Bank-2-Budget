@@ -1,7 +1,7 @@
 package bank2budget.core.budget;
 
 import bank2budget.core.Account;
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,7 +17,7 @@ import java.util.TreeSet;
 public class TransactionGrouper {
 
     private final TreeSet<LocalDate> firsts;
-    private final TreeMap<LocalDate, List<Transaction>> byMonth = new TreeMap<>();
+    private final TreeMap<LocalDate, List<CashTransaction>> byMonth = new TreeMap<>();
 
     public TransactionGrouper(Collection<Account> accounts, TreeSet<LocalDate> firsts) {
         this.firsts = firsts;
@@ -27,7 +27,7 @@ public class TransactionGrouper {
         }
     }
 
-    public List<Transaction> transactions(LocalDate first) {
+    public List<CashTransaction> transactions(LocalDate first) {
         return byMonth.getOrDefault(first, List.of());
     }
 

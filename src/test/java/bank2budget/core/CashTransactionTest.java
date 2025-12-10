@@ -1,15 +1,11 @@
 package bank2budget.core;
 
 import bank2budget.adapters.parser.RawCashTransaction;
-import bank2budget.adapters.parser.TransactionParser;
-import bank2budget.core.Transaction.TransactionType;
+import bank2budget.core.CashTransaction.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -108,12 +104,12 @@ public class CashTransactionTest {
         UtilTest.printResult(expected, result);
     }
 
-    public static Transaction newTx(String isoDate, int positionOfDay, boolean lastOfDay, double amount, double balance, String account, String contraAccount, String category) {
+    public static CashTransaction newTx(String isoDate, int positionOfDay, boolean lastOfDay, double amount, double balance, String account, String contraAccount, String category) {
         LocalDate date = LocalDate.parse(isoDate);
         int txNumber = getTxNumber(date, positionOfDay);
-        Transaction.TransactionType txType = amount > 0 ? Transaction.TransactionType.CREDIT : Transaction.TransactionType.DEBIT;
+        CashTransaction.TransactionType txType = amount > 0 ? CashTransaction.TransactionType.CREDIT : CashTransaction.TransactionType.DEBIT;
 
-        return new Transaction(
+        return new CashTransaction(
                 txNumber,
                 date,
                 positionOfDay, // positionOfDay

@@ -13,22 +13,22 @@ import java.util.TreeMap;
 public class Account {
 
     private final String accountNumber;
-    private final TreeMap<Integer, Transaction> allTransactionsIndex = new TreeMap<>();
+    private final TreeMap<Integer, CashTransaction> allTransactionsIndex = new TreeMap<>();
 
-    public Account(String accountNumber, List<Transaction> transactions) {
+    public Account(String accountNumber, List<CashTransaction> transactions) {
         this.accountNumber = accountNumber;
         for (var t : transactions) {
             allTransactionsIndex.put(t.transactionNumber(), t);
         }
     }
 
-    public List<Transaction> getTransactions(LocalDate from, LocalDate to) {
-        List<Transaction> transactions = transactionsAscending();
-        List<Transaction> result = CashTransactionDomainLogic.filterByTimespan(transactions, from, to);
+    public List<CashTransaction> getTransactions(LocalDate from, LocalDate to) {
+        List<CashTransaction> transactions = transactionsAscending();
+        List<CashTransaction> result = CashTransactionDomainLogic.filterByTimespan(transactions, from, to);
         return result;
     }
 
-    public Transaction getTransactionBy(int transactionNumber) {
+    public CashTransaction getTransactionBy(int transactionNumber) {
         return allTransactionsIndex.get(transactionNumber);
     }
 
@@ -58,7 +58,7 @@ public class Account {
         evaluateOverlapAndMerge(incoming.transactionsAscending(), overwriteCategories);
     }
 
-    private void evaluateOverlapAndMerge(List<Transaction> incoming, boolean overwriteCategories) {
+    private void evaluateOverlapAndMerge(List<CashTransaction> incoming, boolean overwriteCategories) {
         // Evaluate overlap
         LocalDate[] overlap = CashTransactionDomainLogic.findOverlap(incoming, transactionsAscending());
 
@@ -73,19 +73,19 @@ public class Account {
             merge(incoming, from, to, overwriteCategories);
 
             // finally add non-overlapping incoming transactions
-            List<Transaction> otherIncoming = CashTransactionDomainLogic.filterByTimespanInverted(incoming, overlap[0], overlap[1]);
+            List<CashTransaction> otherIncoming = CashTransactionDomainLogic.filterByTimespanInverted(incoming, overlap[0], overlap[1]);
             addTransactions(otherIncoming);
         }
     }
 
     // decide which transactions to add, discard and add categories to
-    private void merge(List<Transaction> incoming, LocalDate from, LocalDate to, boolean overwriteCategories) {
+    private void merge(List<CashTransaction> incoming, LocalDate from, LocalDate to, boolean overwriteCategories) {
         var existingOverlap = getTransactions(from, to);
         var incomingOverlap = CashTransactionDomainLogic.filterByTimespan(incoming, from, to);
         List<LocalDate> range = DateUtil.dateRange(from, to);
 
-        Map<LocalDate, List<Transaction>> existingByDays = groupByDays(range, existingOverlap);
-        Map<LocalDate, List<Transaction>> incomingByDays = groupByDays(range, incomingOverlap);
+        Map<LocalDate, List<CashTransaction>> existingByDays = groupByDays(range, existingOverlap);
+        Map<LocalDate, List<CashTransaction>> incomingByDays = groupByDays(range, incomingOverlap);
 
         for (LocalDate day : range) {
             var existingDay = existingByDays.get(day);
@@ -103,8 +103,8 @@ public class Account {
         }
     }
 
-    private Map<LocalDate, List<Transaction>> groupByDays(List<LocalDate> range, List<Transaction> transactions) {
-        Map<LocalDate, List<Transaction>> result = new TreeMap<>();
+    private Map<LocalDate, List<CashTransaction>> groupByDays(List<LocalDate> range, List<CashTransaction> transactions) {
+        Map<LocalDate, List<CashTransaction>> result = new TreeMap<>();
         for (LocalDate date : range) {
             result.put(date, new ArrayList<>());
         }
@@ -112,24 +112,24 @@ public class Account {
         return result;
     }
 
-    private void addTransactions(List<Transaction> transactions) {
+    private void addTransactions(List<CashTransaction> transactions) {
         for (var transaction : transactions) {
             allTransactionsIndex.put(transaction.transactionNumber(), transaction);
         }
     }
 
-    private void removeTransactions(List<Transaction> transactions) {
+    private void removeTransactions(List<CashTransaction> transactions) {
         for (var transaction : transactions) {
             int number = transaction.transactionNumber();
             allTransactionsIndex.remove(number);
         }
     }
 
-    private void enrichCategories(List<Transaction> transactions, boolean overwriteCategories) {
+    private void enrichCategories(List<CashTransaction> transactions, boolean overwriteCategories) {
         for (var incoming : transactions) {
             int number = incoming.transactionNumber();
             if (allTransactionsIndex.containsKey(number)) {
-                Transaction existing = allTransactionsIndex.get(number);
+                CashTransaction existing = allTransactionsIndex.get(number);
                 boolean isSame = CashTransactionDomainLogic.areSame(incoming, existing);
                 if (isSame && incoming.category() != null && (existing.category() == null || overwriteCategories)) {
                     var updated = existing.withCategory(incoming.category());
@@ -156,16 +156,7 @@ public class Account {
      * @return list containing all transactions of this account, sorted in
      * ascending order, starting from oldest to most current
      */
-    public List<CashTransaction> getAllTransactionsAscending() {
-        return allTransactionsIndex.values().stream().map(CashTransaction::new).toList();
-    }
-
-    /**
-     *
-     * @return list containing all transactions of this account, sorted in
-     * ascending order, starting from oldest to most current
-     */
-    public List<Transaction> transactionsAscending() {
+    public List<CashTransaction> transactionsAscending() {
         return allTransactionsIndex.values().stream().toList();
     }
 
@@ -173,7 +164,7 @@ public class Account {
         return accountNumber;
     }
 
-    public void replace(List<Transaction> transactions) {
+    public void replace(List<CashTransaction> transactions) {
         for (var tx : transactions) {
             var replaced = allTransactionsIndex.put(tx.transactionNumber(), tx);
             if (replaced == null) {

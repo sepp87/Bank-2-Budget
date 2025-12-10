@@ -22,7 +22,7 @@ public class AccountTest {
         System.out.println("TestMerge_WhenMergingImported_ThenPreferDatesWithMostCtx_Ordered");
 
         // Create test data        
-        List<Transaction> existingTx = List.of(
+        List<CashTransaction> existingTx = List.of(
                 newTx("2025-01-01", 1, false, 10, 10, "abc", "xyz", "Aye"),
                 newTx("2025-01-01", 2, true, 10, 20, "abc", "xyz", "Aye"),
                 newTx("2025-01-02", 1, false, 10, 30, "abc", "xyz", "Aye"),
@@ -30,7 +30,7 @@ public class AccountTest {
                 newTx("2025-01-03", 1, true, 20, 60, "abc", "xyz", "Aye") // <--- incomplete day 1
         );
 
-        List<Transaction> importedTx1 = List.of(
+        List<CashTransaction> importedTx1 = List.of(
                 newTx("2025-01-03", 1, false, 10, 50, "abc", "xyz", "Bee"), // <--- complete day 1
                 newTx("2025-01-03", 2, true, 20, 70, "abc", "xyz", "Bee"), // <--- complete day 1
                 newTx("2025-01-04", 1, false, 10, 80, "abc", "xyz", "Bee"),
@@ -38,7 +38,7 @@ public class AccountTest {
                 newTx("2025-01-05", 1, true, 20, 110, "abc", "xyz", "Bee") // <--- incomplete day 2
         );
 
-        List<Transaction> importedTx2 = List.of(
+        List<CashTransaction> importedTx2 = List.of(
                 newTx("2025-01-05", 1, false, 10, 100, "abc", "xyz", "Cee"), // <--- complete day 2
                 newTx("2025-01-05", 2, true, 20, 120, "abc", "xyz", "Cee"), // <--- complete day 2
                 newTx("2025-01-06", 1, false, 10, 130, "abc", "xyz", "Cee"),
@@ -56,7 +56,7 @@ public class AccountTest {
 
         // Prepare results
         int expected = 13;
-        int result = existing.getAllTransactionsAscending().size();
+        int result = existing.transactionsAscending().size();
 
         // Evaluate results
         assertEquals(expected, result, "Expected number of transactions did not match the actual obtained number of transactions");
@@ -69,7 +69,7 @@ public class AccountTest {
         System.out.println("TestMerge_WhenMergingImported_ThenPreferDatesWithMostCtx_Unordered");
 
         // Create test data        
-        List<Transaction> existingTx = List.of(
+        List<CashTransaction> existingTx = List.of(
                 newTx("2025-01-01", 1, false, 10, 10, "abc", "xyz", "Aye"),
                 newTx("2025-01-01", 2, true, 10, 20, "abc", "xyz", "Aye"),
                 newTx("2025-01-02", 1, false, 10, 30, "abc", "xyz", "Aye"),
@@ -77,7 +77,7 @@ public class AccountTest {
                 newTx("2025-01-03", 1, true, 20, 60, "abc", "xyz", "Aye") // <--- incomplete day 1
         );
 
-        List<Transaction> importedTx1 = List.of(
+        List<CashTransaction> importedTx1 = List.of(
                 newTx("2025-01-03", 1, false, 10, 50, "abc", "xyz", "Bee"), // <--- complete day 1
                 newTx("2025-01-03", 2, true, 20, 70, "abc", "xyz", "Bee"), // <--- complete day 1
                 newTx("2025-01-04", 1, false, 10, 80, "abc", "xyz", "Bee"),
@@ -85,7 +85,7 @@ public class AccountTest {
                 newTx("2025-01-05", 1, true, 20, 110, "abc", "xyz", "Bee") // <--- incomplete day 2
         );
 
-        List<Transaction> importedTx2 = List.of(
+        List<CashTransaction> importedTx2 = List.of(
                 newTx("2025-01-05", 1, false, 10, 100, "abc", "xyz", "Cee"), // <--- complete day 2
                 newTx("2025-01-05", 2, true, 20, 120, "abc", "xyz", "Cee"), // <--- complete day 2
                 newTx("2025-01-06", 1, false, 10, 130, "abc", "xyz", "Cee"),
@@ -103,7 +103,7 @@ public class AccountTest {
 
         // Prepare results
         int expected = 13;
-        int result = existing.getAllTransactionsAscending().size();
+        int result = existing.transactionsAscending().size();
 
         // Evaluate results
         assertEquals(expected, result, "Expected number of transactions did not match the actual obtained number of transactions");
@@ -119,13 +119,13 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenOldCategorized_ThenKeepOldCategories");
 
         // Create test data        
-        List<Transaction> existingTx = List.of(
+        List<CashTransaction> existingTx = List.of(
                 newTx("2025-01-01", 1, true, 10, 10, "abc", "xyz", "Aye"),
                 newTx("2025-01-02", 1, true, 10, 20, "abc", "xyz", "Aye"),
                 newTx("2025-01-03", 1, true, 10, 30, "abc", "xyz", "Aye")
         );
 
-        List<Transaction> importedTx = List.of(
+        List<CashTransaction> importedTx = List.of(
                 newTx("2025-01-01", 1, true, 10, 10, "abc", "xyz", "Bee"),
                 newTx("2025-01-02", 1, true, 10, 20, "abc", "xyz", "Bee"),
                 newTx("2025-01-03", 1, true, 10, 30, "abc", "xyz", "Bee")
@@ -157,13 +157,13 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenOldUncategorized_ThenAddNewCategories");
 
         // Create test data   
-        List<Transaction> existingTx = List.of(
+        List<CashTransaction> existingTx = List.of(
                 newTx("2025-01-01", 1, true, 10, 10, "abc", "xyz", null),
                 newTx("2025-01-02", 1, true, 10, 20, "abc", "xyz", null),
                 newTx("2025-01-03", 1, true, 10, 30, "abc", "xyz", null)
         );
 
-        List<Transaction> importedTx = List.of(
+        List<CashTransaction> importedTx = List.of(
                 newTx("2025-01-01", 1, true, 10, 10, "abc", "xyz", "Bee"),
                 newTx("2025-01-02", 1, true, 10, 20, "abc", "xyz", "Bee"),
                 newTx("2025-01-03", 1, true, 10, 30, "abc", "xyz", "Bee")
@@ -195,13 +195,13 @@ public class AccountTest {
         System.out.println("testAddTransactionsToAccounts_WhenNewOverwriteOld_ThenAddNewCategories");
 
         // Create test data       
-        List<Transaction> existingTx = List.of(
+        List<CashTransaction> existingTx = List.of(
                 newTx("2025-01-01", 1, true, 10, 10, "abc", "xyz", "Aye"),
                 newTx("2025-01-02", 1, true, 10, 20, "abc", "xyz", "Aye"),
                 newTx("2025-01-03", 1, true, 10, 30, "abc", "xyz", "Aye")
         );
 
-        List<Transaction> importedTx = List.of(
+        List<CashTransaction> importedTx = List.of(
                 newTx("2025-01-01", 1, true, 10, 10, "abc", "xyz", "Bee"),
                 newTx("2025-01-02", 1, true, 10, 20, "abc", "xyz", "Bee"),
                 newTx("2025-01-03", 1, true, 10, 30, "abc", "xyz", "Bee")

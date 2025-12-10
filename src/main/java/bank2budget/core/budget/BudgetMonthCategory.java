@@ -1,6 +1,6 @@
 package bank2budget.core.budget;
 
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -17,7 +17,7 @@ public record BudgetMonthCategory(
         BigDecimal opening,
         BigDecimal closing,
         BigDecimal adjustments,
-        List<Transaction> transactions) {
+        List<CashTransaction> transactions) {
 
     public BigDecimal variance() {
         return budgeted.add(actual);
@@ -47,7 +47,7 @@ public record BudgetMonthCategory(
             BigDecimal actual,
             BigDecimal opening,
             BigDecimal closing,
-            List<Transaction> transactions) {
+            List<CashTransaction> transactions) {
 
         return new BudgetMonthCategory(firstOfMonth, UNAPPLIED_INCOME, BigDecimal.ZERO, actual, opening, closing, BigDecimal.ZERO, transactions);
     }
@@ -57,7 +57,7 @@ public record BudgetMonthCategory(
             BigDecimal actual,
             BigDecimal opening,
             BigDecimal closing,
-            List<Transaction> transactions) {
+            List<CashTransaction> transactions) {
 
         return new BudgetMonthCategory(firstOfMonth, UNAPPLIED_EXPENSES, BigDecimal.ZERO, actual, opening, closing, BigDecimal.ZERO, transactions);
     }

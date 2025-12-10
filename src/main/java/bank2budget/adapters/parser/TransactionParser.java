@@ -1,7 +1,7 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.Launcher;
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 import bank2budget.core.Util;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -48,11 +48,11 @@ public abstract class TransactionParser {
         this.parserConfig = config;
     }
 
-    public List<Transaction> parse() {
+    public List<CashTransaction> parse() {
         //ANSI files are  read correctly, but now UTF-8 files are not
         try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(parserConfig.getFile()), parserConfig.getCharset()), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
 
-            List<Transaction> transactions = parseRecordsWith(parser);
+            List<CashTransaction> transactions = parseRecordsWith(parser);
             if (Launcher.LOG_TRANSACTIONS) {
                 for (var t : transactions) {
                     System.out.println(t.toString());
@@ -72,7 +72,7 @@ public abstract class TransactionParser {
      */
     protected abstract CSVFormat getCsvFormat();
 
-    protected List<Transaction> parseRecordsWith(CSVParser parser) throws IOException {
+    protected List<CashTransaction> parseRecordsWith(CSVParser parser) throws IOException {
         List<RawCashTransaction> rawTransactions = new ArrayList<>();
         List<CSVRecord> records = parser.getRecords();
         List<CSVRecord> transactionRecords = getTransactionRecordsFrom(records);

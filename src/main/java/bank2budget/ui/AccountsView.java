@@ -30,7 +30,8 @@ public class AccountsView extends TabPane {
 
     private void addTransactionsView(Account account) {
         String accountNumber = account.getAccountNumber();
-        TransactionsView transactionsView = new TransactionsView(FXCollections.observableArrayList(account.getAllTransactionsAscending()));
+        var transactions = FXCollections.observableArrayList(account.transactionsAscending().stream().map(EditableCashTransaction::new).toList());
+        TransactionsView transactionsView = new TransactionsView(transactions);
         transactionsViews.put(accountNumber, transactionsView);
         Tab tab = new Tab(account.getAccountNumber());
         tab.setContent(transactionsView);
@@ -43,7 +44,8 @@ public class AccountsView extends TabPane {
             String accountNumber = account.getAccountNumber();
             if (transactionsViews.containsKey(accountNumber)) {
                 TransactionsView transactionsView = transactionsViews.get(accountNumber);
-                transactionsView.reload(account.getAllTransactionsAscending());
+                var transactions = FXCollections.observableArrayList(account.transactionsAscending().stream().map(EditableCashTransaction::new).toList());
+                transactionsView.reload(transactions);
             } else {
                 addTransactionsView(account);
             }

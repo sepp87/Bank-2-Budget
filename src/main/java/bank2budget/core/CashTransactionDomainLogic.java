@@ -22,7 +22,7 @@ public class CashTransactionDomainLogic {
      * @param b
      * @return
      */
-    public static boolean areSame(Transaction a, Transaction b) {
+    public static boolean areSame(CashTransaction a, CashTransaction b) {
         Set<Boolean> result = new HashSet<>();
         
         result.add(a.amount().compareTo(b.amount()) == 0);
@@ -63,7 +63,7 @@ public class CashTransactionDomainLogic {
      * @return all transactions outside the given time frame, transactions on
      * boundary dates (from/to) are included
      */
-    public static List<Transaction> filterByTimespanInverted(List<Transaction> transactions, LocalDate from, LocalDate to) {
+    public static List<CashTransaction> filterByTimespanInverted(List<CashTransaction> transactions, LocalDate from, LocalDate to) {
         return filterByTimespan(transactions, from, to, true);
     }
 
@@ -75,12 +75,12 @@ public class CashTransactionDomainLogic {
      * @return all transactions within the given time frame, transactions on
      * boundary dates (from/to) are included
      */
-    public static  List<Transaction> filterByTimespan(List<Transaction> transactions, LocalDate from, LocalDate to) {
+    public static  List<CashTransaction> filterByTimespan(List<CashTransaction> transactions, LocalDate from, LocalDate to) {
         return filterByTimespan(transactions, from, to, false);
     }
 
-    private static List<Transaction> filterByTimespan(List<Transaction> transactions, LocalDate from, LocalDate to, boolean inverted) {
-        List<Transaction> result = new ArrayList<>();
+    private static List<CashTransaction> filterByTimespan(List<CashTransaction> transactions, LocalDate from, LocalDate to, boolean inverted) {
+        List<CashTransaction> result = new ArrayList<>();
         from = from.minusDays(1);
         to = to.plusDays(1);
         for (var transaction : transactions) {
@@ -100,13 +100,13 @@ public class CashTransactionDomainLogic {
      * @param list2 sorted list in ascending order by date
      * @return
      */
-    public static LocalDate[] findOverlap(List<Transaction> list1, List<Transaction> list2) {
+    public static LocalDate[] findOverlap(List<CashTransaction> list1, List<CashTransaction> list2) {
         List<LocalDate> dates1 = getDatesFrom(list1);
         List<LocalDate> dates2 = getDatesFrom(list2);
         return Util.findOverlap(dates1, dates2);
     }
 
-    private static List<LocalDate> getDatesFrom(List<Transaction> list) {
+    private static List<LocalDate> getDatesFrom(List<CashTransaction> list) {
         List<LocalDate> result = new ArrayList<>();
         for (var transaction : list) {
             result.add(transaction.date());
@@ -114,24 +114,24 @@ public class CashTransactionDomainLogic {
         return result;
     }
 
-    public static Map<String, List<Transaction>> groupByCategory(List<Transaction> transactions) {
-        Map<String, List<Transaction>> grouped = new TreeMap<>();
+    public static Map<String, List<CashTransaction>> groupByCategory(List<CashTransaction> transactions) {
+        Map<String, List<CashTransaction>> grouped = new TreeMap<>();
         for (var transaction : transactions) {
             grouped.computeIfAbsent(transaction.category(), k -> new ArrayList<>()).add(transaction);
         }
         return grouped;
     }
 
-    public static List<Transaction> categorized(List<Transaction> transactions) {
+    public static List<CashTransaction> categorized(List<CashTransaction> transactions) {
         return filterByCategorized(transactions, true);
     }
 
-    public static List<Transaction> uncategorized(List<Transaction> transactions) {
+    public static List<CashTransaction> uncategorized(List<CashTransaction> transactions) {
         return filterByCategorized(transactions, false);
     }
 
-    private static List<Transaction> filterByCategorized(List<Transaction> transactions, boolean wantCategorized) {
-        List<Transaction> result = new ArrayList<>();
+    private static List<CashTransaction> filterByCategorized(List<CashTransaction> transactions, boolean wantCategorized) {
+        List<CashTransaction> result = new ArrayList<>();
         for (var transaction : transactions) {
             String category = transaction.category();
             boolean isCategorized = category != null && !category.isBlank();

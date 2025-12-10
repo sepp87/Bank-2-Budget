@@ -1,139 +1,169 @@
 package bank2budget.core;
 
-import bank2budget.core.Transaction.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * CashTransaction is parsed from one single Record in a CSV file. It checks
- * account names and numbers against the config to derive account names and
- * numbers. It also determines - by the same means - if the transaction is
- * internal, meaning moving cash between personal accounts e.g. from a savings
- * account to a running.
  *
- *
- * @author joost
+ * @author joostmeulenkamp
  */
-public class CashTransaction {
+public record CashTransaction(
+        /**
+         * The transaction number is a unique number bound to this transaction.
+         * Every time this cash transaction is parsed this number should remain
+         * the same. Then together with account number it can be used as primary
+         * key.
+         */
+        int transactionNumber,
+        LocalDate date,
+        int positionOfDay,
+        boolean lastOfDay,
+        BigDecimal amount,
+        BigDecimal accountBalance,
+        String accountNumber,
+        String accountName,
+        CreditInstitution accountInstitution,
+        String contraAccountNumber,
+        String contraAccountName,
+        boolean internal,
+        TransactionType transactionType,
+        String description,
+        String category,
+        String notes) {
 
-    private Transaction transaction;
-
-    public CashTransaction(Transaction transaction) {
-        this.transaction = transaction;
-    }
-
-    public CashTransaction(CashTransaction cashTransaction) {
-        this.transaction = cashTransaction.transaction();
-    }
-
-    // SETTERS
-    public CashTransaction setAccountName(String name) {
-        transaction = transaction.withAccountName(name);
-        return this;
-    }
-
-    public CashTransaction setContraAccountName(String name) {
-        transaction = transaction.withContraAccountName(name);
-        return this;
-    }
-
-    public CashTransaction setInternal(boolean internal) {
-        transaction = transaction.withInternal(internal);
-        return this;
-    }
-
-    public CashTransaction setCategory(String category) {
-        transaction = transaction.withCategory(category);
-        return this;
-    }
-
-    public CashTransaction setLastOfDay(Boolean lastOfDay) {
-        transaction = transaction.withLastOfDay(lastOfDay);
-        return this;
-    }
-
-    public CashTransaction setNotes(String notes) {
-        transaction = transaction.withNotes(notes);
-        return this;
-    }
-
-    // GETTERS
-    public Transaction transaction() {
-        return transaction;
-    }
-
-    public String accountNumber() {
-        return transaction.accountNumber();
-    }
-
-    public String accountName() {
-        return transaction.accountName();
-    }
-
-    public BigDecimal accountBalance() {
-        return transaction.accountBalance();
+    public enum TransactionType {
+        DEBIT,
+        CREDIT
     }
 
     public BigDecimal accountBalanceBefore() {
-        return transaction.accountBalanceBefore();
+        return accountBalance.subtract(amount);
     }
 
-    public CreditInstitution accountInstitution() {
-        return transaction.accountInstitution();
+    public CashTransaction withLastOfDay(boolean newLastOfDay) {
+        return new CashTransaction(
+                transactionNumber,
+                date,
+                positionOfDay,
+                newLastOfDay,
+                amount,
+                accountBalance,
+                accountNumber,
+                accountName,
+                accountInstitution,
+                contraAccountNumber,
+                contraAccountName,
+                internal,
+                transactionType,
+                description,
+                category,
+                notes
+        );
     }
 
-    public String contraAccountNumber() {
-        return transaction.contraAccountNumber();
+    public CashTransaction withAccountName(String newAccountName) {
+        return new CashTransaction(
+                transactionNumber,
+                date,
+                positionOfDay,
+                lastOfDay,
+                amount,
+                accountBalance,
+                accountNumber,
+                newAccountName,
+                accountInstitution,
+                contraAccountNumber,
+                contraAccountName,
+                internal,
+                transactionType,
+                description,
+                category,
+                notes
+        );
     }
 
-    public String contraAccountName() {
-        return transaction.contraAccountName();
+    public CashTransaction withContraAccountName(String newContraAccountName) {
+        return new CashTransaction(
+                transactionNumber,
+                date,
+                positionOfDay,
+                lastOfDay,
+                amount,
+                accountBalance,
+                accountNumber,
+                accountName,
+                accountInstitution,
+                contraAccountNumber,
+                newContraAccountName,
+                internal,
+                transactionType,
+                description,
+                category,
+                notes
+        );
     }
 
-    public BigDecimal amount() {
-        return transaction.amount();
+    public CashTransaction withInternal(boolean newInternal) {
+        return new CashTransaction(
+                transactionNumber,
+                date,
+                positionOfDay,
+                lastOfDay,
+                amount,
+                accountBalance,
+                accountNumber,
+                accountName,
+                accountInstitution,
+                contraAccountNumber,
+                contraAccountName,
+                newInternal,
+                transactionType,
+                description,
+                category,
+                notes
+        );
     }
 
-    public LocalDate date() {
-        return transaction.date();
+    public CashTransaction withCategory(String newCategory) {
+        return new CashTransaction(
+                transactionNumber,
+                date,
+                positionOfDay,
+                lastOfDay,
+                amount,
+                accountBalance,
+                accountNumber,
+                accountName,
+                accountInstitution,
+                contraAccountNumber,
+                contraAccountName,
+                internal,
+                transactionType,
+                description,
+                newCategory,
+                notes
+        );
     }
 
-    public boolean internal() {
-        return transaction.internal();
-    }
-
-    public String category() {
-        return transaction.category();
-    }
-
-    public int transactionNumber() {
-        return transaction.transactionNumber();
-    }
-
-    public String description() {
-        return transaction.description();
-    }
-
-    public TransactionType transactionType() {
-        return transaction.transactionType();
-    }
-
-    public boolean lastOfDay() {
-        return transaction.lastOfDay();
-    }
-
-    public int positionOfDay() {
-        return transaction.positionOfDay();
-    }
-
-    public String notes() {
-        return transaction.notes();
-    }
-
-    @Override
-    public String toString() {
-        String result = transaction.transactionNumber() + "\t" + transaction.lastOfDay() + "\t" + transaction.date() + "\t" + Util.padWithTabs("€" + transaction.amount(), 2) + Util.padWithTabs(transaction.accountName(), 4) + Util.padWithTabs(transaction.contraAccountName(), 4) + Util.padWithTabs(transaction.category(), 4);
-        return result;
+    public CashTransaction withNotes(String newNotes) {
+        return new CashTransaction(
+                transactionNumber,
+                date,
+                positionOfDay,
+                lastOfDay,
+                amount,
+                accountBalance,
+                accountNumber,
+                accountName,
+                accountInstitution,
+                contraAccountNumber,
+                contraAccountName,
+                internal,
+                transactionType,
+                description,
+                category,
+                newNotes
+        );
     }
 
 }

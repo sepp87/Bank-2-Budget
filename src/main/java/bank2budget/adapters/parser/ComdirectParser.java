@@ -1,6 +1,6 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -50,7 +50,7 @@ public class ComdirectParser extends TransactionParser {
     }
 
     @Override
-    protected List<Transaction> parseRecordsWith(CSVParser parser) throws IOException {
+    protected List<CashTransaction> parseRecordsWith(CSVParser parser) throws IOException {
         List<RawCashTransaction> rtx = new ArrayList<>();
         List<CSVRecord> records = parser.getRecords();
         List<Batch> batches = new ArrayList<>();

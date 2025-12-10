@@ -2,7 +2,7 @@ package bank2budget.adapters.reader;
 
 import bank2budget.core.CreditInstitution;
 import bank2budget.core.Account;
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 import bank2budget.core.TransactionBuilder;
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +53,7 @@ public class AccountReader {
             for (int i = 0; i < sheetCount; i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 String accountNumber = sheet.getSheetName();
-                List<Transaction> transactions = transactionsFromSheet(sheet);
+                List<CashTransaction> transactions = transactionsFromSheet(sheet);
                 accountMap.put(accountNumber, new Account(accountNumber, transactions));
             }
 
@@ -76,8 +76,8 @@ public class AccountReader {
         return list;
     }
 
-    private static List<Transaction> transactionsFromSheet(Sheet sheet) {
-        List<Transaction> transactions = new ArrayList<>();
+    private static List<CashTransaction> transactionsFromSheet(Sheet sheet) {
+        List<CashTransaction> transactions = new ArrayList<>();
         int last = sheet.getLastRowNum();
         header = getHeaderFrom(sheet);
 
@@ -90,7 +90,7 @@ public class AccountReader {
                 continue;
             }
 
-            Transaction transaction = transactionFromRow(row);
+            CashTransaction transaction = transactionFromRow(row);
             transactions.add(transaction);
         }
         return transactions;
@@ -102,7 +102,7 @@ public class AccountReader {
         return row.getCell(dateColumn) == null || row.getCell(dateColumn).getStringCellValue().equals("");
     }
 
-    private static Transaction transactionFromRow(Row row) {
+    private static CashTransaction transactionFromRow(Row row) {
         TransactionBuilder builder = new TransactionBuilder();
 
         int i = 0;

@@ -1,6 +1,5 @@
 package bank2budget.ui;
 
-import bank2budget.core.CashTransaction;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,20 +29,20 @@ import org.controlsfx.control.textfield.TextFields;
  *
  * @author joostmeulenkamp
  */
-public class TransactionsView extends TableView<CashTransaction> {
+public class TransactionsView extends TableView<EditableCashTransaction> {
 
     private final ObservableList<String> categorySuggestions = FXCollections.observableArrayList();
 
-    public TransactionsView(ObservableList<CashTransaction> transactions) {
+    public TransactionsView(ObservableList<EditableCashTransaction> transactions) {
         super(transactions);
         this.setEditable(true);
         this.getSelectionModel().setCellSelectionEnabled(true);
         this.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        TableColumn<CashTransaction, Integer> transactionNumberColumn = buildColumn("Transaction Number", CashTransaction::transactionNumber);
-        TableColumn<CashTransaction, String> descriptionColumn = buildColumn("Description", CashTransaction::description);
-        TableColumn<CashTransaction, String> notesColumn = buildEditableColumn("Notes", CashTransaction::notes, CashTransaction::setNotes);
-        TableColumn<CashTransaction, String> contraAccountNameColumn = buildColumn("Contra Account Name", CashTransaction::contraAccountName);
+        TableColumn<EditableCashTransaction, Integer> transactionNumberColumn = buildColumn("Transaction Number", EditableCashTransaction::transactionNumber);
+        TableColumn<EditableCashTransaction, String> descriptionColumn = buildColumn("Description", EditableCashTransaction::description);
+        TableColumn<EditableCashTransaction, String> notesColumn = buildEditableColumn("Notes", EditableCashTransaction::notes, EditableCashTransaction::setNotes);
+        TableColumn<EditableCashTransaction, String> contraAccountNameColumn = buildColumn("Contra Account Name", EditableCashTransaction::contraAccountName);
         
         descriptionColumn.setPrefWidth(240);
         notesColumn.setPrefWidth(240);
@@ -51,12 +50,12 @@ public class TransactionsView extends TableView<CashTransaction> {
         
         reloadCategorySuggestions(transactions);
 
-        this.getColumns().add(buildAutoCompleteColumn("Category", CashTransaction::category, CashTransaction::setCategory, categorySuggestions));
-        this.getColumns().add(buildColumn("Amount", CashTransaction::amount));
+        this.getColumns().add(buildAutoCompleteColumn("Category", EditableCashTransaction::category, EditableCashTransaction::setCategory, categorySuggestions));
+        this.getColumns().add(buildColumn("Amount", EditableCashTransaction::amount));
         this.getColumns().add(transactionNumberColumn);
-        this.getColumns().add(buildColumn("Date", CashTransaction::date));
-        this.getColumns().add(buildColumn("Account Balance", CashTransaction::accountBalance));
-        this.getColumns().add(buildColumn("Account Name", CashTransaction::accountName));
+        this.getColumns().add(buildColumn("Date", EditableCashTransaction::date));
+        this.getColumns().add(buildColumn("Account Balance", EditableCashTransaction::accountBalance));
+        this.getColumns().add(buildColumn("Account Name", EditableCashTransaction::accountName));
         this.getColumns().add(contraAccountNameColumn);
         this.getColumns().add(descriptionColumn);
         this.getColumns().add(notesColumn);
@@ -71,7 +70,7 @@ public class TransactionsView extends TableView<CashTransaction> {
 
     }
 
-    public void reload(List<CashTransaction> transactions) {
+    public void reload(List<EditableCashTransaction> transactions) {
         reloadCategorySuggestions(transactions);
         this.getItems().clear();
         this.getItems().addAll(transactions);
@@ -79,10 +78,10 @@ public class TransactionsView extends TableView<CashTransaction> {
 
     }
 
-    private void reloadCategorySuggestions(List<CashTransaction> transactions) {
+    private void reloadCategorySuggestions(List<EditableCashTransaction> transactions) {
         categorySuggestions.clear();
         Set<String> availableCategories = new HashSet<>();
-        for (CashTransaction t : transactions) {
+        for (EditableCashTransaction t : transactions) {
             availableCategories.add(t.category());
         }
         categorySuggestions.addAll(availableCategories);
@@ -161,7 +160,7 @@ public class TransactionsView extends TableView<CashTransaction> {
         return col;
     }
 
-    public static void handleShortcutTriggered(KeyEvent event, TableView<CashTransaction> transactionsView) {
+    public static void handleShortcutTriggered(KeyEvent event, TableView<EditableCashTransaction> transactionsView) {
 
         boolean isModifierDown = isModifierDown(event);
         switch (event.getCode()) {
@@ -246,7 +245,7 @@ public class TransactionsView extends TableView<CashTransaction> {
         Clipboard.getSystemClipboard().setContent(content);
     }
 
-    private static void pasteFromClipboard(TableView<CashTransaction> table) {
+    private static void pasteFromClipboard(TableView<EditableCashTransaction> table) {
         Clipboard clipboard = Clipboard.getSystemClipboard();
         if (!clipboard.hasString()) {
             return;
@@ -268,7 +267,7 @@ public class TransactionsView extends TableView<CashTransaction> {
         // ✅ Handle single-value clipboard — fill all selected cells
         if (!pasteString.contains("\t") && !pasteString.contains("\n")) {
             for (TablePosition<?, ?> pos : posList) {
-                TableColumn<CashTransaction, ?> col = (TableColumn<CashTransaction, ?>) pos.getTableColumn();
+                TableColumn<EditableCashTransaction, ?> col = (TableColumn<EditableCashTransaction, ?>) pos.getTableColumn();
                 int row = pos.getRow();
                 commitValueToCell(table, col, row, pasteString);
             }
@@ -276,7 +275,7 @@ public class TransactionsView extends TableView<CashTransaction> {
             return;
         }
 
-        TablePosition<CashTransaction, ?> startPos = posList.get(0); // upper-left starting cell
+        TablePosition<EditableCashTransaction, ?> startPos = posList.get(0); // upper-left starting cell
 
         int rowClipboard = 0;
         for (String row : rows) {
@@ -294,7 +293,7 @@ public class TransactionsView extends TableView<CashTransaction> {
                     break;
                 }
 
-                TableColumn<CashTransaction, ?> col = table.getVisibleLeafColumn(tableColIndex);
+                TableColumn<EditableCashTransaction, ?> col = table.getVisibleLeafColumn(tableColIndex);
 
                 commitValueToCell(table, col, tableRow, value);
                 colClipboard++;
@@ -306,20 +305,20 @@ public class TransactionsView extends TableView<CashTransaction> {
     }
 
     @SuppressWarnings("unchecked")
-    private static <S> void commitValueToCell(TableView<CashTransaction> table, TableColumn<CashTransaction, ?> col, int row, String value) {
+    private static <S> void commitValueToCell(TableView<EditableCashTransaction> table, TableColumn<EditableCashTransaction, ?> col, int row, String value) {
         Object rowItem = table.getItems().get(row);
 
         try {
             // Try to use the onEditCommit handler first
             if (col.getOnEditCommit() != null) {
-                TableColumn.CellEditEvent<CashTransaction, Object> editEvent
+                TableColumn.CellEditEvent<EditableCashTransaction, Object> editEvent
                         = new TableColumn.CellEditEvent<>(
                                 table,
-                                new TablePosition<>(table, row, (TableColumn<CashTransaction, Object>) col),
+                                new TablePosition<>(table, row, (TableColumn<EditableCashTransaction, Object>) col),
                                 TableColumn.editCommitEvent(),
                                 value
                         );
-                ((EventHandler<TableColumn.CellEditEvent<CashTransaction, ?>>) col.getOnEditCommit()).handle(editEvent);
+                ((EventHandler<TableColumn.CellEditEvent<EditableCashTransaction, ?>>) col.getOnEditCommit()).handle(editEvent);
             } else {
                 // Optional fallback — use reflection if column header matches property name
                 String property = col.getText().replace(" ", "");

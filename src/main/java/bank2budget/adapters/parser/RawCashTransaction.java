@@ -1,7 +1,7 @@
 package bank2budget.adapters.parser;
 
 import bank2budget.core.CreditInstitution;
-import bank2budget.core.Transaction;
+import bank2budget.core.CashTransaction;
 import bank2budget.core.TransactionBuilder;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,7 +31,7 @@ public class RawCashTransaction {
     public String category;
     public String notes;
     
-    public Transaction toTransaction() {
+    public CashTransaction toTransaction() {
         TransactionBuilder builder = new TransactionBuilder()
                 .transactionNumber(transactionNumber)
                 .lastOfDay(lastOfDay)
