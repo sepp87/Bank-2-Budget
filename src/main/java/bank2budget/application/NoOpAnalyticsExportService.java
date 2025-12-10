@@ -1,7 +1,7 @@
 package bank2budget.application;
 
 import bank2budget.core.Account;
-import bank2budget.core.MultiAccountBudget;
+import bank2budget.core.budget.Budget;
 import bank2budget.ports.AnalyticsExportPort;
 import java.util.Collection;
 
@@ -16,7 +16,7 @@ public class NoOpAnalyticsExportService implements AnalyticsExportPort {
     }
 
     @Override
-    public void exportBudget(MultiAccountBudget budget) {
+    public void exportBudget(Budget budget) {
     }
 
 

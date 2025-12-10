@@ -167,7 +167,3 @@ public record Transaction(
     }
 
 }
-
-//    private String category;
-//
-//

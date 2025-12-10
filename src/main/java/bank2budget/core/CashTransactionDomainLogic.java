@@ -63,7 +63,7 @@ public class CashTransactionDomainLogic {
      * @return all transactions outside the given time frame, transactions on
      * boundary dates (from/to) are included
      */
-    public static <T extends CashTransaction> List<T> filterByTimespanInverted(List<T> transactions, LocalDate from, LocalDate to) {
+    public static List<Transaction> filterByTimespanInverted(List<Transaction> transactions, LocalDate from, LocalDate to) {
         return filterByTimespan(transactions, from, to, true);
     }
 
@@ -75,12 +75,12 @@ public class CashTransactionDomainLogic {
      * @return all transactions within the given time frame, transactions on
      * boundary dates (from/to) are included
      */
-    public static <T extends CashTransaction> List<T> filterByTimespan(List<T> transactions, LocalDate from, LocalDate to) {
+    public static  List<Transaction> filterByTimespan(List<Transaction> transactions, LocalDate from, LocalDate to) {
         return filterByTimespan(transactions, from, to, false);
     }
 
-    private static <T extends CashTransaction> List<T> filterByTimespan(List<T> transactions, LocalDate from, LocalDate to, boolean inverted) {
-        List<T> result = new ArrayList<>();
+    private static List<Transaction> filterByTimespan(List<Transaction> transactions, LocalDate from, LocalDate to, boolean inverted) {
+        List<Transaction> result = new ArrayList<>();
         from = from.minusDays(1);
         to = to.plusDays(1);
         for (var transaction : transactions) {
@@ -100,15 +100,15 @@ public class CashTransactionDomainLogic {
      * @param list2 sorted list in ascending order by date
      * @return
      */
-    public static LocalDate[] findOverlap(List<? extends CashTransaction> list1, List<? extends CashTransaction> list2) {
+    public static LocalDate[] findOverlap(List<Transaction> list1, List<Transaction> list2) {
         List<LocalDate> dates1 = getDatesFrom(list1);
         List<LocalDate> dates2 = getDatesFrom(list2);
         return Util.findOverlap(dates1, dates2);
     }
 
-    private static List<LocalDate> getDatesFrom(List<? extends CashTransaction> list) {
+    private static List<LocalDate> getDatesFrom(List<Transaction> list) {
         List<LocalDate> result = new ArrayList<>();
-        for (CashTransaction transaction : list) {
+        for (var transaction : list) {
             result.add(transaction.date());
         }
         return result;

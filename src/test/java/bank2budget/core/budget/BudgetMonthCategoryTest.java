@@ -118,7 +118,6 @@ public class BudgetMonthCategoryTest {
 
         BudgetCalculator calculator = new BudgetCalculator();
         List<BudgetMonth> months = calculator.create(template, budget, accounts);
-        System.out.println(months.size());
 
         // Perform test
         BigDecimal result = months.get(1).operatingCategories().getFirst().closing();
@@ -200,7 +199,6 @@ public class BudgetMonthCategoryTest {
 
         BudgetCalculator calculator = new BudgetCalculator();
         List<BudgetMonth> months = calculator.create(template, budget, accounts);
-        System.out.println(months.size());
 
         // Perform test
         BigDecimal result = months.get(1).operatingCategories().getFirst().closing();

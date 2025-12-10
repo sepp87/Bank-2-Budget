@@ -75,7 +75,6 @@ public class BudgetTemplateReader {
                 Logger.getLogger(BudgetTemplateReader.class.getName()).log(Level.INFO, "Could NOT read category, proceeding without {0}", line);
             }
         }
-        result.entrySet().forEach(System.out::println);
         return result;
     }
 

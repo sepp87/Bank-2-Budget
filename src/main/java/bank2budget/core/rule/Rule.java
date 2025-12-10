@@ -12,6 +12,7 @@ public class Rule<T> {
     private final Predicate<T> check;
     private final Function<T, T> result;
 
+
     public Rule(Predicate<T> check, Function<T, T> result) {
         this.check = check;
         this.result = result;
@@ -19,8 +20,8 @@ public class Rule<T> {
 
     public T apply(T t) {
         if (check.test(t)) {
-            result.apply(t);
+            return result.apply(t);
         }
-        return t;
+        return null;
     }
 }

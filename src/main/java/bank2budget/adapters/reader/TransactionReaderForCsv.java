@@ -23,6 +23,7 @@ public class TransactionReaderForCsv {
     public TransactionReaderForCsv(File file) {
         this.file = file;
         this.transactions = getTransactionsFromCsv(file);
+//        System.out.println();
     }
 
     public List<Transaction> getTransactions() {
@@ -40,6 +41,7 @@ public class TransactionReaderForCsv {
             LOGGER.log(Level.SEVERE, "Unknown bank, could NOT load transactions from file", ex);
             return Collections.emptyList();
         }
+
     }
 
 }

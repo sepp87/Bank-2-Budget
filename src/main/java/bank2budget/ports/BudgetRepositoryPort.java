@@ -1,6 +1,5 @@
 package bank2budget.ports;
 
-import bank2budget.core.MultiAccountBudget;
 
 /**
  *

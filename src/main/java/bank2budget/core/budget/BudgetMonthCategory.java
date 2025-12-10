@@ -19,6 +19,10 @@ public record BudgetMonthCategory(
         BigDecimal adjustments,
         List<Transaction> transactions) {
 
+    public BigDecimal variance() {
+        return budgeted.add(actual);
+    }
+    
     private final static String UNAPPLIED_INCOME = "UNAPPLIED INCOME";
     private final static String UNAPPLIED_EXPENSES = "UNAPPLIED EXPENSES";
 
@@ -57,5 +61,5 @@ public record BudgetMonthCategory(
 
         return new BudgetMonthCategory(firstOfMonth, UNAPPLIED_EXPENSES, BigDecimal.ZERO, actual, opening, closing, BigDecimal.ZERO, transactions);
     }
-
+    
 }

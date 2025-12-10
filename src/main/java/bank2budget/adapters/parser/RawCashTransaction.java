@@ -1,6 +1,5 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.core.CashTransaction;
 import bank2budget.core.CreditInstitution;
 import bank2budget.core.Transaction;
 import bank2budget.core.TransactionBuilder;
@@ -32,14 +31,9 @@ public class RawCashTransaction {
     public String category;
     public String notes;
     
-    public CashTransaction toCashTransaction() {
-        Transaction transaction = toTransaction();
-        return new CashTransaction(transaction);
-    }
-    
     public Transaction toTransaction() {
         TransactionBuilder builder = new TransactionBuilder()
-                .transactionNumber(positionOfDay)
+                .transactionNumber(transactionNumber)
                 .lastOfDay(lastOfDay)
                 .positionOfDay(positionOfDay)
                 .date(date)

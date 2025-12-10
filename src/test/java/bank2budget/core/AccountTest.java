@@ -1,6 +1,5 @@
 package bank2budget.core;
 
-import static bank2budget.core.CashTransactionTest.newCtx;
 import static bank2budget.core.CashTransactionTest.newTx;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;

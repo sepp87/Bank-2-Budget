@@ -23,10 +23,42 @@ public class CashTransaction {
     }
 
     public CashTransaction(CashTransaction cashTransaction) {
-        this.transaction = cashTransaction.getTransaction();
+        this.transaction = cashTransaction.transaction();
     }
 
-    public Transaction getTransaction() {
+    // SETTERS
+    public CashTransaction setAccountName(String name) {
+        transaction = transaction.withAccountName(name);
+        return this;
+    }
+
+    public CashTransaction setContraAccountName(String name) {
+        transaction = transaction.withContraAccountName(name);
+        return this;
+    }
+
+    public CashTransaction setInternal(boolean internal) {
+        transaction = transaction.withInternal(internal);
+        return this;
+    }
+
+    public CashTransaction setCategory(String category) {
+        transaction = transaction.withCategory(category);
+        return this;
+    }
+
+    public CashTransaction setLastOfDay(Boolean lastOfDay) {
+        transaction = transaction.withLastOfDay(lastOfDay);
+        return this;
+    }
+
+    public CashTransaction setNotes(String notes) {
+        transaction = transaction.withNotes(notes);
+        return this;
+    }
+
+    // GETTERS
+    public Transaction transaction() {
         return transaction;
     }
 
@@ -36,11 +68,6 @@ public class CashTransaction {
 
     public String accountName() {
         return transaction.accountName();
-    }
-
-    public void setAccountName(String name) {
-        transaction = transaction.withAccountName(name);
-
     }
 
     public BigDecimal accountBalance() {
@@ -63,10 +90,6 @@ public class CashTransaction {
         return transaction.contraAccountName();
     }
 
-    public void setContraAccountName(String name) {
-        transaction = transaction.withContraAccountName(name);
-    }
-
     public BigDecimal amount() {
         return transaction.amount();
     }
@@ -79,16 +102,8 @@ public class CashTransaction {
         return transaction.internal();
     }
 
-    public void setInternal(boolean internal) {
-        transaction = transaction.withInternal(internal);
-    }
-
     public String category() {
         return transaction.category();
-    }
-
-    public void setCategory(String category) {
-        transaction = transaction.withCategory(category);
     }
 
     public int transactionNumber() {
@@ -107,20 +122,12 @@ public class CashTransaction {
         return transaction.lastOfDay();
     }
 
-    public void setLastOfDay(Boolean lastOfDay) {
-        transaction = transaction.withLastOfDay(lastOfDay);
-    }
-
     public int positionOfDay() {
         return transaction.positionOfDay();
     }
 
     public String notes() {
         return transaction.notes();
-    }
-
-    public void setNotes(String notes) {
-        transaction = transaction.withNotes(notes);
     }
 
     @Override

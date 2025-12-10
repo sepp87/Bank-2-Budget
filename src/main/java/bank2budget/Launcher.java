@@ -38,7 +38,7 @@ import picocli.CommandLine;
  */
 public class Launcher {
 
-    public static boolean log_transactions = false;
+    public static boolean LOG_TRANSACTIONS = false;
 
     public static void main(String[] args) throws Exception {
 
@@ -47,7 +47,7 @@ public class Launcher {
         boolean isHeadless = GraphicsEnvironment.isHeadless();
 
         if (devMode) {
-            runCli(args);
+//            runCli(args);
             runUi(args);
         } else if (hasConsole || isHeadless) {
             runCli(args);

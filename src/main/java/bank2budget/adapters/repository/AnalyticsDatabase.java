@@ -1,8 +1,7 @@
 package bank2budget.adapters.repository;
 
-import bank2budget.core.MonthlyBudget;
-import bank2budget.core.MultiAccountBudget;
 import bank2budget.core.Transaction;
+import bank2budget.core.budget.BudgetMonth;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,7 +10,6 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,10 +18,10 @@ public class AnalyticsDatabase {
     private static final Logger LOGGER = Logger.getLogger(AnalyticsDatabase.class.getName());
     private final String dbPath;
 
-    public AnalyticsDatabase(String dbPath) {
+    public AnalyticsDatabase(String dbPath, int firstOfMonth) {
         this.dbPath = dbPath;
         createSchema();
-        createAnalyticsViews();
+        createAnalyticsViews(firstOfMonth);
     }
 
     private void createSchema() {
@@ -65,9 +63,10 @@ public class AnalyticsDatabase {
               firstOfMonth TEXT NOT NULL,
               category TEXT NOT NULL,
               budgeted REAL NOT NULL,
-              expenses REAL NOT NULL,
-              remainderLastMonth REAL NOT NULL,
-              remainder REAL NOT NULL,
+              actual REAL NOT NULL,
+              opening REAL NOT NULL,
+              closing REAL NOT NULL,
+              adjustments REAL NOT NULL,    
               PRIMARY KEY (firstOfMonth, category)
             );
         """;
@@ -119,59 +118,63 @@ public class AnalyticsDatabase {
         }
     }
 
-    public void insertMonthlyBudgets(Collection<MonthlyBudget> monthlyBudgets) {
+    public void insertMonthlyBudgets(Collection<BudgetMonth> months) {
         String sql = """
             INSERT OR REPLACE INTO budgets_by_month
-            (firstOfMonth, category, budgeted, expenses, remainderLastMonth, remainder)
+            (firstOfMonth, category, budgeted, actual, opening, closing, adjustments)
             VALUES (?, ?, ?, ?, ?, ?);
         """;
 
         try (Connection c = SqliteUtil.getConnection(dbPath); PreparedStatement ps = c.prepareStatement(sql)) {
             c.setAutoCommit(false);
 
-            for (MonthlyBudget b : monthlyBudgets) {
+            for (var month : months) {
 
-                LocalDate firstOfMonth = b.getFirstOfMonth();
-                for (Entry<String, Double> budgetForCategory : b.getBudgetedForCategories().entrySet()) {
-                    String category = budgetForCategory.getKey();
-                    Double budgeted = budgetForCategory.getValue();
+                LocalDate firstOfMonth = month.firstOfMonth();
+
+                for (var category : month.operatingCategories()) {
                     ps.setString(1, firstOfMonth.toString());
-                    ps.setString(2, category);
-                    ps.setDouble(3, budgeted);
-                    ps.setDouble(4, b.getExpensesForCategories().get(category));
-                    ps.setDouble(5, b.getRemainderForCategoriesLastMonth().get(category));
-                    ps.setDouble(6, b.getRemainderForCategories().get(category));
+                    ps.setString(2, category.name());
+                    ps.setDouble(3, category.budgeted().doubleValue());
+                    ps.setDouble(4, category.actual().doubleValue());
+                    ps.setDouble(5, category.opening().doubleValue());
+                    ps.setDouble(6, category.closing().doubleValue());
+                    ps.setDouble(7, category.adjustments().doubleValue());
                     ps.addBatch();
                 }
 
+                var unappliedExpenses = month.unappliedExpenses();
                 ps.setString(1, firstOfMonth.toString());
-                ps.setString(2, "UNASSIGNED EXPENSES");
+                ps.setString(2, unappliedExpenses.name());
                 ps.setDouble(3, 0.);
-                ps.setDouble(4, b.getUnassignedExpenses());
-                ps.setDouble(5, b.getUnassignedExpensesRemainderLastMonth());
-                ps.setDouble(6, b.getUnassignedExpensesRemainder());
+                ps.setDouble(4, unappliedExpenses.actual().doubleValue());
+                ps.setDouble(5, unappliedExpenses.opening().doubleValue());
+                ps.setDouble(6, unappliedExpenses.closing().doubleValue());
+                ps.setDouble(7, 0.);
                 ps.addBatch();
 
+                var unappliedIncome = month.unappliedIncome();
                 ps.setString(1, firstOfMonth.toString());
-                ps.setString(2, "UNASSIGNED INCOME");
+                ps.setString(2, unappliedIncome.name());
                 ps.setDouble(3, 0.);
-                ps.setDouble(4, b.getUnassignedIncome());
-                ps.setDouble(5, b.getUnassignedIncomeRemainderLastMonth());
-                ps.setDouble(6, b.getUnassignedIncomeRemainder());
+                ps.setDouble(4, unappliedIncome.actual().doubleValue());
+                ps.setDouble(5, unappliedIncome.opening().doubleValue());
+                ps.setDouble(6, unappliedIncome.closing().doubleValue());
+                ps.setDouble(7, 0.);
                 ps.addBatch();
+
             }
 
             ps.executeBatch();
             c.commit();
 
-            LOGGER.log(Level.INFO, "Inserted {0} monthly budgets", monthlyBudgets.size());
+            LOGGER.log(Level.INFO, "Inserted {0} monthly budgets", months.size());
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to insert monthly budgets", e);
         }
     }
 
-    private void createAnalyticsViews() {
-        int firstOfMonth = MultiAccountBudget.getFirstOfMonth();
+    private void createAnalyticsViews(int firstOfMonth) {
 
         try (Connection c = SqliteUtil.getConnection(dbPath); Statement s = c.createStatement(); ResultSet rs = s.executeQuery("select sqlite_version();")) {
             if (rs.next()) {

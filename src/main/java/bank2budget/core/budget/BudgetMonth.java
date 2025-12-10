@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 /**
  *
@@ -50,6 +51,25 @@ public class BudgetMonth {
         return firstOfMonth;
     }
 
+    public int financialYear() {
+        LocalDate date = firstOfMonth;
+        int day = date.getDayOfMonth();
+        int month = date.getMonthValue();
+        int year = date.getYear();
+        if (month == 12 && day > 16) {
+            return year + 1;
+        }
+        return year;
+    }
+
+    public int financialMonth() {
+        LocalDate date = firstOfMonth;
+        if (date.getDayOfMonth() > 16) {
+            return date.plusMonths(1).getMonthValue();
+        }
+        return date.getMonthValue();
+    }
+
     public BudgetMonthCategory unappliedIncome() {
         return unappliedIncome;
     }
@@ -81,4 +101,39 @@ public class BudgetMonth {
         return operatingCategories.get(name);
     }
 
+    public BigDecimal budgeted() {
+        return operatingCategories.values().stream()
+                .map(BudgetMonthCategory::budgeted)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal actual() {
+        return Stream.concat(operatingCategories.values().stream(), Stream.of(unappliedIncome, unappliedExpenses))
+                .map(BudgetMonthCategory::actual)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal opening() {
+        return Stream.concat(operatingCategories.values().stream(), Stream.of(unappliedIncome, unappliedExpenses))
+                .map(BudgetMonthCategory::opening)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal closing() {
+        return Stream.concat(operatingCategories.values().stream(), Stream.of(unappliedIncome, unappliedExpenses))
+                .map(BudgetMonthCategory::closing)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal adjustments() {
+        return operatingCategories.values().stream()
+                .map(BudgetMonthCategory::adjustments)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal variance() {
+        return Stream.concat(operatingCategories.values().stream(), Stream.of(unappliedIncome, unappliedExpenses))
+                .map(BudgetMonthCategory::variance)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }

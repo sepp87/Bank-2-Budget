@@ -1,7 +1,6 @@
 package bank2budget.adapters.writer;
 
 import bank2budget.adapters.writer.AccountWriter;
-import bank2budget.core.MultiAccountBudget;
 import bank2budget.core.budget.Budget;
 import bank2budget.core.budget.BudgetMonth;
 import bank2budget.core.budget.BudgetMonthCategory;
@@ -14,8 +13,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -38,6 +35,16 @@ public class BudgetWriterNew {
     private final Path budgetFile;
     private XSSFWorkbook workbook;
 
+    public static String[] getHeader() {
+        return new String[]{
+            "Category",
+            "Budgeted",
+            "Expenses",
+            "Last Month",
+            "Remainder"
+        };
+    }
+
     public BudgetWriterNew(Path budgetFile) {
         this.budgetFile = budgetFile;
     }
@@ -50,7 +57,6 @@ public class BudgetWriterNew {
 
         List<BudgetMonth> reversedMonthlyBudgets = new ArrayList<>(budget.months());
         Collections.reverse(reversedMonthlyBudgets);
-        System.out.println("NUMBER OF MONTHS " + budget.months().size());
 
         Font titleFont = getFont(18, true);
         Font headerFont = getFont(10, true);
@@ -102,11 +108,10 @@ public class BudgetWriterNew {
 
                 // Create a header row
                 Row headerRow = sheet.createRow(1);
-                String[] columns = MultiAccountBudget.getHeader();
+                String[] columns = getHeader();
                 for (int i = 1; i < columns.length; i++) {
                     Cell cell = headerRow.createCell(i);
                     cell.setCellValue(columns[i]);
-
                 }
 
                 List<BudgetMonthCategory> categories = month.operatingCategories();

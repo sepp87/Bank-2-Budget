@@ -1,6 +1,5 @@
 package bank2budget.application;
 
-import bank2budget.core.MultiAccountBudget;
 import bank2budget.core.budget.Budget;
 import bank2budget.core.budget.BudgetCalculator;
 import bank2budget.core.budget.BudgetMonth;
@@ -14,16 +13,14 @@ import java.util.List;
  */
 public class BudgetService {
 
-    private final BudgetRepositoryPort<MultiAccountBudget> repository;
     private final AccountService accountService;
-    private MultiAccountBudget budget;
     private final BudgetRepositoryPort<Budget> newRepo;
     private final Budget newBudget;
     private final BudgetCalculator calculator;
     private final BudgetTemplate template;
 
-    public BudgetService(BudgetRepositoryPort<MultiAccountBudget> repository, AccountService accountService, BudgetRepositoryPort<Budget> newRepo, BudgetCalculator calculator, BudgetTemplate template) {
-        this.repository = repository;
+    public BudgetService(AccountService accountService, BudgetRepositoryPort<Budget> newRepo, BudgetCalculator calculator, BudgetTemplate template) {
+
         this.accountService = accountService;
         this.newRepo = newRepo;
         this.newBudget = newRepo.load();
@@ -32,19 +29,18 @@ public class BudgetService {
 
         List<BudgetMonth> created = calculator.create(template, newBudget, accountService.getAccounts());
         List<BudgetMonth> replaced = newBudget.replace(created);
-        
     }
 
     public void load() {
-        this.budget = repository.load();
-        budget.setAccounts(accountService.getAccounts());
+//        this.budget = repository.load();
+//        budget.setAccounts(accountService.getAccounts());
     }
 
-    public MultiAccountBudget getBudget() {
-        if (this.budget == null) {
+    public Budget getBudget() {
+        if (this.newBudget == null) {
             load();
         }
-        return budget;
+        return newBudget;
 
     }
 
@@ -56,12 +52,11 @@ public class BudgetService {
     }
 
     public void recalculateAndSave() {
-        budget.setAccounts(accountService.getAccounts());
+//        budget.setAccounts(accountService.getAccounts());
         save();
     }
 
     private void save() {
-        repository.save(budget);
         newRepo.save(newBudget);
     }
 }

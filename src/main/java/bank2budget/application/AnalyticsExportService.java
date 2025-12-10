@@ -2,7 +2,7 @@ package bank2budget.application;
 
 import bank2budget.adapters.repository.AnalyticsDatabase;
 import bank2budget.core.Account;
-import bank2budget.core.MultiAccountBudget;
+import bank2budget.core.budget.Budget;
 import bank2budget.ports.AnalyticsExportPort;
 import java.util.Collection;
 
@@ -24,8 +24,8 @@ public class AnalyticsExportService implements AnalyticsExportPort {
         }
     }
 
-    public void exportBudget(MultiAccountBudget budget) {
-        db.insertMonthlyBudgets(budget.getMonthlyBudgets().values());
+    public void exportBudget(Budget budget) {
+        db.insertMonthlyBudgets(budget.months());
     }
 
 }

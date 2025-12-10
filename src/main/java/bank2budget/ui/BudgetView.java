@@ -1,9 +1,10 @@
 package bank2budget.ui;
 
 import bank2budget.App;
-import bank2budget.core.MonthlyBudget;
-import bank2budget.core.MultiAccountBudget;
 import bank2budget.core.Util;
+import bank2budget.core.budget.Budget;
+import bank2budget.core.budget.BudgetMonth;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class BudgetView extends AnchorPane {
     private final ComboBox<LocalDate> monthSelection;
 
     private final App app;
-    private final MultiAccountBudget budget;
+    private final Budget budget;
     private final Label currentMonth;
     private final Label remainingIncome;
     private final Label currentBalance;
@@ -132,7 +133,7 @@ public class BudgetView extends AnchorPane {
 
     public void reload() {
         selectMonthSubscription.unsubscribe();
-        budget.setAccounts(app.getAccountService().getAccounts());
+//        budget.setAccounts(app.getAccountService().getAccounts());
         monthSelection.getItems().clear();
         LocalDate key = monthSelection.getSelectionModel().getSelectedItem();
         populateMonthSelection(key);
@@ -152,7 +153,7 @@ public class BudgetView extends AnchorPane {
     }
 
     private void populateMonthSelection(LocalDate key) {
-        List<LocalDate> monthsDesc = new ArrayList<>(budget.getMonthlyBudgets().keySet()).reversed();
+        List<LocalDate> monthsDesc = new ArrayList<>(budget.monthKeys()).reversed();
         for (LocalDate month : monthsDesc) {
             monthSelection.getItems().add(month);
         }
@@ -164,37 +165,39 @@ public class BudgetView extends AnchorPane {
     }
 
     private void selectMonth(LocalDate key) {
-        MonthlyBudget month = null;
+        BudgetMonth month = null;
         if (key == null) {
-            month = budget.getMonthlyBudgets().lastEntry().getValue();
+            month = budget.months().getLast();
         } else {
-            month = budget.getMonthlyBudgets().get(key);
+            month = budget.month(key);
         }
 
-        currentMonth.setText(Month.of(month.getFinancialMonth()).toString() + " " + month.getFinancialYear());
-//        remainingIncome.setText(key);
-        currentBalance.setText(app.getAccountService().getTotalBalanceOn(month.getLastOfMonth()) + "");
+        currentMonth.setText(Month.of(month.financialMonth()).toString() + " " + month.financialYear());
+        remainingIncome.setText(month.variance().toPlainString());
+        currentBalance.setText(month.closing().toPlainString());
 
         loadBudgetedVsExpenses(month);
         loadSavingsBuffersAndDeficits(month);
     }
 
-    private void loadBudgetedVsExpenses(MonthlyBudget month) {
-        for (Entry<String, Double> entry : month.getBudgetedForCategories().entrySet()) {
-            String category = entry.getKey();
-            Double budgeted = entry.getValue();
-            Double expenses = month.getExpensesForCategories().get(category);
-            addCategoryToBudgetedVsExpenses(category, budgeted, expenses);
+    private void loadBudgetedVsExpenses(BudgetMonth month) {
+        for (var category  : month.operatingCategories()) {
+            String name = category.name();
+            BigDecimal budgeted = category.budgeted();
+            BigDecimal expenses = category.actual();
+            addCategoryToBudgetedVsExpenses(name, budgeted, expenses);
         }
-        addCategoryToBudgetedVsExpenses("UNASSIGNED EXPENSES", 0., month.getUnassignedExpenses());
-        addCategoryToBudgetedVsExpenses("UNASSIGNED INCOME", 0., month.getUnassignedIncome());
+        var unappliedExpenses = month.unappliedExpenses();
+        var unappliedIncome = month.unappliedIncome();
+        addCategoryToBudgetedVsExpenses(unappliedExpenses.name(), BigDecimal.ZERO, unappliedExpenses.actual());
+        addCategoryToBudgetedVsExpenses(unappliedIncome.name(), BigDecimal.ZERO, unappliedIncome.actual());
     }
 
-    private void loadSavingsBuffersAndDeficits(MonthlyBudget month) {
-        for (Entry<String, Double> entry : month.getBudgetedForCategories().entrySet()) {
-            String category = entry.getKey();
-            Double amount = month.getRemainderForCategories().get(category);
-            addCategoryToSavingsBuffersAndDeficits(category, amount);
+    private void loadSavingsBuffersAndDeficits(BudgetMonth month) {
+        for (var category : month.operatingCategories()) {
+            String name = category.name();
+            BigDecimal closing = category.closing();
+            addCategoryToSavingsBuffersAndDeficits(name, closing);
         }
     }
 
@@ -212,29 +215,28 @@ public class BudgetView extends AnchorPane {
         savingsBuffersAndDeficitsTable.addRow(0, category, amount);
     }
 
-    public void addCategoryToBudgetedVsExpenses(String category, Double budgeted, Double expenses) {
+    public void addCategoryToBudgetedVsExpenses(String category, BigDecimal budgeted, BigDecimal actual) {
         int index = budgetedVsExpensesTable.getRowCount();
-        Double remainder = Math.floor((budgeted + expenses) * 100) / 100;
+        BigDecimal difference = budgeted.add(actual);
         budgetedVsExpensesTable.addRow(
                 index,
                 new Label(category),
-                new TextField(budgeted.toString()),
-                new Label(expenses.toString()),
-                new Label(remainder.toString())
+                new TextField(budgeted.toPlainString()),
+                new Label(actual.toPlainString()),
+                new Label(difference.toPlainString())
         );
     }
 
-    public void addCategoryToSavingsBuffersAndDeficits(String category, Double amount) {
+    public void addCategoryToSavingsBuffersAndDeficits(String category, BigDecimal closing) {
         // if amount equals zero, then there is no savings, buffer or deficit
-        if (Util.compareMoney(amount, 0.)) {
+        if (closing.compareTo(BigDecimal.ZERO) == 0) {
             return;
         }
         int index = savingsBuffersAndDeficitsTable.getRowCount();
-        savingsBuffersAndDeficitsTable.addRow(
-                index,
+        savingsBuffersAndDeficitsTable.addRow(index,
                 new Label(category),
-                new Label(amount.toString()),
-                new Button("Rebalance")
+                new Label(closing.toPlainString()),
+                new Button("Adjust")
         );
     }
 

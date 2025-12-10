@@ -111,6 +111,7 @@ public class BudgetTimeline {
             result.add(first);
             first = first.plusMonths(1);
         }
+
         result.add(first); // add one last first of month so the newest transactions falls within the range
 
         return result;

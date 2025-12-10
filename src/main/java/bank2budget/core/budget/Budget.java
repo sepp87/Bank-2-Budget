@@ -34,7 +34,7 @@ public class Budget {
     public List<BudgetMonth> replace(List<BudgetMonth> updated) {
         List<BudgetMonth> replaced = new ArrayList<>();
         for (var month : updated) {
-            var existing = months.replace(month.firstOfMonth(), month);
+            var existing = months.put(month.firstOfMonth(), month);
             if (existing != null) {
                 replaced.add(existing);
             }

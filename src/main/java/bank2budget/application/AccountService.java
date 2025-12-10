@@ -1,8 +1,9 @@
 package bank2budget.application;
 
 import bank2budget.core.Account;
-import bank2budget.core.CashTransaction;
+import bank2budget.core.AccountDomainLogic;
 import bank2budget.core.IntegrityChecker;
+import bank2budget.core.Transaction;
 import bank2budget.core.rule.RuleEngine;
 import bank2budget.ports.AccountRepositoryPort;
 import bank2budget.ports.AccountImporterPort;
@@ -23,15 +24,15 @@ public class AccountService {
 
     private final AccountRepositoryPort repository;
     private final AccountImporterPort importer;
-    private final RuleEngine<CashTransaction> ruleEngine;
+    private final RuleEngine<Transaction> ruleEngine;
     private final Map<String, Account> accountsIndex;
 
-    public AccountService(AccountRepositoryPort repository, AccountImporterPort importer, RuleEngine<CashTransaction> ruleEngine) {
+    public AccountService(AccountRepositoryPort repository, AccountImporterPort importer, RuleEngine<Transaction> ruleEngine) {
         this.repository = repository;
         this.importer = importer;
         this.ruleEngine = ruleEngine;
         this.accountsIndex = repository.load();
-        normalize(accountsIndex.values());
+        applySystemRules(accountsIndex.values());
     }
 
     public Collection<Account> getAccounts() {
@@ -40,13 +41,12 @@ public class AccountService {
 
     public void importFromFiles(List<File> files) {
         List<Account> imported = importer.importFromFiles(files);
-        normalizeApplyRulesAndMerge(imported);
+        applyRulesAndMerge(imported);
     }
-
 
     public boolean importFromTodoAndSave() {
         List<Account> imported = importer.importFromTodo();
-        normalizeApplyRulesAndMerge(imported);
+        applyRulesAndMerge(imported);
 
 //        if(true) {
 //            return false;
@@ -58,23 +58,24 @@ public class AccountService {
         return false;
     }
 
-    private void normalizeApplyRulesAndMerge(List<Account> imported) {
-        normalize(imported);
+    private void applyRulesAndMerge(List<Account> imported) {
         applyRules(imported);
         merge(imported);
     }
 
-    private void normalize(Collection<Account> accounts) {
+    private void applySystemRules(Collection<Account> accounts) {
         for (Account account : accounts) {
-            ruleEngine.overwriteAccountNames(account.getAllTransactionsAscending());
-//            ruleEngine.addMissingAccountNumbers(transactions);
-            ruleEngine.determineInternalTransactions(account.getAllTransactionsAscending());
+            var updated = ruleEngine.applySystemRules(account.transactionsAscending());
+            account.replace(updated);
+            System.out.println("Tx: " + account.transactionsAscending().size() + "\tupdatedTx: " + updated.size());
         }
     }
 
     private void applyRules(Collection<Account> accounts) {
         for (Account account : accounts) {
-            ruleEngine.applyRules(account.getAllTransactionsAscending());
+            var updated = ruleEngine.applyRules(account.transactionsAscending());
+            account.replace(updated);
+            System.out.println("Tx: " + account.transactionsAscending().size() + "\tupdatedTx: " + updated.size());
         }
     }
 
@@ -102,56 +103,12 @@ public class AccountService {
         }
     }
 
-    /**
-     *
-     * @return the date of the latest transaction across all accounts. Returns
-     * null if there are no accounts respectively no transactions available.
-     */
     public LocalDate getLastExportDate() {
-        LocalDate result = null;
-        for (Account a : getAccounts()) {
-            LocalDate candidate = a.getNewestTransactionDate();
-            if (result == null) {
-                result = candidate;
-            }
-            if (candidate.isAfter(result)) {
-                result = candidate;
-            }
-        }
-        return result;
+        return AccountDomainLogic.getLastExportDate(getAccounts());
     }
 
-    /**
-     *
-     * @return the balance of all accounts put together.
-     */
-    public BigDecimal getTotalBalance() {
-        return getTotalBalanceOn(null);
-    }
-
-    /**
-     *
-     * @return the balance of all accounts put together.
-     */
     public BigDecimal getTotalBalanceOn(LocalDate date) {
-        if (date == null) {
-            date = getLastExportDate();
-        }
-        BigDecimal result = BigDecimal.ZERO;
-        for (Account a : getAccounts()) {
-            List<CashTransaction> transactions = a.getAllTransactionsAscending();
-            CashTransaction newest = null;
-            for (CashTransaction transaction : transactions) {
-                if (transaction.date().isAfter(date)) {
-                    break;
-                }
-                newest = transaction;
-            }
-            if (newest != null) {
-                result = result.add(newest.accountBalance());
-            }
-        }
-        return result;
+        return AccountDomainLogic.getTotalBalanceOn(getAccounts(), date);
     }
 
 }

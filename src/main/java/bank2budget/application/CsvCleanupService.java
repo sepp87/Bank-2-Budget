@@ -4,11 +4,11 @@ import bank2budget.AppPaths;
 import bank2budget.adapters.reader.FileUtil;
 import bank2budget.adapters.reader.TransactionReaderFactory;
 import bank2budget.adapters.writer.TransactionWriterFactory;
-import bank2budget.core.CashTransaction;
 import bank2budget.core.Transaction;
 import bank2budget.core.rule.RuleEngine;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.TreeMap;
 
 /**
  *
@@ -17,10 +17,10 @@ import java.util.List;
 public class CsvCleanupService {
 
     private final AppPaths paths;
-    private final RuleEngine ruleEngine;
+    private final RuleEngine<Transaction> ruleEngine;
     private final char decimalSeparator;
 
-    public CsvCleanupService(AppPaths paths, RuleEngine ruleEngine, char decimalSeparator) {
+    public CsvCleanupService(AppPaths paths, RuleEngine<Transaction> ruleEngine, char decimalSeparator) {
         this.paths = paths;
         this.ruleEngine = ruleEngine;
         this.decimalSeparator = decimalSeparator;
@@ -38,13 +38,14 @@ public class CsvCleanupService {
             Path target = done.resolve(base + " cleaned.csv");
 
             var transactions = TransactionReaderFactory.parse(csv.toFile()).getTransactions();
-            List<CashTransaction> ctx = transactions.stream().map(CashTransaction::new).toList();
 
-            ruleEngine.overwriteAccountNames(ctx);
-            ruleEngine.determineInternalTransactions(ctx);
-            ruleEngine.applyRules(ctx);
+            TreeMap<Integer, Transaction> index = new TreeMap<>();
+            transactions.forEach(e -> index.put(e.transactionNumber(), e)); // put all transactions into a map to allow updates
 
-            TransactionWriterFactory.create(target.toFile(), decimalSeparator).write(ctx.stream().map(CashTransaction::getTransaction).toList());
+            var updated = ruleEngine.applyRules(transactions);
+            updated.forEach(e -> index.put(e.transactionNumber(), e)); // update transactions with new versions
+
+            TransactionWriterFactory.create(target.toFile(), decimalSeparator).write(index.values());
         }
     }
 

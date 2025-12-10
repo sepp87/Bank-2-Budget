@@ -108,14 +108,6 @@ public class CashTransactionTest {
         UtilTest.printResult(expected, result);
     }
 
-    public static CashTransaction newCtx(String isoDate, int positionOfDay, boolean lastOfDay, double amount, double balance, String account, String contraAccount, String category) {
-
-        Transaction transaction = newTx(isoDate, positionOfDay, lastOfDay, amount, balance, account, contraAccount, category);
-        CashTransaction ctx = new CashTransaction(transaction);
-
-        return ctx;
-    }
-
     public static Transaction newTx(String isoDate, int positionOfDay, boolean lastOfDay, double amount, double balance, String account, String contraAccount, String category) {
         LocalDate date = LocalDate.parse(isoDate);
         int txNumber = getTxNumber(date, positionOfDay);

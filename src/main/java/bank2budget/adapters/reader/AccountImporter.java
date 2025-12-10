@@ -34,6 +34,7 @@ public class AccountImporter implements AccountImporterPort {
     @Override
     public List<Account> importFromFiles(List<File> files) {
         List<Account> result = new ArrayList<>();
+//        System.out.println();
         for (File file : files) {
             var transactions = TransactionReaderFactory.parse(file).getTransactions();
             List<Account> accounts = groupTransactionsByAccount(transactions);

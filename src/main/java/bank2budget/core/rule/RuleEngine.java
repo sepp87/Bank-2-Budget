@@ -1,8 +1,8 @@
 package bank2budget.core.rule;
 
-import bank2budget.core.CashTransaction;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  *
@@ -11,85 +11,45 @@ import java.util.Map;
 public class RuleEngine<T> {
 
     private final List<Rule<T>> rules;
-    private final Map<String, String> myAccounts;
-    private final Map<String, String> otherAccounts;
+    private final List<Rule<T>> systemRules;
+    private final List<Rule<T>> userRules;
 
-    public RuleEngine(List<Rule<T>> rules, Map<String, String> myAccounts, Map<String, String> otherAccounts) {
-        this.rules = rules;
-        this.myAccounts = myAccounts;
-        this.otherAccounts = otherAccounts;
+
+    public RuleEngine(List<Rule<T>> systemRules, List<Rule<T>> userRules) {
+        this.systemRules = systemRules;
+        this.userRules = userRules;
+        this.rules = Stream.concat(systemRules.stream(), userRules.stream()).toList();
     }
 
-    public void applyRules(List<T> transactions) {
+    public List<T> applySystemRules(List<T> transactions) {
+        return applyRules(systemRules, transactions);
+    }
+
+    public List<T> applyRules(List<T> transactions) {
+        return applyRules(rules, transactions);
+    }
+
+    private List<T> applyRules(List<Rule<T>> rules, List<T> transactions) {
+        List<T> result = new ArrayList<>();
         for (T transaction : transactions) {
-            applyRules(transaction);
+            T newTransaction = applyRules(rules, transaction);
+            if (newTransaction != null) {
+                result.add(newTransaction);
+            }
         }
+        return result;
     }
 
-    public void applyRules(T transaction) {
+    private T applyRules(List<Rule<T>> rules, T transaction) {
+        T result = null; // <--- return null if rules did not apply
         for (Rule<T> rule : rules) {
-            rule.apply(transaction);
-        }
-    }
-
-    // overwrite account names
-    public void overwriteAccountNames(List<CashTransaction> transactions) {
-        for (CashTransaction t : transactions) {
-
-            String accountNumber = t.accountNumber();
-            String accountName = getAccountNameFrom(accountNumber);
-            if (accountName != null) {
-                t.setAccountName(accountName);
+            T newTransaction = rule.apply(transaction);
+            if (newTransaction != null) {
+                transaction = newTransaction; // <--- update transaction incrementally with successive rules
+                result = newTransaction; // <--- return latest transaction, if rules were applied
             }
-
-            String contraAccountNumber = t.contraAccountNumber();
-            String contraAccountName = getAccountNameFrom(contraAccountNumber);
-            if (contraAccountName != null) {
-                t.setContraAccountName(contraAccountName);
-            }
-        }
-    }
-
-    private String getAccountNameFrom(String accountNumber) {
-        if (accountNumber == null) {
-            return null;
-        }
-        String result = myAccounts.get(accountNumber);
-        if (result == null) {
-            result = otherAccounts.get(accountNumber);
         }
         return result;
     }
 
-    private String getAccountNumberFrom(String accountName) {
-        if (accountName == null) {
-            return null;
-        }
-
-        String result = getKeyFromValue(accountName, myAccounts);
-        if (result == null) {
-            result = getKeyFromValue(accountName, otherAccounts);
-        }
-        return result;
-    }
-
-    private static String getKeyFromValue(String value, Map<String, String> properties) {
-        for (Map.Entry<String, String> entry : properties.entrySet()) {
-            String candidate = entry.getValue();
-            if (candidate.equals(value)) {
-                String key = entry.getKey();
-                return key;
-            }
-        }
-        return null;
-    }
-
-    // determine internal transactions
-    public void determineInternalTransactions(List<CashTransaction> transactions) {
-        for (CashTransaction t : transactions) {
-            boolean internal = myAccounts.containsKey(t.accountNumber())
-                    && myAccounts.containsKey(t.contraAccountNumber());
-            t.setInternal(internal);
-        }
-    }
 }

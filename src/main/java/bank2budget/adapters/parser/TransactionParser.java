@@ -53,7 +53,7 @@ public abstract class TransactionParser {
         try (CSVParser parser = CSVParser.parse(new InputStreamReader(new FileInputStream(parserConfig.getFile()), parserConfig.getCharset()), getCsvFormat())) { // To read ANSI encoded characters like 'ü' correctly in macOS
 
             List<Transaction> transactions = parseRecordsWith(parser);
-            if (Launcher.log_transactions) {
+            if (Launcher.LOG_TRANSACTIONS) {
                 for (var t : transactions) {
                     System.out.println(t.toString());
                 }
@@ -192,7 +192,6 @@ public abstract class TransactionParser {
 //        String cleanNumberString = noPlusSpaceAndDot.replace(",", ".");
 //        return Double.parseDouble(cleanNumberString);
 //    }
-
     protected BigDecimal bigDecimalFromString(String numberString) {
         String noEur = numberString.replace("EUR", "");
         String noPlus = noEur.replace("+", "");

@@ -13,22 +13,22 @@ import java.util.TreeMap;
 public class Account {
 
     private final String accountNumber;
-    private final TreeMap<Integer, CashTransaction> allTransactionsIndex = new TreeMap<>();
+    private final TreeMap<Integer, Transaction> allTransactionsIndex = new TreeMap<>();
 
     public Account(String accountNumber, List<Transaction> transactions) {
         this.accountNumber = accountNumber;
         for (var t : transactions) {
-            allTransactionsIndex.put(t.transactionNumber(), new CashTransaction(t));
+            allTransactionsIndex.put(t.transactionNumber(), t);
         }
     }
 
-    public List<CashTransaction> getTransactions(LocalDate from, LocalDate to) {
-        List<CashTransaction> transactions = getAllTransactionsAscending();
-        List<CashTransaction> result = CashTransactionDomainLogic.filterByTimespan(transactions, from, to);
+    public List<Transaction> getTransactions(LocalDate from, LocalDate to) {
+        List<Transaction> transactions = transactionsAscending();
+        List<Transaction> result = CashTransactionDomainLogic.filterByTimespan(transactions, from, to);
         return result;
     }
 
-    public CashTransaction getTransactionBy(int transactionNumber) {
+    public Transaction getTransactionBy(int transactionNumber) {
         return allTransactionsIndex.get(transactionNumber);
     }
 
@@ -55,12 +55,12 @@ public class Account {
     }
 
     public void merge(Account incoming, boolean overwriteCategories) {
-        evaluateOverlapAndMerge(incoming.getAllTransactionsAscending(), overwriteCategories);
+        evaluateOverlapAndMerge(incoming.transactionsAscending(), overwriteCategories);
     }
 
-    private void evaluateOverlapAndMerge(List<CashTransaction> incoming, boolean overwriteCategories) {
+    private void evaluateOverlapAndMerge(List<Transaction> incoming, boolean overwriteCategories) {
         // Evaluate overlap
-        LocalDate[] overlap = CashTransactionDomainLogic.findOverlap(incoming, getAllTransactionsAscending());
+        LocalDate[] overlap = CashTransactionDomainLogic.findOverlap(incoming, transactionsAscending());
 
         // no overlap, so add all incoming
         if (overlap == null) {
@@ -73,23 +73,23 @@ public class Account {
             merge(incoming, from, to, overwriteCategories);
 
             // finally add non-overlapping incoming transactions
-            List<CashTransaction> otherIncoming = CashTransactionDomainLogic.filterByTimespanInverted(incoming, overlap[0], overlap[1]);
+            List<Transaction> otherIncoming = CashTransactionDomainLogic.filterByTimespanInverted(incoming, overlap[0], overlap[1]);
             addTransactions(otherIncoming);
         }
     }
 
     // decide which transactions to add, discard and add categories to
-    private void merge(List<CashTransaction> incoming, LocalDate from, LocalDate to, boolean overwriteCategories) {
-        List<CashTransaction> existingOverlap = getTransactions(from, to);
-        List<CashTransaction> incomingOverlap = CashTransactionDomainLogic.filterByTimespan(incoming, from, to);
+    private void merge(List<Transaction> incoming, LocalDate from, LocalDate to, boolean overwriteCategories) {
+        var existingOverlap = getTransactions(from, to);
+        var incomingOverlap = CashTransactionDomainLogic.filterByTimespan(incoming, from, to);
         List<LocalDate> range = DateUtil.dateRange(from, to);
 
-        Map<LocalDate, List<CashTransaction>> existingByDays = groupByDays(range, existingOverlap);
-        Map<LocalDate, List<CashTransaction>> incomingByDays = groupByDays(range, incomingOverlap);
+        Map<LocalDate, List<Transaction>> existingByDays = groupByDays(range, existingOverlap);
+        Map<LocalDate, List<Transaction>> incomingByDays = groupByDays(range, incomingOverlap);
 
         for (LocalDate day : range) {
-            List<CashTransaction> existingDay = existingByDays.get(day);
-            List<CashTransaction> incomingDay = incomingByDays.get(day);
+            var existingDay = existingByDays.get(day);
+            var incomingDay = incomingByDays.get(day);
 
             // if incoming transactions contains more entries, the existing ones should be replaced
             if (incomingDay.size() > existingDay.size()) {
@@ -103,8 +103,8 @@ public class Account {
         }
     }
 
-    private Map<LocalDate, List<CashTransaction>> groupByDays(List<LocalDate> range, List<CashTransaction> transactions) {
-        Map<LocalDate, List<CashTransaction>> result = new TreeMap<>();
+    private Map<LocalDate, List<Transaction>> groupByDays(List<LocalDate> range, List<Transaction> transactions) {
+        Map<LocalDate, List<Transaction>> result = new TreeMap<>();
         for (LocalDate date : range) {
             result.put(date, new ArrayList<>());
         }
@@ -112,27 +112,28 @@ public class Account {
         return result;
     }
 
-    private void addTransactions(List<CashTransaction> transactions) {
+    private void addTransactions(List<Transaction> transactions) {
         for (var transaction : transactions) {
             allTransactionsIndex.put(transaction.transactionNumber(), transaction);
         }
     }
 
-    private void removeTransactions(List<CashTransaction> transactions) {
+    private void removeTransactions(List<Transaction> transactions) {
         for (var transaction : transactions) {
             int number = transaction.transactionNumber();
             allTransactionsIndex.remove(number);
         }
     }
 
-    private void enrichCategories(List<CashTransaction> transactions, boolean overwriteCategories) {
+    private void enrichCategories(List<Transaction> transactions, boolean overwriteCategories) {
         for (var incoming : transactions) {
             int number = incoming.transactionNumber();
             if (allTransactionsIndex.containsKey(number)) {
-                CashTransaction existing = allTransactionsIndex.get(number);
-                boolean isSame = CashTransactionDomainLogic.areSame(incoming.getTransaction(), existing.getTransaction());
+                Transaction existing = allTransactionsIndex.get(number);
+                boolean isSame = CashTransactionDomainLogic.areSame(incoming, existing);
                 if (isSame && incoming.category() != null && (existing.category() == null || overwriteCategories)) {
-                    existing.setCategory(incoming.category());
+                    var updated = existing.withCategory(incoming.category());
+                    allTransactionsIndex.put(number, updated);
 //                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});
                 }
 //                else {
@@ -144,6 +145,8 @@ public class Account {
 //                }
             } else {
                 System.out.println("trying to enrich existing transactions with re-imported transactions, but transaction does not exist, should not be a case to right?");
+                System.out.println(incoming);
+                System.out.println();
             }
         }
     }
@@ -154,9 +157,7 @@ public class Account {
      * ascending order, starting from oldest to most current
      */
     public List<CashTransaction> getAllTransactionsAscending() {
-        List<CashTransaction> allTransactions = new ArrayList<>();
-        allTransactions.addAll(allTransactionsIndex.values());
-        return allTransactions;
+        return allTransactionsIndex.values().stream().map(CashTransaction::new).toList();
     }
 
     /**
@@ -165,11 +166,19 @@ public class Account {
      * ascending order, starting from oldest to most current
      */
     public List<Transaction> transactionsAscending() {
-        return allTransactionsIndex.values().stream().map(CashTransaction::getTransaction).toList();
+        return allTransactionsIndex.values().stream().toList();
     }
 
     public String getAccountNumber() {
         return accountNumber;
     }
 
+    public void replace(List<Transaction> transactions) {
+        for (var tx : transactions) {
+            var replaced = allTransactionsIndex.put(tx.transactionNumber(), tx);
+            if (replaced == null) {
+                System.out.println("ERROR REPLACED WAS NOT AVAILABLE");
+            }
+        }
+    }
 }

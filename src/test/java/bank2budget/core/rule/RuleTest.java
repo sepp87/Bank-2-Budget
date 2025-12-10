@@ -1,10 +1,7 @@
 package bank2budget.core.rule;
 
-import bank2budget.adapters.reader.RuleFactory;
-import bank2budget.core.CashTransaction;
 import bank2budget.core.TransactionBuilder;
 import bank2budget.core.UtilTest;
-import java.math.BigDecimal;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -25,11 +22,11 @@ public class RuleTest {
         System.out.println("test_WhenDescriptionFoo_ThenCategoryBar");
 
         // create test data
-        CashTransaction transaction = new CashTransaction(new TransactionBuilder().description("Foo").build());
+        var transaction = new TransactionBuilder().description("Foo").build();
         var rule = RuleFactory.create(new RuleConfig("description", "Foo", "category", "Bar"));
 
         // perform test
-        CashTransaction processed = rule.apply(transaction);
+        var processed = rule.apply(transaction);
 
         // prepare results
         String expected = "Bar";
@@ -46,11 +43,11 @@ public class RuleTest {
         System.out.println("test_WhenContraAccountNameFoo_ThenCategoryBar");
 
         // create test data
-        CashTransaction transaction = new CashTransaction(new TransactionBuilder().description("Foo").build());
+        var transaction = new TransactionBuilder().description("Foo").build();
         var rule = RuleFactory.create(new RuleConfig("description", "Foo", "category", "Bar"));
 
         // perform test
-        CashTransaction processed = rule.apply(transaction);
+        var processed = rule.apply(transaction);
 
         // prepare results
         String expected = "Bar";

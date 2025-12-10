@@ -2,7 +2,6 @@ package bank2budget.core;
 
 import bank2budget.core.budget.BudgetTemplate;
 import bank2budget.core.rule.RuleConfig;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -19,16 +18,12 @@ public class Config {
     private Map<String, String> myAccounts;
     private Map<String, String> otherAccounts;
     private List<RuleConfig> ruleConfigs;
-    private Map<String, Double> budgetCategories;
-    private int firstOfMonth = 1;
     private BudgetTemplate budgetTemplate;
 
-    public Config(Map<String, String> myAccounts, Map<String, String> otherAccounts, List<RuleConfig> ruleConfigs, Map<String, Double> budgetCategories, int firstOfMonth, BudgetTemplate budgetTemplate) {
+    public Config(Map<String, String> myAccounts, Map<String, String> otherAccounts, List<RuleConfig> ruleConfigs, BudgetTemplate budgetTemplate) {
         this.myAccounts = myAccounts;
         this.otherAccounts = otherAccounts;
         this.ruleConfigs = ruleConfigs;
-        this.budgetCategories = budgetCategories;
-        this.firstOfMonth = validateFirstOfMonth(firstOfMonth);
         this.budgetTemplate = budgetTemplate;
     }
 
@@ -51,14 +46,6 @@ public class Config {
 
     public List<RuleConfig> ruleConfigs() {
         return ruleConfigs;
-    }
-
-    public Map<String, Double> budgetCategories() {
-        return budgetCategories;
-    }
-
-    public int firstOfMonth() {
-        return firstOfMonth;
     }
     
     public BudgetTemplate budgetTemplate() {

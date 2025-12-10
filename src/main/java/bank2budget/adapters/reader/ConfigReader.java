@@ -32,12 +32,8 @@ public class ConfigReader {
         Map<String, String> myAccounts = propertiesToMap(readProperties(paths.getMyAccountsFile()));
         Map<String, String> otherAccounts = propertiesToMap(readProperties(paths.getOtherAccountsFile()));
         List<RuleConfig> ruleConfigs = new RuleReaderNew(paths.getProcessingRulesFile().toFile()).read();
-        BudgetSettingsReader budgetSettingsReader = new BudgetSettingsReader(paths.getBudgetSettingsFile().toFile());
-        budgetSettingsReader.read();
-        int firstOfMonth = budgetSettingsReader.getFirstOfMonth();
-        Map<String, Double> budgetCategories = budgetSettingsReader.getBudgetTemplate();
         BudgetTemplate budgetTemplate = new BudgetTemplateReader(paths.getBudgetTemplateFile()).read();
-        this.config = new Config(myAccounts, otherAccounts, ruleConfigs, budgetCategories, firstOfMonth, budgetTemplate);
+        this.config = new Config(myAccounts, otherAccounts, ruleConfigs, budgetTemplate);
     }
 
     public Config getConfig() {

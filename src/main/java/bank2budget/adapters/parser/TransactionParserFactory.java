@@ -16,6 +16,7 @@ import java.util.logging.Logger;
  */
 public class TransactionParserFactory {
 
+    private final static Logger LOGGER = Logger.getLogger(TransactionParserFactory.class.getName());
 
     public static TransactionParser createTransactionParser(File csvFile) throws Exception {
 
@@ -88,7 +89,8 @@ public class TransactionParserFactory {
         if (parser == null) {
             throw new Exception("ERROR: Unknown bank, please validate if " + csvFile.getName() + " is really a CSV file. Does the file exist? Create transaction parser terminated. First line: " + firstLine);
         }
-        System.out.println("\nIdentified " + parser.getConfig().getCreditInstitution().toString() + " from file \"" + csvFile.getName() + "\"");
+
+        LOGGER.log(Level.INFO, "Identified {0} from file \"{1}\"", new Object[]{parser.getConfig().getCreditInstitution().toString(), csvFile.getName()});
 
         return parser;
     }

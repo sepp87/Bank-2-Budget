@@ -1,7 +1,7 @@
 package bank2budget.ports;
 
 import bank2budget.core.Account;
-import bank2budget.core.MultiAccountBudget;
+import bank2budget.core.budget.Budget;
 import java.util.Collection;
 
 /**
@@ -11,5 +11,5 @@ import java.util.Collection;
 public interface AnalyticsExportPort {
     
     void exportAccounts(Collection<Account> accounts) ;
-    void exportBudget(MultiAccountBudget budget);
+    void exportBudget(Budget budget);
 }
