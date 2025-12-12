@@ -1,13 +1,12 @@
 package bank2budget.ui;
 
-import bank2budget.App;
-import bank2budget.core.budget.Budget;
-import bank2budget.core.budget.BudgetMonth;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.TreeSet;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -17,9 +16,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.util.Subscription;
 
 /**
  *
@@ -29,30 +28,23 @@ public class BudgetView extends AnchorPane {
 
     private final ComboBox<LocalDate> monthSelection;
 
-    private final App app;
-    private final Budget budget;
     private final Label currentMonth;
     private final Label remainingIncome;
     private final Label currentBalance;
     private final Label lastExport;
     private final GridPane budgetedVsExpensesTable;
     private final GridPane savingsBuffersAndDeficitsTable;
-    private Subscription selectMonthSubscription;
 
     // Month Year                                               [ month ] [ save ]
     // Budgeted vs. Expenses                                    Savings, Buffers and Deficits
     // Header   category - budgeted - expenses - remainder      Header  category - amount
     // Row      category - budgeted - expenses - remainder      Row     category - amount
-    public BudgetView(App app) {
-        this.app = app;
-        this.budget = app.getBudgetService().getBudget();
-
+//    public BudgetView(App app) {
+    public BudgetView() {
 
         // Build header
         this.currentMonth = new Label("January 2026");
-
-        String lastExportDate = app.getAccountService().getLastExportDate() == null ? "" : app.getAccountService().getLastExportDate().toString();
-        this.lastExport = new Label(lastExportDate);
+        this.lastExport = new Label("2025-01-01");
         this.remainingIncome = new Label("€500,-");
         this.currentBalance = new Label("€1000,-");
         GridPane header = new GridPane(3, 3);
@@ -60,10 +52,10 @@ public class BudgetView extends AnchorPane {
         width25Percent.setPercentWidth(25);
         header.getColumnConstraints().addAll(width25Percent, width25Percent, width25Percent, width25Percent);
         header.addRow(0,
-                wrapInStackPane(currentMonth),
-                wrapInStackPane(lastExport),
-                wrapInStackPane(remainingIncome),
-                wrapInStackPane(currentBalance)
+                wrapKpiWithLabel(currentMonth, "Selected month"),
+                wrapKpiWithLabel(lastExport, "Last export date"),
+                wrapKpiWithLabel(remainingIncome, "Available budget"),
+                wrapKpiWithLabel(currentBalance, "Closing balance")
         );
 
         currentMonth.getStyleClass().add("header");
@@ -106,7 +98,6 @@ public class BudgetView extends AnchorPane {
 
         // Build menu
         this.monthSelection = new ComboBox<>();
-        populateMonthSelection(null);
         Button save = new Button("Save");
         HBox menu = new HBox(3, monthSelection, save);
         AnchorPane.setRightAnchor(menu, 10.);
@@ -121,111 +112,91 @@ public class BudgetView extends AnchorPane {
         AnchorPane.setRightAnchor(budgetOverview, 0.0);
 
         this.getChildren().addAll(budgetOverview, menu);
-        this.selectMonthSubscription = newSelectMonthSubscription();
 
     }
 
-    private Subscription newSelectMonthSubscription() {
-        return monthSelection.getSelectionModel().selectedItemProperty().subscribe(this::clearAndSelectMonth);
+    public Label lastExport() {
+        return lastExport;
     }
 
-    public void reload() {
-        selectMonthSubscription.unsubscribe();
-//        budget.setAccounts(app.getAccountService().getAccounts());
-        monthSelection.getItems().clear();
-        LocalDate key = monthSelection.getSelectionModel().getSelectedItem();
-        populateMonthSelection(key);
-        selectMonthSubscription = newSelectMonthSubscription();
+    public Label selectedMonth() {
+        return currentMonth;
     }
 
-    private void clearAndSelectMonth(LocalDate key) {
-        clearTables();
-        selectMonth(key);
+    public void selectedMonth(int month, int year) {
+        String monthYear = capitalize(Month.of(month).toString()) + " " + year;
+        currentMonth.setText(monthYear);
     }
 
-    private void clearTables() {
+    private String capitalize(String s) {
+        if (s == null || s.isEmpty()) {
+            return s;
+        }
+        return s.substring(0, 1).toUpperCase()
+                + s.substring(1).toLowerCase();
+    }
+
+    public Label variance() {
+        return remainingIncome;
+    }
+
+    public Label closing() {
+        return currentBalance;
+    }
+
+    public ComboBox<LocalDate> monthSelector() {
+        return monthSelection;
+    }
+
+    public void clearTables() {
         budgetedVsExpensesTable.getChildren().clear();
         addHeaderToBudgetedVsExpenses();
         savingsBuffersAndDeficitsTable.getChildren().clear();
         addHeaderToSavingsBuffersAndDeficits();
     }
 
-    private void populateMonthSelection(LocalDate key) {
-        List<LocalDate> monthsDesc = new ArrayList<>(budget.monthKeys()).reversed();
-        for (LocalDate month : monthsDesc) {
+    public void populateMonthSelector(Collection<LocalDate> months, LocalDate selected) {
+        TreeSet<LocalDate> monthsDescending = new TreeSet<>(Comparator.reverseOrder());
+        months.forEach(monthsDescending::add);
+
+        for (LocalDate month : monthsDescending) {
             monthSelection.getItems().add(month);
         }
-        if (key == null) {
+        if (selected == null || !months.contains(selected)) {
             monthSelection.getSelectionModel().selectFirst();
         } else {
-            monthSelection.getSelectionModel().select(key);
-        }
-    }
-
-    private void selectMonth(LocalDate key) {
-        BudgetMonth month = null;
-        if (key == null) {
-            month = budget.months().getLast();
-        } else {
-            month = budget.month(key);
-        }
-
-        currentMonth.setText(Month.of(month.financialMonth()).toString() + " " + month.financialYear());
-        remainingIncome.setText(month.variance().toPlainString());
-        currentBalance.setText(month.closing().toPlainString());
-
-        loadBudgetedVsExpenses(month);
-        loadSavingsBuffersAndDeficits(month);
-    }
-
-    private void loadBudgetedVsExpenses(BudgetMonth month) {
-        for (var category  : month.operatingCategories()) {
-            String name = category.name();
-            BigDecimal budgeted = category.budgeted();
-            BigDecimal expenses = category.actual();
-            addCategoryToBudgetedVsExpenses(name, budgeted, expenses);
-        }
-        var unappliedExpenses = month.unappliedExpenses();
-        var unappliedIncome = month.unappliedIncome();
-        addCategoryToBudgetedVsExpenses(unappliedExpenses.name(), BigDecimal.ZERO, unappliedExpenses.actual());
-        addCategoryToBudgetedVsExpenses(unappliedIncome.name(), BigDecimal.ZERO, unappliedIncome.actual());
-    }
-
-    private void loadSavingsBuffersAndDeficits(BudgetMonth month) {
-        for (var category : month.operatingCategories()) {
-            String name = category.name();
-            BigDecimal closing = category.closing();
-            addCategoryToSavingsBuffersAndDeficits(name, closing);
+            monthSelection.getSelectionModel().select(selected);
         }
     }
 
     private void addHeaderToBudgetedVsExpenses() {
         Label category = new Label("Category");
         Label budgeted = new Label("Budgeted");
-        Label expenses = new Label("Expenses");
-        Label remainder = new Label("Remainder");
-        budgetedVsExpensesTable.addRow(0, category, budgeted, expenses, remainder);
+        Label actual = new Label("Actual");
+        Label variance = new Label("Remainder");
+        budgetedVsExpensesTable.addRow(0, category, budgeted, actual, variance);
     }
 
     private void addHeaderToSavingsBuffersAndDeficits() {
         Label category = new Label("Category");
         Label amount = new Label("Amount");
-        savingsBuffersAndDeficitsTable.addRow(0, category, amount);
+        Label adjustments = new Label("Adjustments");
+        savingsBuffersAndDeficitsTable.addRow(0, category, amount, adjustments);
     }
 
     public void addCategoryToBudgetedVsExpenses(String category, BigDecimal budgeted, BigDecimal actual) {
         int index = budgetedVsExpensesTable.getRowCount();
-        BigDecimal difference = budgeted.add(actual);
+        BigDecimal variance = budgeted.add(actual);
         budgetedVsExpensesTable.addRow(
                 index,
                 new Label(category),
                 new TextField(budgeted.toPlainString()),
-                new Label(actual.toPlainString()),
-                new Label(difference.toPlainString())
+                newNumberLabel(actual),
+                newNumberLabel(variance)
         );
     }
 
-    public void addCategoryToSavingsBuffersAndDeficits(String category, BigDecimal closing) {
+    public void addCategoryToSavingsBuffersAndDeficits(String category, BigDecimal closing, BigDecimal adjustments) {
         // if amount equals zero, then there is no savings, buffer or deficit
         if (closing.compareTo(BigDecimal.ZERO) == 0) {
             return;
@@ -233,15 +204,32 @@ public class BudgetView extends AnchorPane {
         int index = savingsBuffersAndDeficitsTable.getRowCount();
         savingsBuffersAndDeficitsTable.addRow(index,
                 new Label(category),
-                new Label(closing.toPlainString()),
-                new Button("Adjust")
+                newNumberLabel(closing),
+                new TextField(adjustments.toPlainString())
         );
+    }
+
+    private StackPane wrapKpiWithLabel(Node node, String title) {
+        VBox box = new VBox();
+        Label label = new Label(title);
+        box.setAlignment(Pos.CENTER);
+        box.getChildren().addAll(node, label);
+        return wrapInStackPane(box);
     }
 
     private StackPane wrapInStackPane(Node node) {
         StackPane pane = new StackPane(node);
         pane.getStyleClass().add("tile");
         return pane;
+    }
+
+    private Label newNumberLabel(BigDecimal value) {
+        String twoDecimals = String.format("%.2f", value);
+        Label label = new Label(twoDecimals);
+        label.setMaxWidth(Double.MAX_VALUE);
+        label.setAlignment(Pos.CENTER_RIGHT);
+        GridPane.setHgrow(label, Priority.ALWAYS);
+        return label;
     }
 
 }

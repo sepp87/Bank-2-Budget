@@ -1,6 +1,6 @@
 package bank2budget.core;
 
-import bank2budget.adapters.parser.RawCashTransaction;
+import bank2budget.adapter.parser.RawCashTransaction;
 import bank2budget.core.CashTransaction.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDate;

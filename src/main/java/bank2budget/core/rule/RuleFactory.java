@@ -37,7 +37,7 @@ public class RuleFactory {
 
         return transaction -> {
             String actualValue = getter.apply(transaction);
-            return actualValue != null && actualValue.contains(config.checkValue());
+            return actualValue != null && actualValue.toLowerCase().contains(config.checkValue().toLowerCase());
         };
     }
 

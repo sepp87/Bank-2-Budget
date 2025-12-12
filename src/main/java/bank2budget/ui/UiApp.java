@@ -33,7 +33,10 @@ public class UiApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Scene scene = new Scene(new EditorView(app), APP_WIDTH, APP_HEIGHT);
+        EditorView editorView = new EditorView(app);
+        EditorController editorController = new EditorController(editorView, app);
+        
+        Scene scene = new Scene(editorView, APP_WIDTH, APP_HEIGHT);
         setStylesheetToScene(scene);
         stage.setScene(scene);
         stage.show();

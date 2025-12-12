@@ -19,101 +19,101 @@ import java.time.LocalDate;
  */
 public class EditableCashTransaction {
 
-    private CashTransaction transaction;
+    private CashTransaction domain;
 
     public EditableCashTransaction(CashTransaction transaction) {
-        this.transaction = transaction;
+        this.domain = transaction;
     }
 
     public EditableCashTransaction(EditableCashTransaction cashTransaction) {
-        this.transaction = cashTransaction.transaction();
+        this.domain = cashTransaction.toDomain();
     }
 
     // SETTERS
     public void setCategory(String category) {
-        transaction = transaction.withCategory(category);
+        domain = domain.withCategory(category);
     }
 
     public void setNotes(String notes) {
-        transaction = transaction.withNotes(notes);
+        domain = domain.withNotes(notes);
     }
 
     // GETTERS
-    public CashTransaction transaction() {
-        return transaction;
+    public CashTransaction toDomain() {
+        return domain;
     }
 
     public String accountNumber() {
-        return transaction.accountNumber();
+        return domain.accountNumber();
     }
 
     public String accountName() {
-        return transaction.accountName();
+        return domain.accountName();
     }
 
     public BigDecimal accountBalance() {
-        return transaction.accountBalance();
+        return domain.accountBalance();
     }
 
     public BigDecimal accountBalanceBefore() {
-        return transaction.accountBalanceBefore();
+        return domain.accountBalanceBefore();
     }
 
     public CreditInstitution accountInstitution() {
-        return transaction.accountInstitution();
+        return domain.accountInstitution();
     }
 
     public String contraAccountNumber() {
-        return transaction.contraAccountNumber();
+        return domain.contraAccountNumber();
     }
 
     public String contraAccountName() {
-        return transaction.contraAccountName();
+        return domain.contraAccountName();
     }
 
     public BigDecimal amount() {
-        return transaction.amount();
+        return domain.amount();
     }
 
     public LocalDate date() {
-        return transaction.date();
+        return domain.date();
     }
 
     public boolean internal() {
-        return transaction.internal();
+        return domain.internal();
     }
 
     public String category() {
-        return transaction.category();
+        return domain.category();
     }
 
     public int transactionNumber() {
-        return transaction.transactionNumber();
+        return domain.transactionNumber();
     }
 
     public String description() {
-        return transaction.description();
+        return domain.description();
     }
 
     public TransactionType transactionType() {
-        return transaction.transactionType();
+        return domain.transactionType();
     }
 
     public boolean lastOfDay() {
-        return transaction.lastOfDay();
+        return domain.lastOfDay();
     }
 
     public int positionOfDay() {
-        return transaction.positionOfDay();
+        return domain.positionOfDay();
     }
 
     public String notes() {
-        return transaction.notes();
+        return domain.notes();
     }
 
     @Override
     public String toString() {
-        String result = transaction.transactionNumber() + "\t" + transaction.lastOfDay() + "\t" + transaction.date() + "\t" + Util.padWithTabs("€" + transaction.amount(), 2) + Util.padWithTabs(transaction.accountName(), 4) + Util.padWithTabs(transaction.contraAccountName(), 4) + Util.padWithTabs(transaction.category(), 4);
+        String result = domain.transactionNumber() + "\t" + domain.lastOfDay() + "\t" + domain.date() + "\t" + Util.padWithTabs("€" + domain.amount(), 2) + Util.padWithTabs(domain.accountName(), 4) + Util.padWithTabs(domain.contraAccountName(), 4) + Util.padWithTabs(domain.category(), 4);
         return result;
     }
 

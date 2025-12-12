@@ -49,8 +49,8 @@ public class CategoryCalculator {
         BigDecimal closing = actual.add(opening).add(adjustments);
 
         var unapplied = wantUnappliedIncome
-                ? BudgetMonthCategory.createUnappliedIncome(firstOfMonth, actual, opening, closing, transactions)
-                : BudgetMonthCategory.createUnappliedExpenses(firstOfMonth, actual, opening, closing, transactions);
+                ? BudgetMonthCategory.createUnappliedIncome(firstOfMonth, opening, actual, closing, transactions)
+                : BudgetMonthCategory.createUnappliedExpenses(firstOfMonth, opening, actual, closing, transactions);
         return unapplied;
     }
 
@@ -86,7 +86,7 @@ public class CategoryCalculator {
             List<CashTransaction> categoryTransactions = byCategory.getOrDefault(name, new ArrayList<>());
             BigDecimal actual = getActual(categoryTransactions);
             BigDecimal closing = budgeted.add(actual).add(opening).add(adjustments);
-            BudgetMonthCategory updated = new BudgetMonthCategory(firstOfMonth, name, budgeted, actual, opening, closing, adjustments, categoryTransactions);
+            BudgetMonthCategory updated = new BudgetMonthCategory(firstOfMonth, name, opening, actual, budgeted, adjustments, closing, categoryTransactions);
             result.add(updated);
         }
         return result;

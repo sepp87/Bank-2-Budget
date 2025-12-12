@@ -1,6 +1,7 @@
 package bank2budget.adapters.parser;
 
-import bank2budget.adapters.parser.TransactionParser;
+import bank2budget.adapter.parser.RawCashTransaction;
+import bank2budget.adapter.parser.TransactionParser;
 import bank2budget.core.CashTransactionTest;
 import bank2budget.core.UtilTest;
 import java.time.LocalDate;

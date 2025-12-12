@@ -48,7 +48,7 @@ public class BudgetTemplate {
             String name = entry.getKey();
             BigDecimal budgeted = entry.getValue();
             BigDecimal zero = BigDecimal.ZERO;
-            var category = new BudgetMonthCategory(first, name, budgeted, zero, zero, zero, zero, Collections.emptyList());
+            var category = new BudgetMonthCategory(first, name, zero, zero, budgeted, zero, zero, Collections.emptyList());
             categories.add(category);
         }
         return new BudgetMonth(first, categories);

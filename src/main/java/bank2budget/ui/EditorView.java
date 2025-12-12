@@ -1,10 +1,8 @@
 package bank2budget.ui;
 
 import bank2budget.App;
-import java.io.File;
-import java.util.List;
-import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -14,8 +12,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
-import javafx.stage.Window;
 
 /**
  *
@@ -23,33 +19,29 @@ import javafx.stage.Window;
  */
 public class EditorView extends BorderPane {
 
-    private AccountsView accountsView;
-    private final App app;
+    private final MultiAccountView accountsView;
+    private final BudgetView budgetView;
+    private final VBox contentWrapper;
 
     public EditorView(App app) {
-        this.app = app;
 
-        MenuBar menuBar = getMenuBar();
+        MenuBar menuBar = createMenuBar();
         this.setTop(menuBar);
 
-//        
-        VBox contentWrapper = new VBox();
-//        VBox.setVgrow(contentWrapper, Priority.ALWAYS);
-//        contentWrapper.maxHeight(Double.MAX_VALUE);
+        this.contentWrapper = new VBox();
         contentWrapper.setMinWidth(800);
         contentWrapper.setMaxWidth(1200);
-        contentWrapper.prefWidthProperty().bind(
-                this.widthProperty().multiply(0.80)
-        );
-        contentWrapper.setStyle("-fx-background-color: green;");
+        contentWrapper.prefWidthProperty().bind(this.widthProperty().multiply(0.80));
+//        contentWrapper.setStyle("-fx-background-color: green;");
+
+        this.accountsView = new MultiAccountView();
+        VBox.setVgrow(accountsView, Priority.ALWAYS);
+
+        this.budgetView = new BudgetView();
 
         if (false) {
-            this.accountsView = new AccountsView(app.getAccountService());
-            VBox.setVgrow(accountsView, Priority.ALWAYS);
             contentWrapper.getChildren().add(accountsView);
-
         } else {
-            BudgetView budgetView = new BudgetView(app);
             contentWrapper.getChildren().add(budgetView);
         }
 
@@ -59,62 +51,74 @@ public class EditorView extends BorderPane {
 //        center.setStyle("-fx-background-color: green;");
 
         this.setCenter(center);
-
+    }
+    
+    public MultiAccountView accountsView() {
+        return accountsView;
+    }
+    
+    public BudgetView budgetView() {
+        return budgetView;
     }
 
-    private MenuBar getMenuBar() {
-        MenuBar menuBar = new MenuBar();
+    public void showAccountsView() {
+        switchViewTo(accountsView);
+    }
+
+    public void showBudgetView() {
+        switchViewTo(budgetView);
+    }
+
+    private void switchViewTo(Node view) {
+        if (contentWrapper.getChildren().contains(view)) {
+            return;
+        }
+        contentWrapper.getChildren().clear();
+        contentWrapper.getChildren().add(view);
+    }
+
+    // Menu bar
+    private MenuItem importCsvs;
+    private MenuItem save;
+    private MenuItem accounts;
+    private MenuItem budget;
+
+    private MenuBar createMenuBar() {
+
+        // File menu
         Menu fileMenu = new Menu("File");
-        MenuItem importCsvs = new MenuItem("Import CSV's");
-        MenuItem save = new MenuItem("Save");
+        this.importCsvs = new MenuItem("Import CSV's");
+        this.save = new MenuItem("Save");
         MenuItem quit = new MenuItem("Quit");
-
-        importCsvs.setOnAction((e) -> onImportCsvs(menuBar.getScene().getWindow()));
-        save.setOnAction(this::onSave);
-
-        menuBar.getMenus().add(fileMenu);
         fileMenu.getItems().addAll(importCsvs, save, quit);
+
+        // View menu
+        Menu viewMenu = new Menu("View");
+        this.accounts = new MenuItem("Transactions");
+        this.budget = new MenuItem("Budget");
+        viewMenu.getItems().addAll(accounts, budget);
+
+        // Root menu bar
+        MenuBar menuBar = new MenuBar();
+        menuBar.getMenus().addAll(fileMenu, viewMenu);
 
         return menuBar;
     }
 
-    private void onImportCsvs(Window ownerWindow) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Import CSV Files");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV Files", "*.csv")
-        );
-
-        List<File> files = fileChooser.showOpenMultipleDialog(ownerWindow);
-        if (files == null) {
-            return;
-        }
-
-        // move files to todo or archive
-        // process files
-        // apply rules  
-        // add to accounts
-        app.getAccountService().importFromFiles(files); // normalizes, applies rules and merges with existing accounts
-
-        // check integrity 
-        // reload table
-        accountsView.reload();
-
-        // show import finished
+    public MenuItem menuItemImportCsvs() {
+        return importCsvs;
     }
 
-    private void onSave(ActionEvent e) {
-        // save transactions to xlsx and db 
-        app.getAccountService().save();
-        app.getAnalyticsExportService().exportAccounts(app.getAccountService().getAccounts());
+    public MenuItem menuItemSave() {
+        return save;
+    }
 
-        // recalculate and save budget
-        app.getBudgetService().recalculateAndSave();
+    public MenuItem menuItemAccounts() {
+        return accounts;
+    }
 
-        // save to db
-        app.getAnalyticsExportService().exportBudget(app.getBudgetService().getBudget());
-
-        // show save finished
+    public MenuItem menuItemBudget() {
+        return budget;
     }
 
     private void buildBudgetSettingsView() {

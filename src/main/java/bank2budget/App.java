@@ -1,21 +1,21 @@
 package bank2budget;
 
-import bank2budget.adapters.reader.AccountImporter;
-import bank2budget.adapters.repository.AnalyticsDatabase;
-import bank2budget.adapters.reader.ConfigReader;
-import bank2budget.adapters.reader.AccountReader;
-import bank2budget.adapters.reader.BudgetReaderNew;
+import bank2budget.adapter.account.AccountImporter;
+import bank2budget.adapter.repository.AnalyticsDatabase;
+import bank2budget.adapter.config.ConfigReader;
+import bank2budget.adapter.account.AccountReader;
 import bank2budget.core.rule.RuleFactory;
-import bank2budget.adapters.repository.AccountXlsxRepository;
-import bank2budget.adapters.repository.BudgetRepositoryNew;
-import bank2budget.adapters.writer.AccountWriter;
-import bank2budget.adapters.writer.BudgetWriterNew;
-import bank2budget.application.AccountService;
-import bank2budget.application.AnalyticsExportService;
-import bank2budget.application.BudgetService;
+import bank2budget.adapter.account.AccountXlsxRepository;
+import bank2budget.adapter.budget.BudgetRepository;
+import bank2budget.adapter.account.AccountWriter;
+import bank2budget.adapter.budget.BudgetReader;
+import bank2budget.adapter.budget.BudgetWriter;
+import bank2budget.app.AccountService;
+import bank2budget.app.AnalyticsExportService;
+import bank2budget.app.BudgetService;
 import bank2budget.core.Config;
-import bank2budget.application.CsvCleanupService;
-import bank2budget.application.NoOpAnalyticsExportService;
+import bank2budget.app.CsvCleanupService;
+import bank2budget.app.NoOpAnalyticsExportService;
 import bank2budget.core.budget.BudgetCalculator;
 import bank2budget.core.rule.RuleEngine;
 import bank2budget.ports.AnalyticsExportPort;
@@ -56,9 +56,9 @@ public class App {
 
         this.analyticsExportService = useSqlite ? new AnalyticsExportService(analyticsDatabase) : new NoOpAnalyticsExportService();
 
-        var budgetReader = new BudgetReaderNew(paths.getBudgetFile());
-        var budgetWriter = new BudgetWriterNew(paths.getBudgetFileNew());
-        var newBudgetRepository = new BudgetRepositoryNew(budgetReader, budgetWriter);
+        var budgetReader = new BudgetReader(paths.getBudgetFile());
+        var budgetWriter = new BudgetWriter(paths.getBudgetFile());
+        var newBudgetRepository = new BudgetRepository(budgetReader, budgetWriter);
         var budgetCalculator = new BudgetCalculator();
         this.budgetService = new BudgetService(accountService, newBudgetRepository, budgetCalculator, config.budgetTemplate());
 

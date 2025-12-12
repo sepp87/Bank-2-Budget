@@ -6,24 +6,6 @@ package bank2budget;
  */
 public class Notes {
     
-    // Refactoring notes - TransactionRecord and RawTransactionRow
-    // IntegrityChecker - FileOrigin is null and can't be used by integritychecker anymore
-    // Rules - can rules use transaction record?
-    
-    // Account.merge
-    // inserting new set of incomplete transactions in the middle, leads to merge with incomplete set
-    // [ old ]  [empty]  [ old ] 
-    // [ old ]  [ new ]  [ old ] 
-    
-    // [2,2,1]  [0,0,0]  [2,2,1]
-    // [2,2,1]  [2,2,1]  [2,2,1]
-    
-    
-    //     [     ]      ---> overlap of three days
-    //     [2,2,1]      ---> new set contains 5 transactions
-    // [2,2,1] [2,2,1]  ---> existing contains 3 transactions
-    //     [ ]          ---> new set should be preferred
-    //         [ ]      ---> existing should be preferred 
     
     
     
@@ -68,20 +50,33 @@ public class Notes {
     // compare if balance is equal
     // if balance is not equal, throw an error message 
     // message contains tells which transaction broke integrity broke and from which file it stems
-    
-//      SELECT SUM(amount), category FROM transactions
-//      GROUP BY category
-    
-    
+    // IntegrityChecker - FileOrigin is null and can't be used by integritychecker anymore
+
+        
     // REFACTORING NOTES
 
-    // Decide where to move or remove commented out code (thought: account names should not be overwritten, maybe an alias)
-    // TransactionReaderForXlsxDone.getAllCashTransactionsFrom()
-    //                  TransactionParser.overwriteAccountNames(transaction);
-    //                  TransactionParser.addMissingAccountNumbers(transaction);
+    // Decide whether to continue overwriting (contra) account names
+    //      OR - introduce an alias into the data model
+    //      OR - make it a UI only thing
     
-    // Move rule application out of the parser completely
-    // Move Transaction.isInternal logic outside of TransactionParser
+    // Budgeting
+    //      DONE Labels for tiles on dashboards
+    //      Adjustments - support correcting a budget at the end of month to negate variances
+    //      Adjustments - from and to XLSX
+    //      Budgeted - enable changing the budgeted value and saving it to settings
+    //      TableView instead of GridPanes
+    //      Category transactions - inspect when clicking on category
+    //      Category transactions - change in inspection mode and enable (virtual) save
+    //      Balance Ratio - Pie Chart for balance per account 
+    //
+    
+    // Transactions
+    //      Virtual save - when editing categories and recalculate budget accordingly
+    
+    // General
+    //      Undo / Redo
+    // 
+    
     
     
 }

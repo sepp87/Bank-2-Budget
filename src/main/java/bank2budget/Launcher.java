@@ -47,7 +47,7 @@ public class Launcher {
         boolean isHeadless = GraphicsEnvironment.isHeadless();
 
         if (devMode) {
-//            runCli(args);
+            runCli(args);
             runUi(args);
         } else if (hasConsole || isHeadless) {
             runCli(args);

@@ -12,17 +12,17 @@ import java.util.List;
 public record BudgetMonthCategory(
         LocalDate firstOfMonth,
         String name,
-        BigDecimal budgeted,
-        BigDecimal actual,
         BigDecimal opening,
-        BigDecimal closing,
+        BigDecimal actual,
+        BigDecimal budgeted,
         BigDecimal adjustments,
+        BigDecimal closing,
         List<CashTransaction> transactions) {
 
     public BigDecimal variance() {
-        return budgeted.add(actual);
+        return actual.add(budgeted);
     }
-    
+
     private final static String UNAPPLIED_INCOME = "UNAPPLIED INCOME";
     private final static String UNAPPLIED_EXPENSES = "UNAPPLIED EXPENSES";
 
@@ -44,22 +44,22 @@ public record BudgetMonthCategory(
 
     public static BudgetMonthCategory createUnappliedIncome(
             LocalDate firstOfMonth,
-            BigDecimal actual,
             BigDecimal opening,
+            BigDecimal actual,
             BigDecimal closing,
             List<CashTransaction> transactions) {
 
-        return new BudgetMonthCategory(firstOfMonth, UNAPPLIED_INCOME, BigDecimal.ZERO, actual, opening, closing, BigDecimal.ZERO, transactions);
+        return new BudgetMonthCategory(firstOfMonth, UNAPPLIED_INCOME, opening, actual, BigDecimal.ZERO, BigDecimal.ZERO, closing, transactions);
     }
 
     public static BudgetMonthCategory createUnappliedExpenses(
             LocalDate firstOfMonth,
-            BigDecimal actual,
             BigDecimal opening,
+            BigDecimal actual,
             BigDecimal closing,
             List<CashTransaction> transactions) {
 
-        return new BudgetMonthCategory(firstOfMonth, UNAPPLIED_EXPENSES, BigDecimal.ZERO, actual, opening, closing, BigDecimal.ZERO, transactions);
+        return new BudgetMonthCategory(firstOfMonth, UNAPPLIED_EXPENSES, opening, actual, BigDecimal.ZERO, BigDecimal.ZERO, closing, transactions);
     }
-    
+
 }

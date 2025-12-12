@@ -101,9 +101,9 @@ public class BudgetMonth {
         return operatingCategories.get(name);
     }
 
-    public BigDecimal budgeted() {
-        return operatingCategories.values().stream()
-                .map(BudgetMonthCategory::budgeted)
+    public BigDecimal opening() {
+        return Stream.concat(operatingCategories.values().stream(), Stream.of(unappliedIncome, unappliedExpenses))
+                .map(BudgetMonthCategory::opening)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -113,15 +113,9 @@ public class BudgetMonth {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public BigDecimal opening() {
-        return Stream.concat(operatingCategories.values().stream(), Stream.of(unappliedIncome, unappliedExpenses))
-                .map(BudgetMonthCategory::opening)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    public BigDecimal closing() {
-        return Stream.concat(operatingCategories.values().stream(), Stream.of(unappliedIncome, unappliedExpenses))
-                .map(BudgetMonthCategory::closing)
+    public BigDecimal budgeted() {
+        return operatingCategories.values().stream()
+                .map(BudgetMonthCategory::budgeted)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -131,9 +125,16 @@ public class BudgetMonth {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public BigDecimal variance() {
+    public BigDecimal closing() {
         return Stream.concat(operatingCategories.values().stream(), Stream.of(unappliedIncome, unappliedExpenses))
+                .map(BudgetMonthCategory::closing)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal variance() {
+        return operatingCategories.values().stream()
                 .map(BudgetMonthCategory::variance)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
 }
