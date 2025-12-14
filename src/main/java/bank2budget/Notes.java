@@ -59,6 +59,8 @@ public class Notes {
     //      OR - introduce an alias into the data model
     //      OR - make it a UI only thing
     
+    // BACKLOG
+    
     // Budgeting
     //      DONE Labels for tiles on dashboards
     //      Adjustments - support correcting a budget at the end of month to negate variances
@@ -72,10 +74,18 @@ public class Notes {
     
     // Transactions
     //      Virtual save - when editing categories and recalculate budget accordingly
+    //      After editing category manual, regain focus on table view instead of tabs
+    //      After editing completed by pressing enter, select next cell
+    //      Start editing when user starts typing on keyboard
+    
     
     // General
     //      Undo / Redo
-    // 
+    //      Notifications (integrity check, csvs loaded, ...)
+    //      Save on another thread
+    //      Budget Settings view
+    //          
+    
     
     
     

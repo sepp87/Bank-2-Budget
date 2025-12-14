@@ -6,7 +6,6 @@ import bank2budget.app.report.SortBy;
 import bank2budget.app.report.SortType;
 import bank2budget.core.budget.BudgetMonth;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,17 +22,15 @@ public class BudgetReportService {
         this.assembler = assembler;
     }
 
-    public List<BudgetReportRow> actualVsBudgeted(LocalDate firstOfMonth) {
-        return actualVsBudgeted(firstOfMonth, SortBy.LABEL, SortType.ASCENDING);
-    }
-
-    public List<BudgetReportRow> actualVsBudgeted(LocalDate firstOfMonth, SortBy sortBy, SortType sortType) {
+    public List<BudgetReportRow> getBudgetedVsActual(LocalDate firstOfMonth, SortBy sortBy, SortType sortType) {
         BudgetMonth month = budgetService.month(firstOfMonth);
         return assembler.buildActualVsBudgeted(month, sortBy, sortType);
     }
+    
 
-    public List<BudgetReportRow> savingsBuffersAndDeficits() {
-        List<BudgetReportRow> result = new ArrayList<>();
-        return result;
+    public List<BudgetReportRow> getProfitAndLoss(LocalDate firstOfMonth, SortBy sortBy, SortType sortType) {
+        BudgetMonth month = budgetService.month(firstOfMonth);
+        return assembler.buildProfitAndLoss(month, sortBy, sortType);
     }
+    
 }

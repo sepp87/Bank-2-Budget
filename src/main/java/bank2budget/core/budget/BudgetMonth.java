@@ -137,4 +137,17 @@ public class BudgetMonth {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    /**
+     * Returns a copy of this month with the provided operating category.
+     *
+     * @param updated
+     * @return
+     */
+    public BudgetMonth withOperatingCategory(BudgetMonthCategory updated) {
+        var updatedMap = new TreeMap<>(operatingCategories);
+        updatedMap.put(updated.name(), updated);
+        var updatedList = updatedMap.values().stream().toList();
+        return new BudgetMonth(firstOfMonth, updatedList, unappliedIncome, unappliedExpenses);
+    }
+
 }

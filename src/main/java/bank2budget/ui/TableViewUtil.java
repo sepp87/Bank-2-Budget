@@ -1,0 +1,153 @@
+package bank2budget.ui;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.geometry.Pos;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.Callback;
+import javafx.util.StringConverter;
+import javafx.util.converter.DefaultStringConverter;
+import org.controlsfx.control.textfield.TextFields;
+
+/**
+ *
+ * @author joostmeulenkamp
+ */
+public class TableViewUtil {
+
+    public static <S> TableColumn<S, BigDecimal> buildAmountColumn(String title, Function<S, BigDecimal> getter) {
+        return buildColumn(title, getter, amountCellFactory());
+    }
+
+    public static <S, T> TableColumn<S, T> buildColumn(String title, Function<S, T> getter) {
+        return buildColumn(title, getter, null);
+    }
+
+    public static <S, T> TableColumn<S, T> buildColumn(String title, Function<S, T> getter, Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory) {
+        TableColumn<S, T> col = new TableColumn<>(title);
+        col.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(getter.apply(data.getValue())));
+        if (cellFactory != null) {
+            col.setCellFactory(cellFactory);
+
+        }
+        return col;
+    }
+
+    private static <S> Callback<TableColumn<S, BigDecimal>, TableCell<S, BigDecimal>> amountCellFactory() {
+
+        return col -> new TableCell<>() {
+            @Override
+            protected void updateItem(BigDecimal value, boolean empty) {
+                super.updateItem(value, empty);
+
+                if (empty || value == null) {
+                    setText(null);
+                } else {
+                    setText(value.setScale(2, RoundingMode.HALF_UP).toPlainString());
+                }
+
+                setAlignment(Pos.CENTER_RIGHT);
+            }
+        };
+    }
+
+    public static <S> TableColumn<S, String> buildEditableTextColumn(String title, Function<S, String> getter, BiConsumer<S, String> setter) {
+        return buildEditableColumn(title, getter, setter, new DefaultStringConverter(), TextFieldTableCell.forTableColumn());
+    }
+
+    public static <S> TableColumn<S, BigDecimal> buildEditableAmountColumn(String title, Function<S, BigDecimal> getter, BiConsumer<S, BigDecimal> setter, StringConverter<BigDecimal> converter) {
+        return buildEditableColumn(title, getter, setter, converter, editableAmountCell(converter));
+    }
+
+    public static <S, T> TableColumn<S, T> buildEditableColumn(String title, Function<S, T> getter, BiConsumer<S, T> setter, StringConverter<T> converter, Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory) {
+        TableColumn<S, T> col = new TableColumn<>(title);
+        col.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(getter.apply(data.getValue())));
+        col.setCellFactory(cellFactory);
+        col.setOnEditCommit(e -> setter.accept(e.getRowValue(), e.getNewValue()));
+        col.setEditable(true);
+        return col;
+    }
+
+    private static <S> Callback<TableColumn<S, BigDecimal>, TableCell<S, BigDecimal>> editableAmountCell(StringConverter<BigDecimal> converter) {
+        return col -> new TextFieldTableCell<>(converter) {
+            @Override
+            public void updateItem(BigDecimal value, boolean empty) {
+                super.updateItem(value, empty);
+
+                if (empty || value == null) {
+                    setText(null);
+                } else {
+                    setText(value.setScale(2, RoundingMode.HALF_UP).toPlainString());
+                }
+
+                setAlignment(Pos.CENTER_RIGHT);
+            }
+
+            @Override
+            public void cancelEdit() {
+                super.cancelEdit();
+
+                BigDecimal value = getItem();
+                if (value != null) {
+                    setText(value.setScale(2, RoundingMode.HALF_UP).toPlainString());
+                } else {
+                    setText(null);
+                }
+            }
+        };
+    }
+
+    public static <S> TableColumn<S, String> buildAutoCompleteColumn(
+            String title,
+            Function<S, String> getter,
+            BiConsumer<S, String> setter,
+            List<String> suggestions
+    ) {
+        TableColumn<S, String> col = new TableColumn<>(title);
+        col.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(getter.apply(data.getValue())));
+        col.setEditable(true);
+
+        // Use a plain converter for the text field cells
+        StringConverter<String> converter = new StringConverter<>() {
+            @Override
+            public String toString(String value) {
+                return value == null ? "" : value;
+            }
+
+            @Override
+            public String fromString(String s) {
+                return s;
+            }
+        };
+
+        // Custom cell factory to inject autocomplete binding
+        col.setCellFactory(tc -> new TextFieldTableCell<S, String>(converter) {
+            @Override
+            public void startEdit() {
+                super.startEdit();
+
+                // When editing starts, ensure editor (TextField) is available
+                if (getGraphic() instanceof TextField editor
+                        && !editor.getProperties().containsKey("autocomplete")) {
+
+                    // Attach ControlsFX autocompletion
+                    TextFields.bindAutoCompletion(editor, suggestions);
+                    editor.getProperties().put("autocomplete", true);
+                }
+            }
+        });
+
+        // Commit edited value back into the model
+        col.setOnEditCommit(e -> setter.accept(e.getRowValue(), e.getNewValue()));
+
+        return col;
+    }
+
+}

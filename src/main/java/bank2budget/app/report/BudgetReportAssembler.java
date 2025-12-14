@@ -3,6 +3,7 @@ package bank2budget.app.report;
 import bank2budget.app.report.CategoryRow.CategoryType;
 
 import bank2budget.core.budget.BudgetMonth;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class BudgetReportAssembler {
 
     public List<BudgetReportRow> buildActualVsBudgeted(BudgetMonth month, SortBy sortBy, SortType sortType) {
         BudgetSectionAssembler sectionAssembler = new BudgetSectionAssembler(sortBy, sortType);
-        
+
         List<BudgetReportRow> result = new ArrayList<>();
 
         var expenseCategories = month.operatingCategories().stream().filter(e -> e.isExpense()).toList();
@@ -31,10 +32,9 @@ public class BudgetReportAssembler {
 
         var totals = buildTotalRow(month);
         result.add(totals);
-        
+
         return result;
     }
-
 
     private TotalRow buildTotalRow(BudgetMonth month) {
         TotalRow totals = new TotalRow(
@@ -47,5 +47,25 @@ public class BudgetReportAssembler {
                 month.closing()
         );
         return totals;
+    }
+
+    public List<BudgetReportRow> buildProfitAndLoss(BudgetMonth month, SortBy sortBy, SortType sortType) {
+        BudgetSectionAssembler sectionAssembler = new BudgetSectionAssembler(sortBy, sortType);
+
+        List<BudgetReportRow> result = new ArrayList<>();
+
+        var profitCategories = month.operatingCategories().stream().filter(e -> e.unadjustedClosing().compareTo(BigDecimal.ZERO) > 0).toList();
+        var profitSection = sectionAssembler.build("Profitable Categories", CategoryType.OPERATING_PROFIT, profitCategories);
+        result.addAll(profitSection);
+
+        var lossCategories = month.operatingCategories().stream().filter(e -> e.unadjustedClosing().compareTo(BigDecimal.ZERO) < 0).toList();
+        var lossSection = sectionAssembler.build("Loss-making Categories", CategoryType.OPERATING_LOSS, lossCategories);
+        result.addAll(lossSection);
+
+
+        var totals = buildTotalRow(month);
+        result.add(totals);
+
+        return result;
     }
 }

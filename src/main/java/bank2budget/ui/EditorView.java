@@ -30,8 +30,8 @@ public class EditorView extends BorderPane {
 
         this.contentWrapper = new VBox();
         contentWrapper.setMinWidth(800);
-        contentWrapper.setMaxWidth(1200);
-        contentWrapper.prefWidthProperty().bind(this.widthProperty().multiply(0.80));
+        contentWrapper.setMaxWidth(1740);
+        contentWrapper.prefWidthProperty().bind(this.widthProperty().multiply(0.95));
 //        contentWrapper.setStyle("-fx-background-color: green;");
 
         this.accountsView = new MultiAccountView();
@@ -51,12 +51,14 @@ public class EditorView extends BorderPane {
 //        center.setStyle("-fx-background-color: green;");
 
         this.setCenter(center);
+        this.getStyleClass().add("editor");
+
     }
-    
+
     public MultiAccountView accountsView() {
         return accountsView;
     }
-    
+
     public BudgetView budgetView() {
         return budgetView;
     }

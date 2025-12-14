@@ -3,7 +3,9 @@ package bank2budget.app.report;
 import static bank2budget.app.report.SortBy.ADJUSTMENTS;
 import static bank2budget.app.report.SortBy.CLOSING;
 import static bank2budget.app.report.SortBy.LABEL;
+import static bank2budget.app.report.SortBy.UNADJUSTED_CLOSING;
 import bank2budget.core.budget.BudgetMonthCategory;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -44,6 +46,7 @@ public class BudgetSectionAssembler {
                     cat.actual(),
                     cat.budgeted(),
                     cat.variance(),
+                    cat.unadjustedClosing(),
                     cat.adjustments(),
                     cat.closing()
             );
@@ -55,23 +58,24 @@ public class BudgetSectionAssembler {
 
     private List<CategoryRow> sort(List<CategoryRow> rows) {
 
+        Comparator<BigDecimal> amount = Comparator.nullsLast(BigDecimal::compareTo);
         Comparator<CategoryRow> comparator = switch (sortBy) {
             case LABEL ->
-                Comparator.comparing(CategoryRow::label);
+                Comparator.comparing(CategoryRow::name);
             case OPENING ->
-                Comparator.comparing(CategoryRow::opening);
+                Comparator.comparing(CategoryRow::opening, amount);
             case ACTUAL ->
-                Comparator.comparing(CategoryRow::actual);
+                Comparator.comparing(CategoryRow::actual, amount);
             case BUDGETED ->
-                Comparator.comparing(CategoryRow::budgeted);
+                Comparator.comparing(CategoryRow::budgeted, amount);
             case VARIANCE ->
-                Comparator.comparing(CategoryRow::variance);
-            case ADJUSTMENTS ->
-                Comparator.comparing(CategoryRow::adjustments);
+                Comparator.comparing(CategoryRow::variance, amount);
             case UNADJUSTED_CLOSING ->
-                Comparator.comparing(CategoryRow::unadjustedClosing);
+                Comparator.comparing(CategoryRow::unadjustedClosing, amount);
+            case ADJUSTMENTS ->
+                Comparator.comparing(CategoryRow::adjustments, amount);
             case CLOSING ->
-                Comparator.comparing(CategoryRow::closing);
+                Comparator.comparing(CategoryRow::closing, amount);
 
         };
 

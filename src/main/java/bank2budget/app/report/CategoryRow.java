@@ -8,21 +8,20 @@ import java.math.BigDecimal;
  */
 public record CategoryRow(
         CategoryType type,
-        String label,
+        String name,
         BigDecimal opening,
         BigDecimal actual,
         BigDecimal budgeted,
         BigDecimal variance,
+        BigDecimal unadjustedClosing,
         BigDecimal adjustments,
         BigDecimal closing)
         implements BudgetReportRow {
 
 
-    public BigDecimal unadjustedClosing() {
-        return opening.add(actual).add(budgeted);
-    }
-
     public enum CategoryType {
+        OPERATING_PROFIT,
+        OPERATING_LOSS,
         OPERATING_INCOME,
         OPERATING_EXPENSE,
         CONTROL

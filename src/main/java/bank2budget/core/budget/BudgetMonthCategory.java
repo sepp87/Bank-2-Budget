@@ -23,6 +23,10 @@ public record BudgetMonthCategory(
         return actual.add(budgeted);
     }
 
+    public BigDecimal unadjustedClosing() {
+        return opening.add(actual).add(budgeted);
+    }
+
     private final static String UNAPPLIED_INCOME = "UNAPPLIED INCOME";
     private final static String UNAPPLIED_EXPENSES = "UNAPPLIED EXPENSES";
 
@@ -62,4 +66,18 @@ public record BudgetMonthCategory(
         return new BudgetMonthCategory(firstOfMonth, UNAPPLIED_EXPENSES, opening, actual, BigDecimal.ZERO, BigDecimal.ZERO, closing, transactions);
     }
 
+    public BudgetMonthCategory withBudgeted(BigDecimal updated) {
+        BigDecimal newClosing = opening.add(actual).add(updated).add(adjustments);
+        return new BudgetMonthCategory(firstOfMonth, name, opening, actual, updated, adjustments, newClosing, transactions);
+    }
+
+    public BudgetMonthCategory withAdjustments(BigDecimal updated) {
+        BigDecimal newClosing = opening.add(actual).add(budgeted).add(updated);
+        return new BudgetMonthCategory(firstOfMonth, name, opening, actual, budgeted, updated, newClosing, transactions);
+    }
+
+    public BudgetMonthCategory withOpening(BigDecimal updated) {
+        BigDecimal newClosing = updated.add(actual).add(budgeted).add(adjustments);
+        return new BudgetMonthCategory(firstOfMonth, name, updated, actual, budgeted, adjustments, newClosing, transactions);
+    }
 }

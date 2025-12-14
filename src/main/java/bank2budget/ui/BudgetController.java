@@ -2,11 +2,8 @@ package bank2budget.ui;
 
 import bank2budget.App;
 import bank2budget.app.BudgetService;
-import bank2budget.core.budget.Budget;
 import bank2budget.core.budget.BudgetMonth;
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import javafx.util.Subscription;
 
 /**
@@ -18,8 +15,10 @@ public class BudgetController {
     private final BudgetView view;
     private final App app;
 
-//    private final Budget budget;
     private final BudgetService budget;
+    private final ProfitAndLossController profitAndLossController;
+    private final BudgetedVsActualController budgetedVsActualController;
+
     private Subscription selectMonthSubscription;
 
     public BudgetController(BudgetView budgetView, App app) {
@@ -30,6 +29,14 @@ public class BudgetController {
         view.populateMonthSelector(budget.monthKeys(), null);
         view.lastExport().setText(app.getAccountService().getLastExportDate().toString());
 
+        LocalDate latest =budget.months().getLast().firstOfMonth();
+        
+        this.profitAndLossController = new ProfitAndLossController(view.getProfitAndLossView(), app.getBudgetReportService(), app.getBudgetService());
+        profitAndLossController.load(latest);
+
+        this.budgetedVsActualController = new BudgetedVsActualController(view.getBudgetedVsActualView(), app.getBudgetReportService(), app.getBudgetService());
+        budgetedVsActualController.load(latest);
+        
         this.selectMonthSubscription = newSelectMonthSubscription();
 
     }
@@ -47,8 +54,9 @@ public class BudgetController {
     }
 
     private void clearAndSelectMonth(LocalDate key) {
-        view.clearTables();
         selectMonth(key);
+        profitAndLossController.load(key);
+        budgetedVsActualController.load(key);
     }
 
     private void selectMonth(LocalDate key) {
@@ -59,35 +67,12 @@ public class BudgetController {
             month = budget.month(key);
         }
 
-        
         view.selectedMonth(month.financialMonth(), month.financialYear());
         view.variance().setText("€ " + month.variance().toPlainString());
         view.closing().setText("€ " + month.closing().toPlainString());
 
-        loadBudgetedVsExpenses(month);
-        loadSavingsBuffersAndDeficits(month);
     }
 
-    private void loadBudgetedVsExpenses(BudgetMonth month) {
-        for (var category : month.operatingCategories()) {
-            String name = category.name();
-            BigDecimal budgeted = category.budgeted();
-            BigDecimal expenses = category.actual();
-            view.addCategoryToBudgetedVsExpenses(name, budgeted, expenses);
-        }
-        var unappliedExpenses = month.unappliedExpenses();
-        var unappliedIncome = month.unappliedIncome();
-        view.addCategoryToBudgetedVsExpenses(unappliedExpenses.name(), BigDecimal.ZERO, unappliedExpenses.actual());
-        view.addCategoryToBudgetedVsExpenses(unappliedIncome.name(), BigDecimal.ZERO, unappliedIncome.actual());
-    }
 
-    private void loadSavingsBuffersAndDeficits(BudgetMonth month) {
-        for (var category : month.operatingCategories()) {
-            String name = category.name();
-            BigDecimal closing = category.closing();
-            BigDecimal adjustments = category.adjustments();
-            view.addCategoryToSavingsBuffersAndDeficits(name, closing, adjustments);
-        }
-    }
 
 }

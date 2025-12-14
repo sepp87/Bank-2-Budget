@@ -12,10 +12,12 @@ import bank2budget.adapter.budget.BudgetReader;
 import bank2budget.adapter.budget.BudgetWriter;
 import bank2budget.app.AccountService;
 import bank2budget.app.AnalyticsExportService;
+import bank2budget.app.BudgetReportService;
 import bank2budget.app.BudgetService;
 import bank2budget.core.Config;
 import bank2budget.app.CsvCleanupService;
 import bank2budget.app.NoOpAnalyticsExportService;
+import bank2budget.app.report.BudgetReportAssembler;
 import bank2budget.core.budget.BudgetCalculator;
 import bank2budget.core.rule.RuleEngine;
 import bank2budget.ports.AnalyticsExportPort;
@@ -35,6 +37,7 @@ public class App {
     private final AccountService accountService;
     private final AnalyticsExportPort analyticsExportService;
     private final BudgetService budgetService;
+    private final BudgetReportService budgetReportService;
 
     public App(AppPaths paths, char decimalSeparatorChar, boolean useSqlite) {
         configureLogging();
@@ -61,6 +64,10 @@ public class App {
         var newBudgetRepository = new BudgetRepository(budgetReader, budgetWriter);
         var budgetCalculator = new BudgetCalculator();
         this.budgetService = new BudgetService(accountService, newBudgetRepository, budgetCalculator, config.budgetTemplate());
+        
+        var budgetReportAssembler = new BudgetReportAssembler();
+        this.budgetReportService = new BudgetReportService(budgetService, budgetReportAssembler);
+        
 
     }
 
@@ -105,6 +112,10 @@ public class App {
 
     public BudgetService getBudgetService() {
         return budgetService;
+    }
+    
+    public BudgetReportService getBudgetReportService() {
+        return budgetReportService;
     }
 
 }

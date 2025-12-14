@@ -5,6 +5,7 @@ import bank2budget.core.budget.BudgetCalculator;
 import bank2budget.core.budget.BudgetMonth;
 import bank2budget.core.budget.BudgetTemplate;
 import bank2budget.ports.BudgetRepositoryPort;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -52,7 +53,7 @@ public class BudgetService {
     public List<BudgetMonth> months() {
         return newBudget.months();
     }
-    
+
     public Set<LocalDate> monthKeys() {
         return newBudget.monthKeys();
     }
@@ -73,4 +74,15 @@ public class BudgetService {
     private void save() {
         newRepo.save(newBudget);
     }
+
+    public void setBudgetedForCategory(LocalDate firstOfMonth, String category, BigDecimal budgeted) {
+        var updated = calculator.updateBudgeted(newBudget, firstOfMonth, category, budgeted);
+        newBudget.replace(updated);
+    }
+
+    public void setAdjustmentsForCategory(LocalDate firstOfMonth, String category, BigDecimal adjustments) {
+        var updated = calculator.updateAdjustments(newBudget, firstOfMonth, category, adjustments);
+        newBudget.replace(updated);
+    }
+
 }
