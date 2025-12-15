@@ -91,10 +91,6 @@ public final class AppPaths {
         return resolve(CONFIG_DIRECTORY, "processing-rules.txt");
     }
 
-    public Path getBudgetSettingsFile() {
-        return resolve(CONFIG_DIRECTORY, "budget-settings.txt");
-    }
-
     public Path getBudgetTemplateFile() {
         return resolve(CONFIG_DIRECTORY, "budget-template.txt");
     }

@@ -63,13 +63,14 @@ public class Notes {
     
     // Budgeting
     //      DONE Labels for tiles on dashboards
-    //      Adjustments - support correcting a budget at the end of month to negate variances
-    //      Adjustments - from and to XLSX
+    //      DONE Adjustments - support correcting a budget at the end of month to negate variances
+    //      DONE Adjustments - from and to XLSX
+    //      DONE TableView instead of GridPanes
     //      Budgeted - enable changing the budgeted value and saving it to settings
-    //      TableView instead of GridPanes
     //      Category transactions - inspect when clicking on category
     //      Category transactions - change in inspection mode and enable (virtual) save
     //      Balance Ratio - Pie Chart for balance per account 
+    //      Support opening account balance
     //
     
     // Transactions
@@ -77,6 +78,7 @@ public class Notes {
     //      After editing category manual, regain focus on table view instead of tabs
     //      After editing completed by pressing enter, select next cell
     //      Start editing when user starts typing on keyboard
+    //      Simplified categorization rules
     
     
     // General

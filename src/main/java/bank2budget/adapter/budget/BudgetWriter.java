@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -36,15 +38,6 @@ public class BudgetWriter {
     private final Path budgetFile;
     private XSSFWorkbook workbook;
 
-    public final static String[] COLUMNS = new String[]{
-        "Category",
-        "Opening",
-        "Actual",
-        "Budgeted",
-        "Adjustments",
-        "Closing"
-    };
-
     public BudgetWriter(Path budgetFile) {
         this.budgetFile = budgetFile;
     }
@@ -58,78 +51,21 @@ public class BudgetWriter {
         List<BudgetMonth> reversedMonthlyBudgets = new ArrayList<>(budget.months());
         Collections.reverse(reversedMonthlyBudgets);
 
-        Font titleFont = getFont(18, true);
-        Font headerFont = getFont(10, true);
-        Font bodyFont = getFont(10, false);
-        Font totalFont = getFont(14, true);
+        LinkedHashMap<String, CellStyle> styleMap = new LinkedHashMap<>();
+        styleMap.put("Category", normalStyle());
+        styleMap.put("Opening", openingStyle());
+        styleMap.put("Actual", actualStyle());
+        styleMap.put("Budgeted", budgetedStyle());
+        styleMap.put("Adjustments", budgetedStyle());
+        styleMap.put("Closing", closingStyle());
 
-        LinkedHashMap<String, CellStyle> map = new LinkedHashMap<>();
-        map.put("Category", normalStyle());
-        map.put("Opening", openingStyle());
-        map.put("Actual", actualStyle());
-        map.put("Budgeted", budgetedStyle());
-        map.put("Adjustments", adjustmentsStyle());
-        map.put("Closing", closingStyle());
+        List<String> columns = styleMap.keySet().stream().toList();
 
-        CellStyle normalStyle = normalStyle();
-        CellStyle openingStyle = openingStyle();
-        CellStyle actualStyle = actualStyle();
-        CellStyle budgetedStyle = budgetedStyle();
-        CellStyle closingStyle = closingStyle();
-
-        CellStyle titleNormalColumnStyle = styleWithFont(normalStyle, titleFont);
-        CellStyle titleOpeningColumnStyle = styleWithFont(openingStyle, titleFont);
-        CellStyle titleBudgetedColumnStyle = styleWithFont(budgetedStyle, titleFont);
-        CellStyle titleClosingColumnStyle = styleWithFont(closingStyle, titleFont);
-
-        CellStyle headerNormalColumnStyle = styleWithFont(normalStyle, headerFont);
-        CellStyle headerOpeningColumnStyle = styleWithFont(openingStyle, headerFont);
-        CellStyle headerBudgetedColumnStyle = styleWithFont(budgetedStyle, headerFont);
-        CellStyle headerClosingColumnStyle = styleWithFont(closingStyle, headerFont);
-
-        CellStyle bodyNormalColumnStyle = styleWithFont(normalStyle, bodyFont);
-        CellStyle bodyOpeningColumnStyle = styleWithFont(openingStyle, bodyFont);
-        CellStyle bodyBudgetedColumnStyle = styleWithFont(budgetedStyle, bodyFont);
-        CellStyle bodyClosingColumnStyle = styleWithFont(closingStyle, bodyFont);
-
-        CellStyle totalNormalColumnStyle = styleWithFont(normalStyle, totalFont);
-        CellStyle totalOpeningColumnStyle = styleWithFont(openingStyle, totalFont);
-        CellStyle totalBudgetedColumnStyle = styleWithFont(budgetedStyle, totalFont);
-        CellStyle totalClosingColumnStyle = styleWithFont(closingStyle, totalFont);
-
-        CellStyle[][] styles = {
-            {
-                titleNormalColumnStyle,
-                titleOpeningColumnStyle,
-                titleNormalColumnStyle,
-                titleBudgetedColumnStyle,
-                titleBudgetedColumnStyle,
-                titleClosingColumnStyle
-            },
-            {
-                headerNormalColumnStyle,
-                headerOpeningColumnStyle,
-                headerNormalColumnStyle,
-                headerBudgetedColumnStyle,
-                headerBudgetedColumnStyle,
-                headerClosingColumnStyle
-            },
-            {
-                bodyNormalColumnStyle,
-                bodyOpeningColumnStyle,
-                bodyNormalColumnStyle,
-                bodyBudgetedColumnStyle,
-                bodyBudgetedColumnStyle,
-                bodyClosingColumnStyle
-            },
-            {
-                totalNormalColumnStyle,
-                totalOpeningColumnStyle,
-                totalNormalColumnStyle,
-                totalBudgetedColumnStyle,
-                totalBudgetedColumnStyle,
-                totalClosingColumnStyle
-            }
+        Font[] fonts = new Font[]{
+            getFont(18, true), // title
+            getFont(10, true), // header
+            getFont(10, false), // body
+            getFont(14, true) // total
         };
 
         try {
@@ -146,10 +82,9 @@ public class BudgetWriter {
 
                 // Create a header row
                 Row headerRow = sheet.createRow(1);
-//                 columns = HEADER;
-                for (int i = 1; i < COLUMNS.length; i++) {
+                for (int i = 1; i < columns.size(); i++) {
                     Cell cell = headerRow.createCell(i);
-                    cell.setCellValue(COLUMNS[i]);
+                    cell.setCellValue(columns.get(i));
                 }
 
                 List<BudgetMonthCategory> categories = month.operatingCategories();
@@ -162,32 +97,13 @@ public class BudgetWriter {
                     }
 
                     Row row = sheet.createRow(i);
-
-                    String name = category.name();
-                    BigDecimal opening = category.opening();
-                    BigDecimal actual = category.actual();
-                    BigDecimal budgeted = category.budgeted();
-                    BigDecimal adjustments = category.adjustments();
-
-                    row.createCell(0).setCellValue(name);
-                    row.createCell(1).setCellValue(toExcelNumber(opening));
-                    row.createCell(2).setCellValue(toExcelNumber(actual));
-                    row.createCell(3).setCellValue(toExcelNumber(budgeted));
-                    row.createCell(4).setCellValue(toExcelNumber(adjustments));
-                    int excelRowNum = i + 1;
-                    row.createCell(5).setCellFormula("B" + excelRowNum + "+C" + excelRowNum + "+D" + excelRowNum + "+E" + excelRowNum);
-
+                    categoryToRow(category, row);
                     i++;
                 }
 
                 BudgetMonthCategory unappliedExpenses = month.unappliedExpenses();
                 Row unappliedExpensesRow = sheet.createRow(i++);
-                unappliedExpensesRow.createCell(0).setCellValue(unappliedExpenses.name());
-                unappliedExpensesRow.createCell(1).setCellValue(toExcelNumber(unappliedExpenses.opening()));
-                unappliedExpensesRow.createCell(2).setCellValue(toExcelNumber(unappliedExpenses.actual()));
-                unappliedExpensesRow.createCell(3).setCellValue(toExcelNumber(unappliedExpenses.budgeted()));
-                unappliedExpensesRow.createCell(4).setCellValue(toExcelNumber(unappliedExpenses.adjustments()));
-                unappliedExpensesRow.createCell(5).setCellValue(toExcelNumber(unappliedExpenses.closing()));
+                categoryToRow(unappliedExpenses, unappliedExpensesRow);
 
                 sheet.createRow(i++); // empty row between expenses and income
 
@@ -198,32 +114,14 @@ public class BudgetWriter {
                     }
 
                     Row row = sheet.createRow(i);
-
-                    String name = category.name();
-                    BigDecimal opening = category.opening();
-                    BigDecimal actual = category.actual();
-                    BigDecimal budgeted = category.budgeted();
-                    BigDecimal adjustments = category.adjustments();
-
-                    row.createCell(0).setCellValue(name);
-                    row.createCell(1).setCellValue(toExcelNumber(opening));
-                    row.createCell(2).setCellValue(toExcelNumber(actual));
-                    row.createCell(3).setCellValue(toExcelNumber(budgeted));
-                    row.createCell(4).setCellValue(toExcelNumber(adjustments));
-                    int excelRowNum = i + 1;
-                    row.createCell(5).setCellFormula("B" + excelRowNum + "+C" + excelRowNum + "+D" + excelRowNum + "+E" + excelRowNum);
-
+                    categoryToRow(category, row);
+                    
                     i++;
                 }
 
                 BudgetMonthCategory unappliedIncome = month.unappliedIncome();
                 Row unappliedIncomeRow = sheet.createRow(i++);
-                unappliedIncomeRow.createCell(0).setCellValue(unappliedIncome.name());
-                unappliedIncomeRow.createCell(1).setCellValue(toExcelNumber(unappliedIncome.opening()));
-                unappliedIncomeRow.createCell(2).setCellValue(toExcelNumber(unappliedIncome.actual()));
-                unappliedIncomeRow.createCell(3).setCellValue(toExcelNumber(unappliedIncome.budgeted()));
-                unappliedIncomeRow.createCell(4).setCellValue(toExcelNumber(unappliedIncome.adjustments()));
-                unappliedIncomeRow.createCell(5).setCellValue(toExcelNumber(unappliedIncome.closing()));
+                categoryToRow(unappliedIncome, unappliedIncomeRow);
 
                 sheet.createRow(i++); // empty row between income and total
 
@@ -240,41 +138,28 @@ public class BudgetWriter {
                 totalRow.setHeight((short) 400);
 
                 // Style the table
-//                int lastRowNum = sheet.getLastRowNum();
-//                int rowCount = lastRowNum + 1;
-//                int m = 0; // m decides if it is title, header, body or total
-//                for (int j = 0; j < rowCount; j++) {
-//                    Row row = sheet.getRow(j);
-//                    if (m > 1) {
-//                        m = (j != lastRowNum) ? 2 : 3;
-//                    }
-//                    for (int k = 0; k < 6; k++) {
-//                        CellStyle style = styles[m][k]; // k decides which style/color is taken
-//                        Cell cell = (row.getCell(k) != null) ? row.getCell(k) : row.createCell(k);
-//                        cell.setCellStyle(style);
-//                    }
-//                    m++;
-//                }
-
+                Map<String, CellStyle> mergedStyles = new TreeMap<>(); // prevent font+style duplication
                 int lastRowNum = sheet.getLastRowNum();
                 int rowCount = lastRowNum + 1;
-                int m = 0; // m decides if it is title, header, body or total
+                int f = 0; // f decides if it is title, header, body or total
                 for (int j = 0; j < rowCount; j++) {
                     Row row = sheet.getRow(j);
-                    if (m > 1) {
-                        m = (j != lastRowNum) ? 2 : 3;
+                    if (f > 1) {
+                        f = (j != lastRowNum) ? 2 : 3;
                     }
-                    for (int k = 0; k < 6; k++) {
-                        CellStyle colStyle = map.get(COLUMNS[k]);
-                        CellStyle style = styles[m][k]; // k decides which style/color is taken
-                        Cell cell = (row.getCell(k) != null) ? row.getCell(k) : row.createCell(k);
-                        cell.setCellStyle(style);
+                    Font font = fonts[f];
+                    for (int s = 0; s < 6; s++) {
+                        String mergedIndex = f + "" + s;
+                        CellStyle style = styleMap.get(columns.get(s)); // s decides which style/color is taken
+                        CellStyle merged = mergedStyles.computeIfAbsent(mergedIndex, e -> styleWithFont(style, font));
+                        Cell cell = (row.getCell(s) != null) ? row.getCell(s) : row.createCell(s);
+                        cell.setCellStyle(merged);
                     }
-                    m++;
+                    f++;
                 }
 
                 // Resize all columns to fit the content size
-                for (int j = 0; j < COLUMNS.length; j++) {
+                for (int j = 0; j < columns.size(); j++) {
                     sheet.autoSizeColumn(j);
                 }
             }
@@ -290,6 +175,17 @@ public class BudgetWriter {
             Logger.getLogger(AccountWriter.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+    }
+
+    private void categoryToRow(BudgetMonthCategory category, Row row) {
+        row.createCell(0).setCellValue(category.name());
+        row.createCell(1).setCellValue(toExcelNumber(category.opening()));
+        row.createCell(2).setCellValue(toExcelNumber(category.actual()));
+        row.createCell(3).setCellValue(toExcelNumber(category.budgeted()));
+        row.createCell(4).setCellValue(toExcelNumber(category.adjustments()));
+        int excelRowNum = row.getRowNum() + 1;
+        String sum = "SUM(B" + excelRowNum + ":E" + excelRowNum + ")";
+        row.createCell(5).setCellFormula(sum);
     }
 
     private static double toExcelNumber(BigDecimal value) {
