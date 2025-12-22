@@ -27,15 +27,6 @@ public class Config {
         this.budgetTemplate = budgetTemplate;
     }
 
-    private int validateFirstOfMonth(int i) {
-        if (i > 0 && i < 29) {
-            return i;
-        } else {
-            LOGGER.log(Level.WARNING, "Specified first of month ({0}) does NOT fall within range 1 > 28, using fallback: 1", i);
-        }
-        return 1;
-    }
-
     public Map<String, String> myAccounts() {
         return myAccounts;
     }

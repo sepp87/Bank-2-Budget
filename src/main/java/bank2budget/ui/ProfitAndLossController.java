@@ -33,11 +33,9 @@ public class ProfitAndLossController {
     }
 
     public final void load(LocalDate firstOfMonth) {
-        Platform.runLater(() -> {
             selected = firstOfMonth;
             List<BudgetReportRow> rows = reportService.getProfitAndLoss(firstOfMonth, sortBy, sortType);
             view.getItems().setAll(rows);
-        });
     }
 
     private void onAdjustmentEdit(BudgetReportRow row, BigDecimal newValue) {

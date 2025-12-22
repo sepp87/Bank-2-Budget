@@ -24,20 +24,20 @@ public class CashTransactionDomainLogic {
      */
     public static boolean areSame(CashTransaction a, CashTransaction b) {
         Set<Boolean> result = new HashSet<>();
-        
+
         result.add(a.amount().compareTo(b.amount()) == 0);
         result.add(a.transactionNumber() == b.transactionNumber());
         result.add((a.date() == null ? b.date() == null : a.date().equals(b.date())));
         result.add(a.accountBalance().compareTo(b.accountBalance()) == 0);
         result.add((a.accountNumber() == null ? b.accountNumber() == null : a.accountNumber().equals(b.accountNumber())));
-        result.add(a.accountName()== null ? b.accountName() == null : a.accountName().equals(b.accountName()));
-        result.add(a.accountInstitution()== b.accountInstitution());
-        result.add(a.contraAccountNumber()== null ? b.contraAccountNumber() == null : a.contraAccountNumber().equals(b.contraAccountNumber()));
+        result.add(a.accountName() == null ? b.accountName() == null : a.accountName().equals(b.accountName()));
+        result.add(a.accountInstitution() == b.accountInstitution());
+        result.add(a.contraAccountNumber() == null ? b.contraAccountNumber() == null : a.contraAccountNumber().equals(b.contraAccountNumber()));
         result.add(a.contraAccountName() == null ? b.contraAccountName() == null : a.contraAccountName().equals(b.contraAccountName()));
         result.add(Objects.equals(a.internal(), b.internal()));
-        result.add(a.positionOfDay()== b.positionOfDay());
-        result.add(a.transactionType()== b.transactionType());
-        result.add(a.description()== null ? b.description() == null : a.description().equals(b.description()));
+        result.add(a.positionOfDay() == b.positionOfDay());
+        result.add(a.transactionType() == b.transactionType());
+        result.add(a.description() == null ? b.description() == null : a.description().equals(b.description()));
 
 //        System.out.println(Util.compareMoney(a.getAmount(), b.getAmount()));
 //        System.out.println(a.getTransactionNumber() == b.getTransactionNumber());
@@ -75,7 +75,7 @@ public class CashTransactionDomainLogic {
      * @return all transactions within the given time frame, transactions on
      * boundary dates (from/to) are included
      */
-    public static  List<CashTransaction> filterByTimespan(List<CashTransaction> transactions, LocalDate from, LocalDate to) {
+    public static List<CashTransaction> filterByTimespan(List<CashTransaction> transactions, LocalDate from, LocalDate to) {
         return filterByTimespan(transactions, from, to, false);
     }
 
@@ -141,6 +141,15 @@ public class CashTransactionDomainLogic {
             }
         }
         return result;
+    }
+
+    public static Map<String, List<CashTransaction>> groupByAccountNumber(List<CashTransaction> transactions) {
+        Map<String, List<CashTransaction>> transactionsByAccounts = new TreeMap<>();
+        for (var transaction : transactions) {
+            String accountNumber = transaction.accountNumber();
+            transactionsByAccounts.computeIfAbsent(accountNumber, k -> new ArrayList<>()).add(transaction);
+        }
+        return transactionsByAccounts;
     }
 
 }

@@ -1,105 +1,19 @@
-package bank2budget.ui;
+package bank2budget.ui.tableview;
 
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import static javafx.scene.input.KeyCode.C;
-import static javafx.scene.input.KeyCode.V;
-import javafx.scene.input.KeyEvent;
 
 /**
  *
  * @author joostmeulenkamp
  */
-public class AccountController {
+public class TableViewClipboardSupport {
 
-    private final AccountView view;
-    private final ObservableList<EditableCashTransaction> transactions;
-
-    public AccountController(AccountView transactionsView, ObservableList<EditableCashTransaction> transactions) {
-        this.view = transactionsView;
-        this.transactions = transactions;
-
-        view.setOnKeyPressed((e) -> {
-            handleShortcutTriggered(e, view);
-        });
-        
-        
-        view.load(transactions);
-    }
-    
-    public void reload(ObservableList<EditableCashTransaction> transactions) {
-        this.transactions.clear();
-        this.transactions.addAll(transactions);
-    }
-    
-    public ObservableList<EditableCashTransaction> transactions() {
-        return transactions;
-    }
-
-    public static void handleShortcutTriggered(KeyEvent event, TableView<EditableCashTransaction> transactionsView) {
-
-        boolean isModifierDown = isModifierDown(event);
-        switch (event.getCode()) {
-
-            case C:
-                if (isModifierDown) {
-                    copySelectionToClipboard(transactionsView);
-                    // copy cell value
-                }
-                break;
-            case V:
-                if (isModifierDown) {
-                    // paste value to selected cells
-                    pasteFromClipboard(transactionsView);
-                }
-                break;
-
-        }
-
-    }
-
-    public static boolean isModifierDown(KeyEvent event) {
-        switch (determineOperatingSystem()) {
-            case WINDOWS:
-                return event.isControlDown();
-            case MACOS:
-                return event.isMetaDown();
-            case LINUX:
-                return event.isMetaDown();
-            default:
-                return event.isControlDown();
-        }
-    }
-
-    public static OperatingSystem determineOperatingSystem() {
-        String osName = System.getProperty("os.name").toLowerCase();
-        if (osName.contains("win")) {
-            return OperatingSystem.WINDOWS;
-        } else if (osName.contains("mac")) {
-            return OperatingSystem.MACOS;
-        } else if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) {
-            return OperatingSystem.LINUX;
-        } else if (osName.contains("sunos")) {
-            return OperatingSystem.SOLARIS;
-        } else {
-            return OperatingSystem.OTHER_OS;
-        }
-    }
-
-    public enum OperatingSystem {
-        WINDOWS,
-        MACOS,
-        LINUX,
-        SOLARIS,
-        OTHER_OS
-    }
-
-    private static void copySelectionToClipboard(TableView<?> table) {
+    public static void copySelectionToClipboard(TableView<?> table) {
         StringBuilder clipboardString = new StringBuilder();
 
         var selectedCells = table.getSelectionModel().getSelectedCells();
@@ -126,7 +40,7 @@ public class AccountController {
         Clipboard.getSystemClipboard().setContent(content);
     }
 
-    private static void pasteFromClipboard(TableView<EditableCashTransaction> table) {
+    public static <S> void pasteFromClipboard(TableView<S> table) {
         Clipboard clipboard = Clipboard.getSystemClipboard();
         if (!clipboard.hasString()) {
             return;
@@ -148,7 +62,8 @@ public class AccountController {
         // ✅ Handle single-value clipboard — fill all selected cells
         if (!pasteString.contains("\t") && !pasteString.contains("\n")) {
             for (TablePosition<?, ?> pos : posList) {
-                TableColumn<EditableCashTransaction, ?> col = (TableColumn<EditableCashTransaction, ?>) pos.getTableColumn();
+                @SuppressWarnings("unchecked")
+                TableColumn<S, ?> col = (TableColumn<S, ?>) pos.getTableColumn();
                 int row = pos.getRow();
                 commitValueToCell(table, col, row, pasteString);
             }
@@ -156,7 +71,8 @@ public class AccountController {
             return;
         }
 
-        TablePosition<EditableCashTransaction, ?> startPos = posList.get(0); // upper-left starting cell
+        @SuppressWarnings("unchecked")
+        TablePosition<S, ?> startPos = (TablePosition< S, ?>) posList.get(0); // upper-left starting cell
 
         int rowClipboard = 0;
         for (String row : rows) {
@@ -174,7 +90,7 @@ public class AccountController {
                     break;
                 }
 
-                TableColumn<EditableCashTransaction, ?> col = table.getVisibleLeafColumn(tableColIndex);
+                TableColumn<S, ?> col = table.getVisibleLeafColumn(tableColIndex);
 
                 commitValueToCell(table, col, tableRow, value);
                 colClipboard++;
@@ -186,20 +102,20 @@ public class AccountController {
     }
 
     @SuppressWarnings("unchecked")
-    private static <S> void commitValueToCell(TableView<EditableCashTransaction> table, TableColumn<EditableCashTransaction, ?> col, int row, String value) {
+    private static <S> void commitValueToCell(TableView<S> table, TableColumn<S, ?> col, int row, String value) {
         Object rowItem = table.getItems().get(row);
 
         try {
             // Try to use the onEditCommit handler first
             if (col.getOnEditCommit() != null) {
-                TableColumn.CellEditEvent<EditableCashTransaction, Object> editEvent
+                TableColumn.CellEditEvent<S, Object> editEvent
                         = new TableColumn.CellEditEvent<>(
                                 table,
-                                new TablePosition<>(table, row, (TableColumn<EditableCashTransaction, Object>) col),
+                                new TablePosition<>(table, row, (TableColumn<S, Object>) col),
                                 TableColumn.editCommitEvent(),
                                 value
                         );
-                ((EventHandler<TableColumn.CellEditEvent<EditableCashTransaction, ?>>) col.getOnEditCommit()).handle(editEvent);
+                ((EventHandler<TableColumn.CellEditEvent<S, ?>>) col.getOnEditCommit()).handle(editEvent);
             } else {
                 // Optional fallback — use reflection if column header matches property name
                 String property = col.getText().replace(" ", "");

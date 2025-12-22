@@ -5,6 +5,8 @@ import java.time.Month;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.TreeSet;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -32,6 +34,8 @@ public class BudgetView extends AnchorPane {
 
     private final ProfitAndLossView profitAndLossView;
     private final BudgetedVsActualView budgetedVsActualView;
+    private final AccountBalanceView accountBalanceView;
+    private final Button reviewTransactionsButton;
 
     // Month Year                                               [ month ] [ save ]
     // Budgeted vs. Expenses                                    Savings, Buffers and Deficits
@@ -57,18 +61,24 @@ public class BudgetView extends AnchorPane {
                 wrapKpiWithLabel(currentBalance, "Closing balance")
         );
 
-        // Build tables
+        // Build table - budgeted vs. actual
         Label budgetedVsActualHeader = new Label("Budgeted vs. Actual");
         budgetedVsActualHeader.getStyleClass().add("header");
-//        budgetedVsActualHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         budgetedVsActualView = new BudgetedVsActualView();
-        VBox budgetedVsExpenses = new VBox(budgetedVsActualHeader, budgetedVsActualView);
+        reviewTransactionsButton = new Button("Review transactions");
+        VBox budgetedVsActual = new VBox(budgetedVsActualHeader, budgetedVsActualView, reviewTransactionsButton);
 
-        Label savingsBuffersAndDeficitsHeader = new Label("Savings, Buffers and Deficits");
-        savingsBuffersAndDeficitsHeader.getStyleClass().add("header");
-//        savingsBuffersAndDeficitsHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        // Build table - profit and loss
+        Label profitAndLossHeader = new Label("Savings, Buffers and Deficits");
+        profitAndLossHeader.getStyleClass().add("header");
         this.profitAndLossView = new ProfitAndLossView();
-        VBox savingsBuffersAndDeficits = new VBox(savingsBuffersAndDeficitsHeader, profitAndLossView);
+        VBox profitAndLosses = new VBox(profitAndLossHeader, profitAndLossView);
+
+        // Build Pie Chart
+        Label accountBalanceHeader = new Label("Account Balance");
+        accountBalanceHeader.getStyleClass().add("header");
+        this.accountBalanceView = new AccountBalanceView();
+        VBox accountBalance = new VBox(accountBalanceHeader, accountBalanceView);
 
         ColumnConstraints width37_5Percent = new ColumnConstraints();
         width37_5Percent.setPercentWidth(37.5);
@@ -81,8 +91,9 @@ public class BudgetView extends AnchorPane {
         tables.getStyleClass().add("grid-row");
         tables.getColumnConstraints().addAll(width37_5Percent, width37_5Percent, width25Percent);
         tables.addRow(0,
-                wrapInStackPane(budgetedVsExpenses),
-                wrapInStackPane(savingsBuffersAndDeficits)
+                wrapInStackPane(budgetedVsActual),
+                wrapInStackPane(profitAndLosses),
+                wrapInStackPane(accountBalance)
         );
 
         // Build menu
@@ -109,6 +120,14 @@ public class BudgetView extends AnchorPane {
 
     public BudgetedVsActualView getBudgetedVsActualView() {
         return budgetedVsActualView;
+    }
+
+    public Button getReviewTransactionsButton() {
+        return reviewTransactionsButton;
+    }
+
+    public AccountBalanceView getAccountBalanceView() {
+        return accountBalanceView;
     }
 
     public Label lastExport() {

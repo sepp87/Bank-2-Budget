@@ -31,6 +31,11 @@ public class Budget {
         return months.get(key);
     }
 
+    public BudgetMonth nextMonth(LocalDate key) {
+        var next = months.navigableKeySet().higher(key);
+        return next == null ? null : months.get(next);
+    }
+
     public List<BudgetMonth> replace(List<BudgetMonth> updated) {
         List<BudgetMonth> replaced = new ArrayList<>();
         for (var month : updated) {

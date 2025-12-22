@@ -25,12 +25,16 @@ public class AccountService {
     private final AccountRepositoryPort repository;
     private final AccountImporterPort importer;
     private final RuleEngine<CashTransaction> ruleEngine;
-    private final Map<String, Account> accountsIndex;
+    private Map<String, Account> accountsIndex;
 
     public AccountService(AccountRepositoryPort repository, AccountImporterPort importer, RuleEngine<CashTransaction> ruleEngine) {
         this.repository = repository;
         this.importer = importer;
         this.ruleEngine = ruleEngine;
+        load();
+    }
+
+    private void load() {
         this.accountsIndex = repository.load();
         applySystemRules(accountsIndex.values());
     }
@@ -39,9 +43,14 @@ public class AccountService {
         return accountsIndex.values();
     }
 
-    public void importFromFiles(List<File> files) {
+    public boolean importFromFiles(List<File> files) {
         List<Account> imported = importer.importFromFiles(files);
         applyRulesAndMerge(imported);
+        if (hasValidAccounts()) {
+            return true;
+        }
+        load(); // reload all if import failed 
+        return false;
     }
 
     public boolean importFromTodoAndSave() {

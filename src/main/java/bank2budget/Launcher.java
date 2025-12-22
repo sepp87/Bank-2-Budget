@@ -5,6 +5,8 @@ import bank2budget.cli.CommandLineArgs;
 import bank2budget.ui.UiAppRunner;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
+import java.util.Map;
+import java.util.TreeMap;
 import picocli.CommandLine;
 
 // TODO evaluate if Util methods belong in corresponding class
@@ -42,6 +44,9 @@ public class Launcher {
 
     public static void main(String[] args) throws Exception {
 
+        if(false) {
+            return;
+        }
         boolean devMode = Boolean.getBoolean("bank2budget.dev") || "dev".equalsIgnoreCase(System.getenv("BANK2BUDGET_MODE"));
         boolean hasConsole = System.console() != null;
         boolean isHeadless = GraphicsEnvironment.isHeadless();

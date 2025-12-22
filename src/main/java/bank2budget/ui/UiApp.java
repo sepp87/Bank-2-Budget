@@ -42,6 +42,7 @@ public class UiApp extends Application {
         stage.show();
         stage.setTitle("Bank-2-Budget");
         stage.setFullScreen(false);
+        stage.setMinWidth(1100);
     }
 
     public static void setStylesheetToScene(Scene scene) {

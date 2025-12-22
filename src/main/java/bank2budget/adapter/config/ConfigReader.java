@@ -32,7 +32,7 @@ public class ConfigReader {
         this.paths = paths;
         Map<String, String> myAccounts = propertiesToMap(readProperties(paths.getMyAccountsFile()));
         Map<String, String> otherAccounts = propertiesToMap(readProperties(paths.getOtherAccountsFile()));
-        List<RuleConfig> ruleConfigs = new RuleReaderNew(paths.getProcessingRulesFile().toFile()).read();
+        List<RuleConfig> ruleConfigs = new RuleReader(paths.getCategorizationRulesFile()).read();
         BudgetTemplate budgetTemplate = new BudgetTemplateReader(paths.getBudgetTemplateFile()).read();
         this.config = new Config(myAccounts, otherAccounts, ruleConfigs, budgetTemplate);
     }

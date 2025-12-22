@@ -58,6 +58,10 @@ public class BudgetService {
         return newBudget.monthKeys();
     }
 
+    public BudgetMonth nextMonth(LocalDate firstOfMonth) {
+        return newBudget.nextMonth(firstOfMonth);
+    }
+
     public void importFromTodoAndSave() {
         if (accountService.importFromTodoAndSave()) {
             load();
@@ -66,9 +70,13 @@ public class BudgetService {
     }
 
     public void recalculateAndSave() {
+        recalculate();
+        save();
+    }
+
+    public void recalculate() {
         List<BudgetMonth> created = calculator.create(template, newBudget, accountService.getAccounts());
         List<BudgetMonth> replaced = newBudget.replace(created);
-        save();
     }
 
     private void save() {

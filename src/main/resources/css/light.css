@@ -7,7 +7,12 @@
 
 }
 
-.editor .grid-root {
+.editor .center {
+    /*-fx-background-color: pink;*/
+}
+
+.grid-root {
+    /*-fx-padding: 50 0 0 0;*/
     -fx-padding: 50 0 0 0;
     -fx-spacing: 20px;
 }
@@ -17,13 +22,18 @@
 }
 
 .tile {
-    -fx-background-color: white;
+    -fx-background: white;
+    -fx-background-color: -fx-background;
     -fx-background-insets: 0;
     -fx-background-radius: 10;
     -fx-padding: 20 20 20 20;
     -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.1) , 10,0,7,7 );
 }
 
+.donut-center {
+    -fx-fill: -fx-background;
+
+}
 
 .tile .kpi {
     -fx-font-size: 40px;
@@ -54,4 +64,54 @@
     -fx-padding: 10 0 0 0;
     -fx-font-weight: bold;
     -fx-border-width: 1 0 0 0;
+}
+
+.notification-view {
+    -fx-spacing: 10px;
+    -fx-padding: 20 20 20 20;
+}
+
+.notification {
+    /* mediumspringgreen aquamarine palegreen */
+    -fx-background-color: mediumspringgreen;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-padding: 20 20 20 20;
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.1) , 10,0,7,7 );
+}
+
+.notification.error {
+    /* lightsalmon salmon lightcoral */
+    -fx-background-color: lightsalmon;
+}
+
+.notification .label {
+    -fx-font-size: 15px;
+    -fx-text-fill: black;
+    /*-fx-font-weight: bold;*/
+
+}
+
+.anchor {
+    /*-fx-background-color: red;*/
+
+}
+
+.viewport{
+    /*-fx-background-color: red;*/
+
+}
+
+.overlay {
+    -fx-padding: 50 0 50 0;
+    -fx-background-color: rgba(0,0,0,0.3);
+
+}
+
+.transaction-review {
+    -fx-padding: 20 0 20 0;
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.1) , 10,0,7,7 );
+
 }

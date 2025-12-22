@@ -8,9 +8,10 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 /**
@@ -22,6 +23,9 @@ public class EditorView extends BorderPane {
     private final MultiAccountView accountsView;
     private final BudgetView budgetView;
     private final VBox contentWrapper;
+    private final NotificationView notificationView;
+    private final TransactionReviewView transactionReviewView;
+    private final StackPane overlayLayer;
 
     public EditorView(App app) {
 
@@ -45,13 +49,49 @@ public class EditorView extends BorderPane {
             contentWrapper.getChildren().add(budgetView);
         }
 
-        HBox center = new HBox(contentWrapper);
-        center.setMaxWidth(USE_PREF_SIZE);
-        center.setAlignment(Pos.TOP_CENTER);
-//        center.setStyle("-fx-background-color: green;");
+//        HBox center = new HBox(contentWrapper);
+//        center.setMaxWidth(USE_PREF_SIZE);
+//        center.setAlignment(Pos.TOP_CENTER);
+//        center.getStyleClass().add("center");
+        StackPane contentLayer = new StackPane();
+        contentLayer.setMaxWidth(USE_PREF_SIZE); // to negate automatic stretching to full-width of panes by BorderPane
+        contentLayer.setAlignment(Pos.TOP_CENTER);
+        contentLayer.getStyleClass().add("center");
+        contentLayer.getChildren().add(contentWrapper);
 
-        this.setCenter(center);
+        transactionReviewView = new TransactionReviewView();
+        transactionReviewView.setMinWidth(800);
+        transactionReviewView.setMaxWidth(1740);
+        transactionReviewView.prefWidthProperty().bind(this.widthProperty().multiply(0.95));
+        VBox overlayWrapper = new VBox();
+        overlayWrapper.setMaxWidth(USE_PREF_SIZE); // to negate automatic stretching to full-width of panes by BorderPane
+        overlayWrapper.setAlignment(Pos.TOP_CENTER);
+        overlayWrapper.getChildren().add(transactionReviewView);
+        this.overlayLayer = new StackPane();
+        overlayLayer.getStyleClass().add("overlay");
+        overlayLayer.setVisible(false);
+        overlayLayer.getChildren().add(overlayWrapper);
+
+        AnchorPane notificationLayer = new AnchorPane();
+        notificationLayer.getStyleClass().add("anchor");
+        notificationView = new NotificationView();
+        notificationLayer.getChildren().add(notificationView);
+        notificationLayer.setMouseTransparent(true);
+        AnchorPane.setBottomAnchor(notificationView, 0.);
+        AnchorPane.setRightAnchor(notificationView, 0.);
+
+        StackPane viewport = new StackPane();
+        this.getStyleClass().add("viewport");
+        viewport.getChildren().addAll(contentLayer, overlayLayer, notificationLayer);
+
+        notificationLayer.prefWidthProperty().bind(viewport.widthProperty());
+        notificationLayer.prefHeightProperty().bind(viewport.heightProperty());
+
+        this.setCenter(viewport);
         this.getStyleClass().add("editor");
+
+        viewport.setMinHeight(0); // ensure the viewport shrinks to the window size
+        contentLayer.setMinHeight(0); // ensure the content layer also shrinks to the window size
 
     }
 
@@ -63,12 +103,28 @@ public class EditorView extends BorderPane {
         return budgetView;
     }
 
+    public TransactionReviewView transactionReviewView() {
+        return transactionReviewView;
+    }
+
+    public NotificationView notificationView() {
+        return notificationView;
+    }
+
     public void showAccountsView() {
         switchViewTo(accountsView);
     }
 
     public void showBudgetView() {
         switchViewTo(budgetView);
+    }
+
+    public void showTransactionReview() {
+        overlayLayer.setVisible(true);
+    }
+
+    public void hideTransactionReview() {
+        overlayLayer.setVisible(false);
     }
 
     private void switchViewTo(Node view) {

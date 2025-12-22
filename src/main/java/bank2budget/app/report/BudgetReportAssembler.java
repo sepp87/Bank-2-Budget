@@ -55,13 +55,21 @@ public class BudgetReportAssembler {
         List<BudgetReportRow> result = new ArrayList<>();
 
         var profitCategories = month.operatingCategories().stream().filter(e -> e.unadjustedClosing().compareTo(BigDecimal.ZERO) > 0).toList();
-        var profitSection = sectionAssembler.build("Profitable Categories", CategoryType.OPERATING_PROFIT, profitCategories);
-        result.addAll(profitSection);
+        if (!profitCategories.isEmpty()) {
+            var profitSection = sectionAssembler.build("Profitable Categories", CategoryType.OPERATING_PROFIT, profitCategories);
+            result.addAll(profitSection);
+        }
 
         var lossCategories = month.operatingCategories().stream().filter(e -> e.unadjustedClosing().compareTo(BigDecimal.ZERO) < 0).toList();
-        var lossSection = sectionAssembler.build("Loss-making Categories", CategoryType.OPERATING_LOSS, lossCategories);
-        result.addAll(lossSection);
-
+        if (!lossCategories.isEmpty()) {
+            var lossSection = sectionAssembler.build("Loss-making Categories", CategoryType.OPERATING_LOSS, lossCategories);
+            result.addAll(lossSection);
+        }
+        var controlCategories = month.controlCategories().stream().filter(e -> e.unadjustedClosing().compareTo(BigDecimal.ZERO) != 0).toList();
+        if (!controlCategories.isEmpty()) {
+            var controlSection = sectionAssembler.build("Control Categories", CategoryType.CONTROL, controlCategories);
+            result.addAll(controlSection);
+        }
 
         var totals = buildTotalRow(month);
         result.add(totals);

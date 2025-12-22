@@ -1,8 +1,10 @@
 package bank2budget.core.budget;
 
+import bank2budget.core.CashTransaction;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -84,7 +86,7 @@ public class BudgetMonth {
      * revenue/expense activity.
      */
     public List<BudgetMonthCategory> operatingCategories() {
-        return operatingCategories.values().stream().toList();
+        return List.copyOf(operatingCategories.values());
     }
 
     /**
@@ -97,44 +99,55 @@ public class BudgetMonth {
         return List.of(unappliedIncome, unappliedExpenses);
     }
 
+    public List<BudgetMonthCategory> categories() {
+        return Stream.concat(operatingCategories().stream(), controlCategories().stream()).toList();
+    }
+
     public BudgetMonthCategory operatingCategory(String name) {
         return operatingCategories.get(name);
     }
 
     public BigDecimal opening() {
-        return Stream.concat(operatingCategories.values().stream(), Stream.of(unappliedIncome, unappliedExpenses))
+        return categories().stream()
                 .map(BudgetMonthCategory::opening)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public BigDecimal actual() {
-        return Stream.concat(operatingCategories.values().stream(), Stream.of(unappliedIncome, unappliedExpenses))
+        return categories().stream()
                 .map(BudgetMonthCategory::actual)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public BigDecimal budgeted() {
-        return operatingCategories.values().stream()
+        return categories().stream()
                 .map(BudgetMonthCategory::budgeted)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public BigDecimal adjustments() {
-        return operatingCategories.values().stream()
+        return categories().stream()
                 .map(BudgetMonthCategory::adjustments)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public BigDecimal closing() {
-        return Stream.concat(operatingCategories.values().stream(), Stream.of(unappliedIncome, unappliedExpenses))
+        return categories().stream()
                 .map(BudgetMonthCategory::closing)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public BigDecimal variance() {
-        return operatingCategories.values().stream()
+        return categories().stream()
                 .map(BudgetMonthCategory::variance)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public List<CashTransaction> transactions() {
+        return categories().stream()
+                .flatMap(category -> category.transactions().stream())
+                .sorted(Comparator.comparing(CashTransaction::transactionNumber))
+                .toList();
     }
 
     /**

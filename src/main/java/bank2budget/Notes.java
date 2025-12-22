@@ -66,29 +66,31 @@ public class Notes {
     //      DONE Adjustments - support correcting a budget at the end of month to negate variances
     //      DONE Adjustments - from and to XLSX
     //      DONE TableView instead of GridPanes
+    //      DONE Balance Ratio - Pie Chart for balance per account 
     //      Budgeted - enable changing the budgeted value and saving it to settings
     //      Category transactions - inspect when clicking on category
     //      Category transactions - change in inspection mode and enable (virtual) save
-    //      Balance Ratio - Pie Chart for balance per account 
     //      Support opening account balance
     //
     
     // Transactions
+    //      DONE Simplified categorization rules
     //      Virtual save - when editing categories and recalculate budget accordingly
-    //      After editing category manual, regain focus on table view instead of tabs
-    //      After editing completed by pressing enter, select next cell
-    //      Start editing when user starts typing on keyboard
-    //      Simplified categorization rules
+    //      DONE After editing category manual, regain focus on table view instead of tabs
+    //      DONE After editing completed by pressing enter, select next cell
+    //      DONE Start editing when user starts typing on keyboard
+
     
     
     // General
+    //      DONE Save on another thread
+    //      DONE Notifications (saving, integrity check, csvs loaded, ...)
     //      Undo / Redo
-    //      Notifications (integrity check, csvs loaded, ...)
-    //      Save on another thread
     //      Budget Settings view
     //          
     
-    
+    // Thoughts
+    //      BudgetMonth: should Adjustments, Budgeted and Variance also be streamed from control categories? does it hurt? it makes method pattern consistent with others
     
     
 }

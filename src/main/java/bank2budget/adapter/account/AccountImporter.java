@@ -5,6 +5,7 @@ import bank2budget.adapter.config.FileUtil;
 import bank2budget.core.Account;
 import bank2budget.ports.AccountImporterPort;
 import bank2budget.core.CashTransaction;
+import bank2budget.core.CashTransactionDomainLogic;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -45,11 +46,7 @@ public class AccountImporter implements AccountImporterPort {
     }
 
     private List<Account> groupTransactionsByAccount(List<CashTransaction> transactions) {
-        Map<String, List<CashTransaction>> transactionsByAccounts = new TreeMap<>();
-        for (var transaction : transactions) {
-            String accountNumber = transaction.accountNumber();
-            transactionsByAccounts.computeIfAbsent(accountNumber, k -> new ArrayList<>()).add(transaction);
-        }
+        Map<String, List<CashTransaction>> transactionsByAccounts = CashTransactionDomainLogic.groupByAccountNumber(transactions);
 
         List<Account> result = new ArrayList<>();
         for (Entry<String, List<CashTransaction>> entry : transactionsByAccounts.entrySet()) {

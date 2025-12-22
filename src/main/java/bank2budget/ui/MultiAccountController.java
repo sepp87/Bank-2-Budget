@@ -15,7 +15,7 @@ public class MultiAccountController {
 
     private final MultiAccountView view;
     private final AccountService accountService;
-    private final Map<String, AccountController> accountControllers = new TreeMap<>();
+    private final Map<String, TransactionTableController> transactionTableControllers = new TreeMap<>();
 
     public MultiAccountController(MultiAccountView accountsView, AccountService accountService) {
         this.view = accountsView;
@@ -34,7 +34,7 @@ public class MultiAccountController {
     public void saveToDomain() {
         for(var account : accountService.getAccounts()) {
             var number = account.getAccountNumber();
-            var transactions = accountControllers.get(number).transactions().stream().map(EditableCashTransaction::toDomain).toList();
+            var transactions = transactionTableControllers.get(number).transactions().stream().map(EditableCashTransaction::toDomain).toList();
             account.replace(transactions);
         }
     }
@@ -42,20 +42,21 @@ public class MultiAccountController {
     private void addAccountView(Account account) {
         String accountNumber = account.getAccountNumber();
         var transactions = FXCollections.observableArrayList(account.transactionsAscending().stream().map(EditableCashTransaction::new).toList());
-        AccountView accountView = new AccountView();
-        AccountController accountController = new AccountController(accountView, transactions);
-        accountControllers.put(accountNumber, accountController);
-        view.addTab(accountNumber, accountView);
+        TransactionTableView transactionTableView = new TransactionTableView();
+        TransactionTableController transactionTableController = new TransactionTableController(transactionTableView);
+        transactionTableController.load(transactions);
+        transactionTableControllers.put(accountNumber, transactionTableController);
+        view.addTab(accountNumber, transactionTableView);
     }
     
         public void reload() {
         Collection<Account> accounts = accountService.getAccounts();
         for (Account account : accounts) {
             String accountNumber = account.getAccountNumber();
-            if (accountControllers.containsKey(accountNumber)) {
-                AccountController accountController = accountControllers.get(accountNumber);
+            if (transactionTableControllers.containsKey(accountNumber)) {
+                TransactionTableController transactionTableController = transactionTableControllers.get(accountNumber);
                 var transactions = FXCollections.observableArrayList(account.transactionsAscending().stream().map(EditableCashTransaction::new).toList());
-                accountController.reload(transactions);
+                transactionTableController.load(transactions);
             } else {
                 addAccountView(account);
             }

@@ -87,8 +87,8 @@ public final class AppPaths {
         return resolve(CONFIG_DIRECTORY, "other-accounts.txt");
     }
 
-    public Path getProcessingRulesFile() {
-        return resolve(CONFIG_DIRECTORY, "processing-rules.txt");
+    public Path getCategorizationRulesFile() {
+        return resolve(CONFIG_DIRECTORY, "categorization-rules.txt");
     }
 
     public Path getBudgetTemplateFile() {
