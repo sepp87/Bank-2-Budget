@@ -16,11 +16,13 @@ public class RuleFactory {
 
     private final static Logger LOGGER = Logger.getLogger(RuleFactory.class.getName());
 
-    private final static Map<String, Function<CashTransaction, String>> GETTERS = Map.of("description", CashTransaction::description,
+    private final static Map<String, Function<CashTransaction, String>> GETTERS = Map.of(
+            "description", CashTransaction::description,
             "contraAccountName", CashTransaction::contraAccountName
     );
 
-    private final static Map<String, BiFunction<CashTransaction, String, CashTransaction>> SETTERS = Map.of("category", CashTransaction::withCategory
+    private final static Map<String, BiFunction<CashTransaction, String, CashTransaction>> SETTERS = Map.of(
+            "category", CashTransaction::withCategory
     );
 
     public static Rule<CashTransaction> create(RuleConfig config) {
@@ -36,6 +38,9 @@ public class RuleFactory {
         Function<CashTransaction, String> getter = GETTERS.get(config.checkField());
 
         return transaction -> {
+            if(config.resultField().equals("category") && transaction.category() != null) {
+                return false;
+            }
             String actualValue = getter.apply(transaction);
             return actualValue != null && actualValue.toLowerCase().contains(config.checkValue().toLowerCase());
         };

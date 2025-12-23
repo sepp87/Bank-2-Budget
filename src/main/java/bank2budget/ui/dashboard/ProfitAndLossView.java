@@ -1,9 +1,10 @@
-package bank2budget.ui;
+package bank2budget.ui.dashboard;
 
 import bank2budget.app.report.BudgetReportRow;
 import bank2budget.app.report.CategoryRow;
 import bank2budget.app.report.SectionRow;
 import bank2budget.app.report.TotalRow;
+import bank2budget.ui.TableViewUtil;
 import java.math.BigDecimal;
 import java.util.function.BiConsumer;
 import javafx.scene.control.TableColumn;
@@ -18,12 +19,12 @@ public class ProfitAndLossView extends BudgetReportView {
     public ProfitAndLossView() {
 
         var categoryColumn = categoryColumn();
-        var unadjustedClosingColumn = unadjustedClosingColumn();
+//        var unadjustedClosingColumn = unadjustedClosingColumn();
         var adjustmentsColumn = adjustmentsColumn();
         var closingColumn = closingColumn();
 
         getColumns().add(categoryColumn);
-        getColumns().add(unadjustedClosingColumn);
+//        getColumns().add(unadjustedClosingColumn);
         getColumns().add(adjustmentsColumn);
         getColumns().add(closingColumn);
 
@@ -33,7 +34,7 @@ public class ProfitAndLossView extends BudgetReportView {
 //        adjustmentsColumn.setMaxWidth(1f * Integer.MAX_VALUE);
 //        closingColumn.setMaxWidth(1f * Integer.MAX_VALUE);
 
-        unadjustedClosingColumn.setMaxWidth(80);
+//        unadjustedClosingColumn.setMaxWidth(80);
         adjustmentsColumn.setMaxWidth(80);
         closingColumn.setMaxWidth(80);
 
@@ -85,13 +86,14 @@ public class ProfitAndLossView extends BudgetReportView {
                         adjustmentEditHandler.accept(c, value);
                     }
                 },
-                TableViewUtil.bigDecimalConverter()
+                TableViewUtil.bigDecimalConverter(),
+                this::requestFocus
         );
     }
 
     private TableColumn<BudgetReportRow, BigDecimal> closingColumn() {
         return TableViewUtil.buildAmountColumn(
-                "Closing",
+                "Savings",
                 row -> switch (row) {
             case CategoryRow c ->
                 c.closing();

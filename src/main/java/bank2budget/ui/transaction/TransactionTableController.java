@@ -1,4 +1,4 @@
-package bank2budget.ui;
+package bank2budget.ui.transaction;
 
 import bank2budget.ui.platform.ModifierKey;
 import bank2budget.ui.tableview.TableViewClipboardSupport;

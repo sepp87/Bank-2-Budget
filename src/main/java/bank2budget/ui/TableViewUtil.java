@@ -49,7 +49,7 @@ public class TableViewUtil {
             }
         };
     }
-    
+
     public static <S> TableColumn<S, BigDecimal> buildAmountColumn(String title, Function<S, BigDecimal> getter) {
         return buildColumn(title, getter, amountCellFactory());
     }
@@ -86,19 +86,29 @@ public class TableViewUtil {
         };
     }
 
-    public static <S> TableColumn<S, String> buildEditableTextColumn(String title, Function<S, String> getter, BiConsumer<S, String> setter) {
-        return buildEditableColumn(title, getter, setter, new DefaultStringConverter(), TextFieldTableCell.forTableColumn());
+    public static <S> TableColumn<S, String> buildEditableTextColumn(String title, Function<S, String> getter, BiConsumer<S, String> setter, Runnable afterEdit) {
+        return buildEditableColumn(title, getter, setter, new DefaultStringConverter(), TextFieldTableCell.forTableColumn(), afterEdit);
     }
 
-    public static <S> TableColumn<S, BigDecimal> buildEditableAmountColumn(String title, Function<S, BigDecimal> getter, BiConsumer<S, BigDecimal> setter, StringConverter<BigDecimal> converter) {
-        return buildEditableColumn(title, getter, setter, converter, editableAmountCell(converter));
+    public static <S> TableColumn<S, BigDecimal> buildEditableAmountColumn(String title, Function<S, BigDecimal> getter, BiConsumer<S, BigDecimal> setter, StringConverter<BigDecimal> converter, Runnable afterEdit) {
+        return buildEditableColumn(title, getter, setter, converter, editableAmountCell(converter), afterEdit);
     }
 
-    public static <S, T> TableColumn<S, T> buildEditableColumn(String title, Function<S, T> getter, BiConsumer<S, T> setter, StringConverter<T> converter, Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory) {
+    public static <S, T> TableColumn<S, T> buildEditableColumn(String title, Function<S, T> getter, BiConsumer<S, T> setter, StringConverter<T> converter, Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory, Runnable afterEdit) {
         TableColumn<S, T> col = new TableColumn<>(title);
         col.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(getter.apply(data.getValue())));
         col.setCellFactory(cellFactory);
-        col.setOnEditCommit(e -> setter.accept(e.getRowValue(), e.getNewValue()));
+        col.setOnEditCommit(e -> {
+            setter.accept(e.getRowValue(), e.getNewValue());
+            if (afterEdit != null) {
+                afterEdit.run();
+            }
+        });
+        col.setOnEditCancel(e -> {
+            if (afterEdit != null) {
+                afterEdit.run();
+            }
+        });
         col.setEditable(true);
         return col;
     }
@@ -136,7 +146,8 @@ public class TableViewUtil {
             String title,
             Function<S, String> getter,
             BiConsumer<S, String> setter,
-            List<String> suggestions
+            List<String> suggestions,
+            Runnable afterEdit
     ) {
         TableColumn<S, String> col = new TableColumn<>(title);
         col.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(getter.apply(data.getValue())));
@@ -173,7 +184,18 @@ public class TableViewUtil {
         });
 
         // Commit edited value back into the model
-        col.setOnEditCommit(e -> setter.accept(e.getRowValue(), e.getNewValue()));
+        col.setOnEditCommit(e -> {
+            setter.accept(e.getRowValue(), e.getNewValue());
+            if (afterEdit != null) {
+                afterEdit.run();
+            }
+        });
+        col.setOnEditCancel(e -> {
+            if (afterEdit != null) {
+                afterEdit.run();
+            }
+        });
+        
 
         return col;
     }

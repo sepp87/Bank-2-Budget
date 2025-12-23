@@ -1,4 +1,4 @@
-package bank2budget.ui;
+package bank2budget.ui.dashboard;
 
 import bank2budget.App;
 import bank2budget.app.BudgetService;
@@ -36,15 +36,16 @@ public class BudgetController {
         view.lastExport().setText(app.getAccountService().getLastExportDate().toString());
 
         this.profitAndLossController = new ProfitAndLossController(view.getProfitAndLossView(), app.getBudgetReportService(), app.getBudgetService());
-
+        
         this.budgetedVsActualController = new BudgetedVsActualController(view.getBudgetedVsActualView(), app.getBudgetReportService(), app.getBudgetService());
+        budgetedVsActualController.setOnEdited(e -> profitAndLossController.reload());
 
         this.accountBalanceView = view.getAccountBalanceView();
 
         this.selectMonthSubscription = newSelectMonthSubscription();
 
     }
-    
+
     public BudgetMonth getSelectedMonth() {
         LocalDate selected = view.monthSelector().getSelectionModel().getSelectedItem();
         return app.getBudgetService().month(selected);

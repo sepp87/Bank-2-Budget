@@ -4,6 +4,7 @@ import bank2budget.core.Account;
 import static bank2budget.core.CashTransactionTest.newTx;
 import bank2budget.core.UtilTest;
 import bank2budget.core.CashTransaction;
+import static bank2budget.core.budget.BudgetTemplateCategory.EntryType.EXPENSE;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +30,7 @@ public class BudgetTest {
         System.out.println("testGetMonthlyBudgets_WhenFirstOfMonthIsTenth_ThenReturnTwoMonthlyBudgets");
 
         // Create test data
-        Map<String, BigDecimal> categories = Map.of("GROCERIES", BigDecimal.valueOf(100));
+        var categories = Map.of("GROCERIES", new BudgetTemplateCategory(EXPENSE, "GROCERIES", BigDecimal.valueOf(100)));
         BudgetTemplate template = new BudgetTemplate(10, categories);
 
         Budget budget = new Budget();

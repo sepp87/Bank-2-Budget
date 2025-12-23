@@ -1,4 +1,4 @@
-package bank2budget.ui;
+package bank2budget.ui.dashboard;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -58,7 +58,7 @@ public class BudgetView extends AnchorPane {
                 wrapKpiWithLabel(currentMonth, "Selected month"),
                 wrapKpiWithLabel(lastExport, "Last export date"),
                 wrapKpiWithLabel(remainingIncome, "Available budget"),
-                wrapKpiWithLabel(currentBalance, "Closing balance")
+                wrapKpiWithLabel(currentBalance, "Total balance")
         );
 
         // Build table - budgeted vs. actual

@@ -1,9 +1,12 @@
 package bank2budget.ui;
 
 import bank2budget.App;
-import bank2budget.core.AccountDomainLogic;
 import bank2budget.core.CashTransaction;
 import bank2budget.core.CashTransactionDomainLogic;
+import bank2budget.ui.dashboard.BudgetController;
+import bank2budget.ui.transaction.EditableCashTransaction;
+import bank2budget.ui.transaction.MultiAccountController;
+import bank2budget.ui.transaction.TransactionReviewController;
 import java.io.File;
 import java.util.List;
 import javafx.collections.FXCollections;
@@ -41,6 +44,7 @@ public class EditorController {
         // View menu - event handlers
         view.menuItemAccounts().setOnAction((e) -> view.showAccountsView());
         view.menuItemBudget().setOnAction((e) -> view.showBudgetView());
+        view.menuItemBudgetTemplate().setOnAction((e) -> view.showBudgetTemplateView());
 
         budgetController.setOnReviewTransactions((e) -> startTransactionReview());
         transactionReviewController.setOnReviewFinished((e) -> finishTransactionReview());
@@ -98,30 +102,35 @@ public class EditorController {
         // show import finished
         if (isSuccess) {
             view.notificationView().showNotification("Import succesful!");
-
+            app.getBudgetService().recalculate();
+            budgetController.reload();
         } else {
             view.notificationView().showError("Import aborted! Balance history interrupted.");
-
         }
-
     }
+    
+    
 
     private void onSave(ActionEvent e) {
+        
+//        if(true) {
+//            return;
+//        }
 
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() {
-                // save transactions to xlsx and db 
-                accountsController.saveToDomain();
-
-                app.getAccountService().save();
-                app.getAnalyticsExportService().exportAccounts(app.getAccountService().getAccounts());
-
-                // recalculate and save budget
-                app.getBudgetService().recalculateAndSave();
-
-                // save to db
-                app.getAnalyticsExportService().exportBudget(app.getBudgetService().getBudget());
+//                // save transactions to xlsx and db 
+//                accountsController.saveToDomain();
+//
+//                app.getAccountService().save();
+//                app.getAnalyticsExportService().exportAccounts(app.getAccountService().getAccounts());
+//
+//                // recalculate and save budget
+//                app.getBudgetService().recalculateAndSave();
+//
+//                // save to db
+//                app.getAnalyticsExportService().exportBudget(app.getBudgetService().getBudget());
 
                 // show save finished
                 view.notificationView().showNotification("Save successful!");

@@ -1,6 +1,10 @@
 package bank2budget.ui;
 
 import bank2budget.App;
+import bank2budget.ui.budgettemplate.BudgetTemplateView;
+import bank2budget.ui.dashboard.BudgetView;
+import bank2budget.ui.transaction.MultiAccountView;
+import bank2budget.ui.transaction.TransactionReviewView;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -24,6 +28,7 @@ public class EditorView extends BorderPane {
     private final BudgetView budgetView;
     private final VBox contentWrapper;
     private final NotificationView notificationView;
+    private final BudgetTemplateView budgetTemplateView;
     private final TransactionReviewView transactionReviewView;
     private final StackPane overlayLayer;
 
@@ -43,7 +48,7 @@ public class EditorView extends BorderPane {
 
         this.budgetView = new BudgetView();
 
-        if (false) {
+        if (true) {
             contentWrapper.getChildren().add(accountsView);
         } else {
             contentWrapper.getChildren().add(budgetView);
@@ -59,6 +64,10 @@ public class EditorView extends BorderPane {
         contentLayer.getStyleClass().add("center");
         contentLayer.getChildren().add(contentWrapper);
 
+        budgetTemplateView = new BudgetTemplateView();
+        budgetTemplateView.setMinWidth(800);
+        budgetTemplateView.setMaxWidth(1740);
+        budgetTemplateView.prefWidthProperty().bind(this.widthProperty().multiply(0.95));
         transactionReviewView = new TransactionReviewView();
         transactionReviewView.setMinWidth(800);
         transactionReviewView.setMaxWidth(1740);
@@ -119,6 +128,10 @@ public class EditorView extends BorderPane {
         switchViewTo(budgetView);
     }
 
+    public void showBudgetTemplateView() {
+
+    }
+
     public void showTransactionReview() {
         overlayLayer.setVisible(true);
     }
@@ -140,6 +153,7 @@ public class EditorView extends BorderPane {
     private MenuItem save;
     private MenuItem accounts;
     private MenuItem budget;
+    private MenuItem budgetTemplate;
 
     private MenuBar createMenuBar() {
 
@@ -154,6 +168,8 @@ public class EditorView extends BorderPane {
         Menu viewMenu = new Menu("View");
         this.accounts = new MenuItem("Transactions");
         this.budget = new MenuItem("Budget");
+        this.budgetTemplate = new MenuItem("Budget Template");
+
         viewMenu.getItems().addAll(accounts, budget);
 
         // Root menu bar
@@ -177,6 +193,10 @@ public class EditorView extends BorderPane {
 
     public MenuItem menuItemBudget() {
         return budget;
+    }
+
+    public MenuItem menuItemBudgetTemplate() {
+        return budgetTemplate;
     }
 
     private void buildBudgetSettingsView() {

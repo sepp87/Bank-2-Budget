@@ -1,4 +1,4 @@
-package bank2budget.adapter.config;
+package bank2budget.adapter.rule;
 
 import bank2budget.core.rule.RuleConfig;
 import bank2budget.ports.RuleReaderPort;

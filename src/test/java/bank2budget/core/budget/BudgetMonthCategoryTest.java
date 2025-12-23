@@ -3,6 +3,7 @@ package bank2budget.core.budget;
 import bank2budget.core.Account;
 import bank2budget.core.UtilTest;
 import static bank2budget.core.CashTransactionTest.newTx;
+import static bank2budget.core.budget.BudgetTemplateCategory.EntryType.EXPENSE;
 import static bank2budget.core.budget.BudgetTest.groupTransactionsByAccount;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -27,7 +28,7 @@ public class BudgetMonthCategoryTest {
         System.out.println("testGetTransactions_WhenFirstOfMonthIsTenth_ThenReturn3And2Transactions");
 
         // Create test data
-        Map<String, BigDecimal> categories = Map.of("GROCERIES", BigDecimal.valueOf(100));
+        var categories = Map.of("GROCERIES", new BudgetTemplateCategory(EXPENSE, "GROCERIES", BigDecimal.valueOf(100)));
         BudgetTemplate template = new BudgetTemplate(10, categories);
 
         Budget budget = new Budget();
@@ -66,7 +67,7 @@ public class BudgetMonthCategoryTest {
         System.out.println("testGetTransactions_WhenBudgeted100AndExpenseIs50_ThenRemainderIs50");
 
         // Create test data
-        Map<String, BigDecimal> categories = Map.of("GROCERIES", BigDecimal.valueOf(100));
+        var categories = Map.of("GROCERIES", new BudgetTemplateCategory(EXPENSE, "GROCERIES", BigDecimal.valueOf(100)));
         BudgetTemplate template = new BudgetTemplate(1, categories); // <--- 1st is first of month!
 
         Budget budget = new Budget();
@@ -101,7 +102,7 @@ public class BudgetMonthCategoryTest {
         System.out.println("testGetTransactions_WhenBudgeted100AndExpense50_ThenNextMonthsRemainderIs150");
 
         // Create test data
-        Map<String, BigDecimal> categories = Map.of("GROCERIES", BigDecimal.valueOf(100));
+        var categories = Map.of("GROCERIES", new BudgetTemplateCategory(EXPENSE, "GROCERIES", BigDecimal.valueOf(100)));
         BudgetTemplate template = new BudgetTemplate(1, categories); // <--- 1st is first of month!
 
         Budget budget = new Budget();
@@ -137,7 +138,7 @@ public class BudgetMonthCategoryTest {
         System.out.println("testGetTransactions_WhenBudgeted100AndExpense50For2Accounts_ThenRemainderIs0");
 
         // Create test data
-        Map<String, BigDecimal> categories = Map.of("GROCERIES", BigDecimal.valueOf(100));
+        var categories = Map.of("GROCERIES", new BudgetTemplateCategory(EXPENSE, "GROCERIES", BigDecimal.valueOf(100)));
         BudgetTemplate template = new BudgetTemplate(1, categories); // <--- 1st is first of month!
 
         Budget budget = new Budget();
@@ -177,7 +178,7 @@ public class BudgetMonthCategoryTest {
         System.out.println("testGetTransactions_WhenBudgeted100AndExpense50For2Accounts_ThenNextMonthsRemainderIs100");
 
         // Create test data
-        Map<String, BigDecimal> categories = Map.of("GROCERIES", BigDecimal.valueOf(100));
+        var categories = Map.of("GROCERIES", new BudgetTemplateCategory(EXPENSE, "GROCERIES", BigDecimal.valueOf(100)));
         BudgetTemplate template = new BudgetTemplate(1, categories); // <--- 1st is first of month!
 
         Budget budget = new Budget();

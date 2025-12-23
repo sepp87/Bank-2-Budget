@@ -28,7 +28,7 @@ public class CashTransactionTest {
     public void testSetAmount_WhenAmountNegative_ThenTransactionTypeDebit() {
         System.out.println("testSetAmount_WhenAmountNegative_ThenTransactionTypeDebit");
 
-        var transaction = new TransactionBuilder().amount(BigDecimal.valueOf(-10.)).build();
+        var transaction = new CashTransactionBuilder().amount(BigDecimal.valueOf(-10.)).build();
 
         TransactionType expected = TransactionType.DEBIT;
         TransactionType result = transaction.transactionType();
@@ -44,7 +44,7 @@ public class CashTransactionTest {
     public void testSetAmount_WhenAmountPositive_ThenTransactionTypeCredit() {
         System.out.println("testSetAmount_WhenAmountPositive_ThenTransactionTypeCredit");
 
-        var transaction = new TransactionBuilder().amount(BigDecimal.valueOf(10.)).build();
+        var transaction = new CashTransactionBuilder().amount(BigDecimal.valueOf(10.)).build();
 
         TransactionType expected = TransactionType.CREDIT;
         TransactionType result = transaction.transactionType();

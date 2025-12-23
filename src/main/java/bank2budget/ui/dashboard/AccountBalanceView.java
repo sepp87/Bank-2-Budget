@@ -1,5 +1,6 @@
-package bank2budget.ui;
+package bank2budget.ui.dashboard;
 
+import java.awt.Rectangle;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import javafx.collections.FXCollections;
 import javafx.scene.chart.PieChart;
+import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 /**
@@ -22,7 +24,7 @@ public class AccountBalanceView extends VBox {
     public AccountBalanceView() {
 
         this.pie = new PieChart();
-        
+
         pie.setLabelsVisible(false);
         pie.setLegendVisible(true);
         pie.setStartAngle(90);
@@ -34,8 +36,8 @@ public class AccountBalanceView extends VBox {
     public void setData(Map<String, BigDecimal> balances) {
         HashSet<String> toRemove = new HashSet<>(data.keySet());
         toRemove.removeAll(balances.keySet());
-        
-        for(var key : toRemove) {
+
+        for (var key : toRemove) {
             var removed = data.remove(key);
             pie.getData().remove(removed);
         }

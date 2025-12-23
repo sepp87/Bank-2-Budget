@@ -1,12 +1,14 @@
-package bank2budget.ui;
+package bank2budget.ui.dashboard;
 
 import bank2budget.app.report.BudgetReportRow;
 import bank2budget.app.report.CategoryRow;
 import bank2budget.app.report.SectionRow;
 import bank2budget.app.report.TotalRow;
+import bank2budget.ui.TableViewUtil;
 import java.math.BigDecimal;
 import java.util.function.BiConsumer;
 import javafx.scene.control.TableColumn;
+
 /**
  *
  * @author joostmeulenkamp
@@ -26,14 +28,12 @@ public class BudgetedVsActualView extends BudgetReportView {
         getColumns().add(varianceColumn);
 
         // 200 and 80
-        
         categoryColumn.setMinWidth(140);
 //        categoryColumn.setMaxWidth(5f * Integer.MAX_VALUE);
 //        budgetedColumn.setMaxWidth(1f * Integer.MAX_VALUE);
 //        actualColumn.setMaxWidth(1f * Integer.MAX_VALUE);
 //        varianceColumn.setMaxWidth(1f * Integer.MAX_VALUE);
-        
-        
+
         budgetedColumn.setMaxWidth(80);
         actualColumn.setMaxWidth(80);
         varianceColumn.setMaxWidth(80);
@@ -75,7 +75,8 @@ public class BudgetedVsActualView extends BudgetReportView {
                         budgetedEditHandler.accept(c, value);
                     }
                 },
-                TableViewUtil.bigDecimalConverter()
+                TableViewUtil.bigDecimalConverter(), 
+                this::requestFocus
         );
     }
 

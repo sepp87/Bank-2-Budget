@@ -1,4 +1,4 @@
-package bank2budget.ui;
+package bank2budget.ui.dashboard;
 
 import bank2budget.app.BudgetReportService;
 import bank2budget.app.BudgetService;
@@ -9,7 +9,7 @@ import bank2budget.app.report.SortType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import javafx.application.Platform;
+import javafx.event.EventHandler;
 
 /**
  *
@@ -31,6 +31,10 @@ public class ProfitAndLossController {
 
         view.onAdjustmentEdited(this::onAdjustmentEdit);
     }
+    
+    public void reload() {
+        load(selected);
+    }
 
     public final void load(LocalDate firstOfMonth) {
             selected = firstOfMonth;
@@ -47,4 +51,5 @@ public class ProfitAndLossController {
         // issue command here
         // budgetCommandService.updateAdjustment(...);
     }
+   
 }

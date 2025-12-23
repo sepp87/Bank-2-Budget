@@ -1,9 +1,8 @@
-package bank2budget.ui;
+package bank2budget.ui.dashboard;
 
 import bank2budget.app.report.BudgetReportRow;
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 /**
@@ -18,9 +17,6 @@ public abstract class BudgetReportView extends TableView<BudgetReportRow> {
         setEditable(true);
         getSelectionModel().setCellSelectionEnabled(true);
         getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
-        addEventHandler(TableColumn.editCommitEvent(), e -> this.requestFocus());
-        addEventHandler(TableColumn.editCancelEvent(), e -> this.requestFocus());
 
         setRowFactory(tv -> new BudgetReportRowFactory());
 

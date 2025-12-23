@@ -7,7 +7,7 @@ import java.time.LocalDate;
  *
  * @author joostmeulenkamp
  */
-public class TransactionBuilder {
+public class CashTransactionBuilder {
 
     private int transactionNumber;
     private LocalDate date;
@@ -25,77 +25,77 @@ public class TransactionBuilder {
     private String category;
     private String notes;
 
-    public TransactionBuilder transactionNumber(int value) {
+    public CashTransactionBuilder transactionNumber(int value) {
         this.transactionNumber = value;
         return this;
     }
 
-    public TransactionBuilder date(LocalDate value) {
+    public CashTransactionBuilder date(LocalDate value) {
         this.date = value;
         return this;
     }
 
-    public TransactionBuilder positionOfDay(int value) {
+    public CashTransactionBuilder positionOfDay(int value) {
         this.positionOfDay = value;
         return this;
     }
 
-    public TransactionBuilder lastOfDay(boolean value) {
+    public CashTransactionBuilder lastOfDay(boolean value) {
         this.lastOfDay = value;
         return this;
     }
 
-    public TransactionBuilder amount(BigDecimal value) {
+    public CashTransactionBuilder amount(BigDecimal value) {
         this.amount = value;
         return this;
     }
 
-    public TransactionBuilder accountBalance(BigDecimal value) {
+    public CashTransactionBuilder accountBalance(BigDecimal value) {
         this.accountBalance = value;
         return this;
     }
 
-    public TransactionBuilder accountNumber(String value) {
+    public CashTransactionBuilder accountNumber(String value) {
         this.accountNumber = (value == null || value.isBlank()) ? null : value;
         return this;
     }
 
-    public TransactionBuilder accountName(String value) {
+    public CashTransactionBuilder accountName(String value) {
         this.accountName = (value == null || value.isBlank()) ? null : value;
         return this;
     }
 
-    public TransactionBuilder accountInstitution(CreditInstitution value) {
+    public CashTransactionBuilder accountInstitution(CreditInstitution value) {
         this.accountInstitution = value;
         return this;
     }
 
-    public TransactionBuilder contraAccountNumber(String value) {
+    public CashTransactionBuilder contraAccountNumber(String value) {
         this.contraAccountNumber = (value == null || value.isBlank()) ? null : value;
         return this;
     }
 
-    public TransactionBuilder contraAccountName(String value) {
+    public CashTransactionBuilder contraAccountName(String value) {
         this.contraAccountName = (value == null || value.isBlank()) ? null : value;
         return this;
     }
 
-    public TransactionBuilder internal(boolean value) {
+    public CashTransactionBuilder internal(boolean value) {
         this.internal = value;
         return this;
     }
 
-    public TransactionBuilder description(String value) {
+    public CashTransactionBuilder description(String value) {
         this.description = (value == null || value.isBlank()) ? null : value;
         return this;
     }
 
-    public TransactionBuilder category(String value) {
+    public CashTransactionBuilder category(String value) {
         this.category = (value == null || value.isBlank()) ? null : value;
         return this;
     }
 
-    public TransactionBuilder notes(String value) {
+    public CashTransactionBuilder notes(String value) {
         this.notes = (value == null || value.isBlank()) ? null : value;
         return this;
     }

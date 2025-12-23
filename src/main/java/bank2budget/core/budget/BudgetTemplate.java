@@ -1,5 +1,6 @@
 package bank2budget.core.budget;
 
+import static bank2budget.core.budget.BudgetTemplateCategory.EntryType.INCOME;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,9 +19,9 @@ public class BudgetTemplate {
     private static final Logger LOGGER = Logger.getLogger(BudgetTemplate.class.getName());
 
     private final int firstOfMonth;
-    private final Map<String, BigDecimal> operatingCategories;
+    private final Map<String, BudgetTemplateCategory> operatingCategories;
 
-    public BudgetTemplate(int firstOfMonth, Map<String, BigDecimal> categories) {
+    public BudgetTemplate(int firstOfMonth, Map<String, BudgetTemplateCategory> categories) {
         this.firstOfMonth = validateFirstOfMonth(firstOfMonth);
         this.operatingCategories = categories;
     }
@@ -38,7 +39,7 @@ public class BudgetTemplate {
         return firstOfMonth;
     }
 
-    public Map<String, BigDecimal> operatingCategories() {
+    public Map<String, BudgetTemplateCategory> operatingCategories() {
         return Map.copyOf(operatingCategories);
     }
 
@@ -46,7 +47,8 @@ public class BudgetTemplate {
         List<BudgetMonthCategory> categories = new ArrayList<>();
         for (var entry : operatingCategories.entrySet()) {
             String name = entry.getKey();
-            BigDecimal budgeted = entry.getValue();
+            var template = entry.getValue();
+            BigDecimal budgeted = template.type() == INCOME ? template.budgeted().negate() : template.budgeted(); // income is negative, because it is allocated to expenses
             BigDecimal zero = BigDecimal.ZERO;
             var category = new BudgetMonthCategory(first, name, zero, zero, budgeted, zero, zero, Collections.emptyList());
             categories.add(category);

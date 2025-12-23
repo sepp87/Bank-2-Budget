@@ -1,5 +1,6 @@
 package bank2budget.adapter.config;
 
+import bank2budget.adapter.rule.RuleReader;
 import bank2budget.adapter.budget.BudgetTemplateReader;
 import bank2budget.AppPaths;
 import bank2budget.core.Config;

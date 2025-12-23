@@ -71,7 +71,7 @@ public class Notes {
     //      Category transactions - inspect when clicking on category
     //      Category transactions - change in inspection mode and enable (virtual) save
     //      Support opening account balance
-    //
+    //      Change category rules to only label when null
     
     // Transactions
     //      DONE Simplified categorization rules

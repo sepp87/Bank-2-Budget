@@ -36,7 +36,7 @@ public class AccountService {
 
     private void load() {
         this.accountsIndex = repository.load();
-        applySystemRules(accountsIndex.values());
+        applyRules(accountsIndex.values());
     }
 
     public Collection<Account> getAccounts() {

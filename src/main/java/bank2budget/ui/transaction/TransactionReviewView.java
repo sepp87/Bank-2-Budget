@@ -1,4 +1,4 @@
-package bank2budget.ui;
+package bank2budget.ui.transaction;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;

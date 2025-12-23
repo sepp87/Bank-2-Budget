@@ -1,4 +1,4 @@
-package bank2budget.ui;
+package bank2budget.ui.transaction;
 
 import bank2budget.core.CashTransaction;
 import bank2budget.core.CashTransaction.TransactionType;

@@ -1,4 +1,4 @@
-package bank2budget.ui;
+package bank2budget.ui.dashboard;
 
 import bank2budget.app.report.BudgetReportRow;
 import bank2budget.app.report.SectionRow;

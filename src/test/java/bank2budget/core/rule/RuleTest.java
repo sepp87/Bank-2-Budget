@@ -1,6 +1,6 @@
 package bank2budget.core.rule;
 
-import bank2budget.core.TransactionBuilder;
+import bank2budget.core.CashTransactionBuilder;
 import bank2budget.core.UtilTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ public class RuleTest {
         System.out.println("test_WhenDescriptionFoo_ThenCategoryBar");
 
         // create test data
-        var transaction = new TransactionBuilder().description("Foo").build();
+        var transaction = new CashTransactionBuilder().description("Foo").build();
         var rule = RuleFactory.create(new RuleConfig("description", "Foo", "category", "Bar"));
 
         // perform test
@@ -43,7 +43,7 @@ public class RuleTest {
         System.out.println("test_WhenContraAccountNameFoo_ThenCategoryBar");
 
         // create test data
-        var transaction = new TransactionBuilder().description("Foo").build();
+        var transaction = new CashTransactionBuilder().description("Foo").build();
         var rule = RuleFactory.create(new RuleConfig("description", "Foo", "category", "Bar"));
 
         // perform test

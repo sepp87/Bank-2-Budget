@@ -1,6 +1,8 @@
 package bank2budget.adapter.budget;
 
 import bank2budget.core.budget.BudgetTemplate;
+import bank2budget.core.budget.BudgetTemplateCategory;
+import bank2budget.core.budget.BudgetTemplateCategory.EntryType;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -35,7 +37,7 @@ public class BudgetTemplateReader {
     private BudgetTemplate readFrom(Path path) throws IOException {
         List<String> lines = Files.readAllLines(path);
         int firstOfMonth = getFirstOfMonth(lines);
-        Map<String, BigDecimal> categories = getCategories(lines);
+        var categories = getCategories(lines);
         return new BudgetTemplate(firstOfMonth, categories);
     }
 
@@ -55,22 +57,21 @@ public class BudgetTemplateReader {
         return firstOfMonth;
     }
 
-    private Map<String, BigDecimal> getCategories(List<String> lines) {
-        Map<String, BigDecimal> result = new TreeMap<>();
+
+    private Map<String, BudgetTemplateCategory> getCategories(List<String> lines) {
+        Map<String, BudgetTemplateCategory> result = new TreeMap<>();
         for (String line : lines) {
             try {
                 String upper = line.strip().toUpperCase();
-                if (upper.startsWith("INCOME")) {
-                    String[] parts = line.split(";");
-                    String category = parts[1].strip();
-                    BigDecimal budgeted = new BigDecimal(parts[2].strip()).negate(); // income is negative, because it is allocated to expenses
-                    result.put(category, budgeted);
-                } else if (upper.startsWith("EXPENSE")) {
-                    String[] parts = line.split(";");
-                    String category = parts[1].strip();
-                    BigDecimal budgeted = new BigDecimal(parts[2].strip());
-                    result.put(category, budgeted);
-                }
+
+                EntryType type = EntryType.valueOf(upper);
+                String[] parts = line.split(";");
+                String name = parts[1].strip();
+                BigDecimal budgeted = new BigDecimal(parts[2].strip());
+                
+                var category = new BudgetTemplateCategory(type, name, budgeted);
+                result.put(name, category);
+
             } catch (Exception e) {
                 Logger.getLogger(BudgetTemplateReader.class.getName()).log(Level.INFO, "Could NOT read category, proceeding without {0}", line);
             }

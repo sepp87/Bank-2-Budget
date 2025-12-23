@@ -1,4 +1,4 @@
-package bank2budget.ui;
+package bank2budget.ui.dashboard;
 
 import bank2budget.app.BudgetReportService;
 import bank2budget.app.BudgetService;
@@ -9,6 +9,7 @@ import bank2budget.app.report.SortType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import javafx.event.EventHandler;
 
 /**
  *
@@ -22,13 +23,18 @@ public class BudgetedVsActualController {
     private SortBy sortBy = SortBy.LABEL;
     private SortType sortType = SortType.ASCENDING;
     private LocalDate selected;
-    
+    private EventHandler onEditedHandler;
+
     public BudgetedVsActualController(BudgetedVsActualView budgetedVsActualView, BudgetReportService budgetReportService, BudgetService budgetService) {
         this.view = budgetedVsActualView;
         this.reportService = budgetReportService;
         this.budgetService = budgetService;
 
         view.onBudgetedEdited(this::onBudgetedEdit);
+    }
+
+    public void reload() {
+        load(selected);
     }
 
     public final void load(LocalDate firstOfMonth) {
@@ -42,8 +48,14 @@ public class BudgetedVsActualController {
             budgetService.setBudgetedForCategory(selected, c.name(), newValue);
             load(selected);
         }
-
+        if (onEditedHandler != null) {
+            onEditedHandler.handle(null);
+        }
         // issue command here
         // budgetCommandService.updateAdjustment(...);
+    }
+
+    public void setOnEdited(EventHandler eh) {
+        this.onEditedHandler = eh;
     }
 }

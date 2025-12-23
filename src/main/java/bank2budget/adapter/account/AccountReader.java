@@ -3,7 +3,7 @@ package bank2budget.adapter.account;
 import bank2budget.core.CreditInstitution;
 import bank2budget.core.Account;
 import bank2budget.core.CashTransaction;
-import bank2budget.core.TransactionBuilder;
+import bank2budget.core.CashTransactionBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -103,7 +103,7 @@ public class AccountReader {
     }
 
     private static CashTransaction transactionFromRow(Row row) {
-        TransactionBuilder builder = new TransactionBuilder();
+        CashTransactionBuilder builder = new CashTransactionBuilder();
 
         int i = 0;
         for (String column : header) {
