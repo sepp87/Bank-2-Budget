@@ -26,11 +26,11 @@ public class TransactionReviewController {
         transactionTableController.load(transactions);
     }
 
-    public void setOnReviewFinished(EventHandler<ActionEvent> eh) {
+    public void setOnFinished(EventHandler<ActionEvent> eh) {
         view.getFinishButton().setOnAction(eh);
     }
 
-    public void setOnReviewCanceled(EventHandler<ActionEvent> eh) {
+    public void setOnCanceled(EventHandler<ActionEvent> eh) {
         view.getCancelButton().setOnAction(eh);
 
     }

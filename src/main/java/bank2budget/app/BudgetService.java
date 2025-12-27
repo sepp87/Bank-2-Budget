@@ -45,6 +45,10 @@ public class BudgetService {
         }
         return newBudget;
     }
+    
+    public BudgetTemplate getBudgetTemplate() {
+        return template;
+    }
 
     public BudgetMonth month(LocalDate firstOfMonth) {
         return newBudget.month(firstOfMonth);
@@ -93,4 +97,6 @@ public class BudgetService {
         newBudget.replace(updated);
     }
 
+   
+    
 }

@@ -1,4 +1,4 @@
-package bank2budget.ui;
+package bank2budget.ui.tableview;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -20,35 +23,7 @@ import org.controlsfx.control.textfield.TextFields;
  *
  * @author joostmeulenkamp
  */
-public class TableViewUtil {
-
-    public static StringConverter<BigDecimal> bigDecimalConverter() {
-        return new StringConverter<BigDecimal>() {
-
-            private BigDecimal previous;
-
-            @Override
-            public String toString(BigDecimal value) {
-                previous = value;
-                return value != null ? value.toPlainString() : "";
-            }
-
-            @Override
-            public BigDecimal fromString(String string) {
-                if (string == null) {
-                    return previous;
-                }
-
-                string = string.trim().replace(",", ".");
-
-                if (string.matches("^[+-]?[0-9]+(\\.[0-9]+)?$")) {
-                    return new BigDecimal(string);
-                }
-
-                return previous;
-            }
-        };
-    }
+public class TableColumnUtil {
 
     public static <S> TableColumn<S, BigDecimal> buildAmountColumn(String title, Function<S, BigDecimal> getter) {
         return buildColumn(title, getter, amountCellFactory());
@@ -58,7 +33,7 @@ public class TableViewUtil {
         return buildColumn(title, getter, null);
     }
 
-    public static <S, T> TableColumn<S, T> buildColumn(String title, Function<S, T> getter, Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory) {
+    private static <S, T> TableColumn<S, T> buildColumn(String title, Function<S, T> getter, Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory) {
         TableColumn<S, T> col = new TableColumn<>(title);
         col.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(getter.apply(data.getValue())));
         if (cellFactory != null) {
@@ -87,14 +62,20 @@ public class TableViewUtil {
     }
 
     public static <S> TableColumn<S, String> buildEditableTextColumn(String title, Function<S, String> getter, BiConsumer<S, String> setter, Runnable afterEdit) {
-        return buildEditableColumn(title, getter, setter, new DefaultStringConverter(), TextFieldTableCell.forTableColumn(), afterEdit);
+        return buildEditableColumn(title, getter, setter, TextFieldTableCell.forTableColumn(), afterEdit);
     }
 
-    public static <S> TableColumn<S, BigDecimal> buildEditableAmountColumn(String title, Function<S, BigDecimal> getter, BiConsumer<S, BigDecimal> setter, StringConverter<BigDecimal> converter, Runnable afterEdit) {
-        return buildEditableColumn(title, getter, setter, converter, editableAmountCell(converter), afterEdit);
+    public static <S> TableColumn<S, BigDecimal> buildEditableAmountColumn(String title, Function<S, BigDecimal> getter, BiConsumer<S, BigDecimal> setter, Runnable afterEdit) {
+        var converter = StringConverterUtil.bigDecimalConverter();
+        return buildEditableColumn(title, getter, setter, editableAmountCell(converter), afterEdit);
     }
 
-    public static <S, T> TableColumn<S, T> buildEditableColumn(String title, Function<S, T> getter, BiConsumer<S, T> setter, StringConverter<T> converter, Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory, Runnable afterEdit) {
+    public static <S, T> TableColumn<S, T> buildEditableChoiceColumn(String title, Function<S, T> getter, BiConsumer<S, T> setter, ObservableList<T> values, Runnable afterEdit) {
+        Callback<TableColumn<S, T>, TableCell<S, T>> choiceCellFactory = tc -> new ChoiceBoxTableCell<>(values);
+       return buildEditableColumn(title, getter, setter, choiceCellFactory, afterEdit);
+    }
+
+    private static <S, T> TableColumn<S, T> buildEditableColumn(String title, Function<S, T> getter, BiConsumer<S, T> setter, Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory, Runnable afterEdit) {
         TableColumn<S, T> col = new TableColumn<>(title);
         col.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(getter.apply(data.getValue())));
         col.setCellFactory(cellFactory);
@@ -195,7 +176,6 @@ public class TableViewUtil {
                 afterEdit.run();
             }
         });
-        
 
         return col;
     }

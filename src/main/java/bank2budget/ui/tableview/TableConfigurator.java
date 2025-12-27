@@ -1,0 +1,73 @@
+package bank2budget.ui.tableview;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import javafx.collections.ObservableList;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+
+/**
+ *
+ * @author joostmeulenkamp
+ */
+public class TableConfigurator<S> {
+
+    private final TableView<S> table;
+
+    public TableConfigurator(TableView<S> table) {
+        this.table = table;
+
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+
+        table.setEditable(true);
+        table.getSelectionModel().setCellSelectionEnabled(true);
+        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        table.setOnKeyTyped((e) -> TableViewEditSupport.onKeyTyped(e, table));
+        table.setOnKeyPressed((e) -> TableViewShortcutSupport.shortcutPressed(e, table));
+    }
+
+    public <T> TableColumn<S, T> addColumn(String title, Function<S, T> getter) {
+        var column = TableColumnUtil.buildColumn(title, getter);
+        table.getColumns().add(column);
+        return column;
+    }
+
+    public TableColumn<S, BigDecimal> addAmountColumn(String title, Function<S, BigDecimal> getter) {
+        var column = TableColumnUtil.buildAmountColumn(title, getter);
+        table.getColumns().add(column);
+        return column;
+    }
+
+    public TableColumn<S, String> addEditableTextColumn(String title, Function<S, String> getter, BiConsumer<S, String> setter) {
+        var column = TableColumnUtil.buildEditableTextColumn(title, getter, setter, table::requestFocus);
+        table.getColumns().add(column);
+        return column;
+    }
+
+    public TableColumn<S, String> addEditableTextColumWithAutocomplete(String title, Function<S, String> getter, BiConsumer<S, String> setter, List<String> values) {
+        var column = TableColumnUtil.buildAutoCompleteColumn(title, getter, setter, values, table::requestFocus);
+        table.getColumns().add(column);
+        return column;
+    }
+
+    public TableColumn<S, BigDecimal> addEditableAmountColumn(String title, Function<S, BigDecimal> getter, BiConsumer<S, BigDecimal> setter) {
+        var column = TableColumnUtil.buildEditableAmountColumn(title, getter, setter, table::requestFocus);
+        table.getColumns().add(column);
+        return column;
+    }
+
+    public <T> TableColumn<S, T> addEditableChoiceColumn(String title, Function<S, T> getter, BiConsumer<S, T> setter, ObservableList<T> values) {
+        var column = TableColumnUtil.buildEditableChoiceColumn(title, getter, setter, values, table::requestFocus);
+        table.getColumns().add(column);
+        return column;
+    }
+
+    public void remove() {
+        table.setOnKeyTyped(null);
+        table.setOnKeyPressed(null);
+    }
+}

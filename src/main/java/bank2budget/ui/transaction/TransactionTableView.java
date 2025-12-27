@@ -1,42 +1,39 @@
 package bank2budget.ui.transaction;
 
-import bank2budget.ui.TableViewUtil;
-import bank2budget.ui.tableview.EnhancedTableView;
+import bank2budget.ui.tableview.TableConfigurator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 
 /**
  *
  * @author joostmeulenkamp
  */
-public class TransactionTableView extends EnhancedTableView<EditableCashTransaction> {
+public class TransactionTableView extends TableView<EditableCashTransaction> {
 
     private final ObservableList<String> categorySuggestions = FXCollections.observableArrayList();
 
     public TransactionTableView() {
 
-        TableColumn<EditableCashTransaction, Integer> transactionNumberColumn = TableViewUtil.buildColumn("Transaction Number", EditableCashTransaction::transactionNumber);
-        TableColumn<EditableCashTransaction, String> descriptionColumn = TableViewUtil.buildColumn("Description", EditableCashTransaction::description);
-        TableColumn<EditableCashTransaction, String> notesColumn = TableViewUtil.buildEditableTextColumn("Notes", EditableCashTransaction::notes, EditableCashTransaction::setNotes, this::requestFocus);
-        TableColumn<EditableCashTransaction, String> contraAccountNameColumn = TableViewUtil.buildColumn("Contra Account Name", EditableCashTransaction::contraAccountName);
+        var configurator = new TableConfigurator<>(this);
+
+        configurator.addEditableTextColumWithAutocomplete("Category", EditableCashTransaction::category, EditableCashTransaction::setCategory, categorySuggestions);
+        configurator.addAmountColumn("Amount", EditableCashTransaction::amount);
+        var transactionNumberColumn = configurator.addColumn("Transaction Number", EditableCashTransaction::transactionNumber);
+        configurator.addColumn("Date", EditableCashTransaction::date);
+        configurator.addAmountColumn("Account Balance", EditableCashTransaction::accountBalance);
+        configurator.addColumn("Account Name", EditableCashTransaction::accountName);
+        var contraAccountNameColumn = configurator.addColumn("Contra Account Name", EditableCashTransaction::contraAccountName);
+        var descriptionColumn = configurator.addColumn("Description", EditableCashTransaction::description);
+        var notesColumn = configurator.addEditableTextColumn("Notes", EditableCashTransaction::notes, EditableCashTransaction::setNotes);
 
         descriptionColumn.setPrefWidth(240);
         notesColumn.setPrefWidth(240);
         contraAccountNameColumn.setPrefWidth(240);
-
-        this.getColumns().add(TableViewUtil.buildAutoCompleteColumn("Category", EditableCashTransaction::category, EditableCashTransaction::setCategory, categorySuggestions, this::requestFocus));
-        this.getColumns().add(TableViewUtil.buildColumn("Amount", EditableCashTransaction::amount));
-        this.getColumns().add(transactionNumberColumn);
-        this.getColumns().add(TableViewUtil.buildColumn("Date", EditableCashTransaction::date));
-        this.getColumns().add(TableViewUtil.buildColumn("Account Balance", EditableCashTransaction::accountBalance));
-        this.getColumns().add(TableViewUtil.buildColumn("Account Name", EditableCashTransaction::accountName));
-        this.getColumns().add(contraAccountNameColumn);
-        this.getColumns().add(descriptionColumn);
-        this.getColumns().add(notesColumn);
 
         transactionNumberColumn.setSortType(TableColumn.SortType.DESCENDING);
         this.getSortOrder().add(transactionNumberColumn);
@@ -46,8 +43,7 @@ public class TransactionTableView extends EnhancedTableView<EditableCashTransact
 
     public void load(List<EditableCashTransaction> transactions) {
         loadCategorySuggestions(transactions);
-        this.getItems().clear();
-        this.getItems().addAll(transactions);
+        this.getItems().setAll(transactions);
         this.sort();
 
     }

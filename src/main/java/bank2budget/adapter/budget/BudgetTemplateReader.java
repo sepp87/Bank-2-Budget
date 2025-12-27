@@ -57,18 +57,22 @@ public class BudgetTemplateReader {
         return firstOfMonth;
     }
 
-
     private Map<String, BudgetTemplateCategory> getCategories(List<String> lines) {
         Map<String, BudgetTemplateCategory> result = new TreeMap<>();
         for (String line : lines) {
             try {
-                String upper = line.strip().toUpperCase();
+                String upper = line.strip().toUpperCase().split(";")[0];
+
+                var values = List.of(EntryType.values()).stream().map(EntryType::toString).toList();
+                if (!values.contains(upper)) {
+                    continue;
+                }
 
                 EntryType type = EntryType.valueOf(upper);
                 String[] parts = line.split(";");
                 String name = parts[1].strip();
                 BigDecimal budgeted = new BigDecimal(parts[2].strip());
-                
+
                 var category = new BudgetTemplateCategory(type, name, budgeted);
                 result.put(name, category);
 

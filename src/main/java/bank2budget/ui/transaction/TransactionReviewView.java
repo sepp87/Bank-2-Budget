@@ -28,7 +28,7 @@ public class TransactionReviewView extends VBox {
         VBox.setVgrow(this, Priority.ALWAYS);
 
         this.getChildren().addAll(controls, transactionTableView);
-        this.getStyleClass().add("transaction-review");
+        this.getStyleClass().add("overlay-modal");
     }
 
     public TransactionTableView getTransactionTableView() {

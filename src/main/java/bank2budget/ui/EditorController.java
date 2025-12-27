@@ -1,13 +1,20 @@
 package bank2budget.ui;
 
 import bank2budget.App;
+import bank2budget.AppPaths;
+import bank2budget.adapter.rule.RuleReader;
 import bank2budget.core.CashTransaction;
 import bank2budget.core.CashTransactionDomainLogic;
+import bank2budget.ui.budgettemplate.BudgetTemplateController;
+import bank2budget.ui.budgettemplate.EditableBudgetTemplateCategory;
 import bank2budget.ui.dashboard.BudgetController;
+import bank2budget.ui.rules.EditableRuleConfig;
+import bank2budget.ui.rules.RuleController;
 import bank2budget.ui.transaction.EditableCashTransaction;
 import bank2budget.ui.transaction.MultiAccountController;
 import bank2budget.ui.transaction.TransactionReviewController;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -27,14 +34,24 @@ public class EditorController {
 
     private final MultiAccountController accountsController;
     private final BudgetController budgetController;
+    private final BudgetTemplateController budgetTemplateController;
+    private final RuleController rulesController;
     private final TransactionReviewController transactionReviewController;
 
-    public EditorController(EditorView editorView, App app) {
+    public EditorController(EditorView editorView, App app) throws IOException {
         this.view = editorView;
         this.app = app;
 
         this.accountsController = new MultiAccountController(view.accountsView(), app.getAccountService());
         this.budgetController = new BudgetController(view.budgetView(), app);
+
+        this.budgetTemplateController = new BudgetTemplateController(view.budgetTemplateView());
+        var categories = app.getBudgetService().getBudgetTemplate().operatingCategories().values().stream().map(EditableBudgetTemplateCategory::new).toList();
+        budgetTemplateController.setFirstOfMonth(app.getBudgetService().getBudgetTemplate().firstOfMonth());
+        budgetTemplateController.load(categories);
+        this.rulesController = new RuleController(view.rulesView());
+        var rules = new RuleReader(new AppPaths().getCategorizationRulesFile()).read().stream().map(EditableRuleConfig::new).toList();
+        rulesController.load(rules);
         this.transactionReviewController = new TransactionReviewController(view.transactionReviewView());
 
         // File menu - event handlers
@@ -45,10 +62,18 @@ public class EditorController {
         view.menuItemAccounts().setOnAction((e) -> view.showAccountsView());
         view.menuItemBudget().setOnAction((e) -> view.showBudgetView());
         view.menuItemBudgetTemplate().setOnAction((e) -> view.showBudgetTemplateView());
+        view.menuItemRules().setOnAction((e) -> view.showRulesView());
 
+        // Budget - event handler
         budgetController.setOnReviewTransactions((e) -> startTransactionReview());
-        transactionReviewController.setOnReviewFinished((e) -> finishTransactionReview());
-        transactionReviewController.setOnReviewCanceled((e) -> cancelTransactionReview());
+
+        // Modal menu - event handlers
+        budgetTemplateController.setOnCanceled((e) -> closeOverlayModal());
+        budgetTemplateController.setOnFinished((e) -> closeOverlayModal());
+        rulesController.setOnCanceled((e) -> closeOverlayModal());
+        rulesController.setOnFinished((e) -> closeOverlayModal());
+        transactionReviewController.setOnFinished((e) -> finishTransactionReview());
+        transactionReviewController.setOnCanceled((e) -> closeOverlayModal());
 
     }
 
@@ -68,12 +93,12 @@ public class EditorController {
         }
         app.getBudgetService().recalculate();
         budgetController.reload();
-        view.hideTransactionReview();
+        view.hideOverlay();
 
     }
 
-    private void cancelTransactionReview() {
-        view.hideTransactionReview();
+    private void closeOverlayModal() {
+        view.hideOverlay();
 
     }
 
@@ -108,15 +133,12 @@ public class EditorController {
             view.notificationView().showError("Import aborted! Balance history interrupted.");
         }
     }
-    
-    
 
     private void onSave(ActionEvent e) {
-        
+
 //        if(true) {
 //            return;
 //        }
-
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() {

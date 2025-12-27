@@ -3,6 +3,7 @@ package bank2budget.ui;
 import bank2budget.App;
 import bank2budget.ui.budgettemplate.BudgetTemplateView;
 import bank2budget.ui.dashboard.BudgetView;
+import bank2budget.ui.rules.RuleView;
 import bank2budget.ui.transaction.MultiAccountView;
 import bank2budget.ui.transaction.TransactionReviewView;
 import javafx.geometry.Pos;
@@ -27,8 +28,10 @@ public class EditorView extends BorderPane {
     private final MultiAccountView accountsView;
     private final BudgetView budgetView;
     private final VBox contentWrapper;
+    private final VBox overlayWrapper;
     private final NotificationView notificationView;
     private final BudgetTemplateView budgetTemplateView;
+    private final RuleView rulesView;
     private final TransactionReviewView transactionReviewView;
     private final StackPane overlayLayer;
 
@@ -64,18 +67,22 @@ public class EditorView extends BorderPane {
         contentLayer.getStyleClass().add("center");
         contentLayer.getChildren().add(contentWrapper);
 
-        budgetTemplateView = new BudgetTemplateView();
+        this.budgetTemplateView = new BudgetTemplateView();
         budgetTemplateView.setMinWidth(800);
         budgetTemplateView.setMaxWidth(1740);
         budgetTemplateView.prefWidthProperty().bind(this.widthProperty().multiply(0.95));
-        transactionReviewView = new TransactionReviewView();
+        this.rulesView = new RuleView();
+        rulesView.setMinWidth(800);
+        rulesView.setMaxWidth(1740);
+        rulesView.prefWidthProperty().bind(this.widthProperty().multiply(0.95));
+        this.transactionReviewView = new TransactionReviewView();
         transactionReviewView.setMinWidth(800);
         transactionReviewView.setMaxWidth(1740);
         transactionReviewView.prefWidthProperty().bind(this.widthProperty().multiply(0.95));
-        VBox overlayWrapper = new VBox();
+        this.overlayWrapper = new VBox();
         overlayWrapper.setMaxWidth(USE_PREF_SIZE); // to negate automatic stretching to full-width of panes by BorderPane
         overlayWrapper.setAlignment(Pos.TOP_CENTER);
-        overlayWrapper.getChildren().add(transactionReviewView);
+        overlayWrapper.getChildren().add(rulesView);
         this.overlayLayer = new StackPane();
         overlayLayer.getStyleClass().add("overlay");
         overlayLayer.setVisible(false);
@@ -112,6 +119,14 @@ public class EditorView extends BorderPane {
         return budgetView;
     }
 
+    public RuleView rulesView() {
+        return rulesView;
+    }
+
+    public BudgetTemplateView budgetTemplateView() {
+        return budgetTemplateView;
+    }
+
     public TransactionReviewView transactionReviewView() {
         return transactionReviewView;
     }
@@ -121,31 +136,44 @@ public class EditorView extends BorderPane {
     }
 
     public void showAccountsView() {
-        switchViewTo(accountsView);
+        switchContentTo(accountsView);
     }
 
     public void showBudgetView() {
-        switchViewTo(budgetView);
+        switchContentTo(budgetView);
     }
 
     public void showBudgetTemplateView() {
-
-    }
-
-    public void showTransactionReview() {
+        switchOverlayTo(budgetTemplateView);
         overlayLayer.setVisible(true);
     }
 
-    public void hideTransactionReview() {
+    public void showRulesView() {
+        switchOverlayTo(rulesView);
+        overlayLayer.setVisible(true);
+    }
+
+    public void showTransactionReview() {
+        switchOverlayTo(transactionReviewView);
+        overlayLayer.setVisible(true);
+    }
+
+    public void hideOverlay() {
         overlayLayer.setVisible(false);
     }
 
-    private void switchViewTo(Node view) {
+    private void switchContentTo(Node view) {
         if (contentWrapper.getChildren().contains(view)) {
             return;
         }
-        contentWrapper.getChildren().clear();
-        contentWrapper.getChildren().add(view);
+        contentWrapper.getChildren().setAll(view);
+    }
+
+    private void switchOverlayTo(Node view) {
+        if (overlayWrapper.getChildren().contains(view)) {
+            return;
+        }
+        overlayWrapper.getChildren().setAll(view);
     }
 
     // Menu bar
@@ -154,6 +182,7 @@ public class EditorView extends BorderPane {
     private MenuItem accounts;
     private MenuItem budget;
     private MenuItem budgetTemplate;
+    private MenuItem rules;
 
     private MenuBar createMenuBar() {
 
@@ -169,8 +198,9 @@ public class EditorView extends BorderPane {
         this.accounts = new MenuItem("Transactions");
         this.budget = new MenuItem("Budget");
         this.budgetTemplate = new MenuItem("Budget Template");
+        this.rules = new MenuItem("Categorization Rules");
 
-        viewMenu.getItems().addAll(accounts, budget);
+        viewMenu.getItems().addAll(accounts, budget, budgetTemplate, rules);
 
         // Root menu bar
         MenuBar menuBar = new MenuBar();
@@ -194,9 +224,13 @@ public class EditorView extends BorderPane {
     public MenuItem menuItemBudget() {
         return budget;
     }
-
+    
     public MenuItem menuItemBudgetTemplate() {
         return budgetTemplate;
+    }
+    
+    public MenuItem menuItemRules() {
+        return rules;
     }
 
     private void buildBudgetSettingsView() {

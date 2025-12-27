@@ -71,7 +71,7 @@ public class Notes {
     //      Category transactions - inspect when clicking on category
     //      Category transactions - change in inspection mode and enable (virtual) save
     //      Support opening account balance
-    //      Change category rules to only label when null
+    //      DONE Change category rules to only label when null
     
     // Transactions
     //      DONE Simplified categorization rules
@@ -80,14 +80,29 @@ public class Notes {
     //      DONE After editing completed by pressing enter, select next cell
     //      DONE Start editing when user starts typing on keyboard
 
-    
-    
     // General
     //      DONE Save on another thread
     //      DONE Notifications (saving, integrity check, csvs loaded, ...)
     //      Undo / Redo
-    //      Budget Settings view
-    //          
+    
+    // Rules
+    //      Add dynamic rules e.g. to rename
+    //      Apply rules again
+    //      Reload rules
+    
+    // Budget Settings view
+    //      improve UX Choice Box editing
+    //      DONE Styling
+    //      DONE opening/switching overlay
+    //      saving
+    //      First of month
+    //      add row
+    //      remove row
+    
+    // Rules View
+    //      
+
+    
     
     // Thoughts
     //      BudgetMonth: should Adjustments, Budgeted and Variance also be streamed from control categories? does it hurt? it makes method pattern consistent with others

@@ -108,7 +108,8 @@
 
 }
 
-.transaction-review {
+/* transaction review and settings */
+.overlay-modal {
     -fx-padding: 20 0 20 0;
     -fx-background-color: white;
     -fx-background-radius: 10;

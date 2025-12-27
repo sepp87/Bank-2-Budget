@@ -4,7 +4,7 @@ import bank2budget.app.report.BudgetReportRow;
 import bank2budget.app.report.CategoryRow;
 import bank2budget.app.report.SectionRow;
 import bank2budget.app.report.TotalRow;
-import bank2budget.ui.TableViewUtil;
+import bank2budget.ui.tableview.TableColumnUtil;
 import java.math.BigDecimal;
 import java.util.function.BiConsumer;
 import javafx.scene.control.TableColumn;
@@ -40,7 +40,7 @@ public class BudgetedVsActualView extends BudgetReportView {
     }
 
     private TableColumn<BudgetReportRow, String> categoryColumn() {
-        return TableViewUtil.buildColumn(
+        return TableColumnUtil.buildColumn(
                 "Category",
                 row -> switch (row) {
             case SectionRow s ->
@@ -61,7 +61,7 @@ public class BudgetedVsActualView extends BudgetReportView {
 
     private TableColumn<BudgetReportRow, BigDecimal> budgetedColumn() {
 
-        return TableViewUtil.buildEditableAmountColumn("Budgeted",
+        return TableColumnUtil.buildEditableAmountColumn("Budgeted",
                 row -> switch (row) {
             case CategoryRow c ->
                 c.budgeted();
@@ -75,13 +75,13 @@ public class BudgetedVsActualView extends BudgetReportView {
                         budgetedEditHandler.accept(c, value);
                     }
                 },
-                TableViewUtil.bigDecimalConverter(), 
+                
                 this::requestFocus
         );
     }
 
     private TableColumn<BudgetReportRow, BigDecimal> actualColumn() {
-        return TableViewUtil.buildAmountColumn(
+        return TableColumnUtil.buildAmountColumn(
                 "Actual",
                 row -> (row instanceof CategoryRow c)
                         ? c.actual()
@@ -90,7 +90,7 @@ public class BudgetedVsActualView extends BudgetReportView {
     }
 
     private TableColumn<BudgetReportRow, BigDecimal> varianceColumn() {
-        return TableViewUtil.buildAmountColumn(
+        return TableColumnUtil.buildAmountColumn(
                 "Remaining",
                 row -> switch (row) {
             case CategoryRow c ->

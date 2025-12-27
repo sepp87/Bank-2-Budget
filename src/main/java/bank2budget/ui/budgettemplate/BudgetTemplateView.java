@@ -1,6 +1,5 @@
 package bank2budget.ui.budgettemplate;
 
-import bank2budget.ui.transaction.TransactionTableView;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,6 +14,7 @@ import javafx.scene.layout.VBox;
  */
 public class BudgetTemplateView extends VBox {
 
+    private Spinner<Integer> firstSpinner;
     private final BudgetTemplateTableView budgetTemplateTableView;
     private final Button cancelButton;
     private final Button finishButton;
@@ -24,9 +24,10 @@ public class BudgetTemplateView extends VBox {
         this.cancelButton = new Button("Cancel");
         HBox controls = new HBox(finishButton, cancelButton);
         controls.setAlignment(Pos.CENTER_RIGHT);
-        
+
         Label firstLabel = new Label("First of Month:");
-        Spinner<Integer> firstSpinner = new Spinner<>();
+        this.firstSpinner = new Spinner<>(1, 28, 1);
+        firstSpinner.setEditable(true);
         HBox firstRoot = new HBox(firstLabel, firstSpinner);
 
         this.budgetTemplateTableView = new BudgetTemplateTableView();
@@ -34,7 +35,7 @@ public class BudgetTemplateView extends VBox {
         VBox.setVgrow(this, Priority.ALWAYS);
 
         this.getChildren().addAll(controls, firstRoot, budgetTemplateTableView);
-        this.getStyleClass().add("budget-template");
+        this.getStyleClass().add("overlay-modal");
 
     }
 
@@ -42,12 +43,15 @@ public class BudgetTemplateView extends VBox {
         return budgetTemplateTableView;
     }
 
-
     public Button getFinishButton() {
         return finishButton;
     }
 
     public Button getCancelButton() {
         return cancelButton;
+    }
+    
+    public void setFirstOfMonth(int first) {
+        firstSpinner.getValueFactory().setValue(first);
     }
 }
