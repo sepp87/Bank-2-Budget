@@ -34,12 +34,12 @@ public class Config {
     public Map<String, String> otherAccounts() {
         return otherAccounts;
     }
-
-    public List<RuleConfig> ruleConfigs() {
-        return ruleConfigs;
-    }
-    
-    public BudgetTemplate budgetTemplate() {
-        return budgetTemplate;
-    }
+//
+//    public List<RuleConfig> ruleConfigs() {
+//        return ruleConfigs;
+//    }
+//    
+//    public BudgetTemplate budgetTemplate() {
+//        return budgetTemplate;
+//    }
 }

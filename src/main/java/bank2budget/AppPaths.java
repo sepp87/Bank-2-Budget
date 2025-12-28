@@ -127,9 +127,6 @@ public final class AppPaths {
         return resolve(DONE_DIRECTORY, "budget.xlsx");
     }
 
-    public Path getBudgetFileNew() {
-        return resolve(DONE_DIRECTORY, "budget-new.xlsx");
-    }
 
     public Path getDatabaseFile() {
         return resolve("db", "bank-2-budget.db");

@@ -22,13 +22,13 @@ public class BudgetService {
     private final BudgetCalculator calculator;
     private final BudgetTemplate template;
 
-    public BudgetService(AccountService accountService, BudgetRepositoryPort<Budget> newRepo, BudgetCalculator calculator, BudgetTemplate template) {
+    public BudgetService(AccountService accountService, BudgetRepositoryPort<Budget> newRepo, BudgetCalculator calculator, BudgetTemplateService templateService) {
 
         this.accountService = accountService;
         this.newRepo = newRepo;
         this.newBudget = newRepo.load();
         this.calculator = calculator;
-        this.template = template;
+        this.template = templateService.getTemplate();
 
         List<BudgetMonth> created = calculator.create(template, newBudget, accountService.getAccounts());
         List<BudgetMonth> replaced = newBudget.replace(created);

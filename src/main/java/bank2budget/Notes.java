@@ -91,18 +91,21 @@ public class Notes {
     //      Reload rules
     
     // Budget Settings view
-    //      improve UX Choice Box editing
+    //      improve UX Choice Box editing (on hover and select)
     //      DONE Styling
     //      DONE opening/switching overlay
     //      saving
-    //      First of month
+    //      DONE First of month
     //      add row
     //      remove row
     
     // Rules View
     //      
 
-    
+    // WARNING
+    // AppPaths directly created in UI
+    // First of Month used as hardcoded value in AnalyticsExportService
+    // Template not reloaded dynamically in BudgetService for recalculate
     
     // Thoughts
     //      BudgetMonth: should Adjustments, Budgeted and Variance also be streamed from control categories? does it hurt? it makes method pattern consistent with others

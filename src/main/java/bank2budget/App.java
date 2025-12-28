@@ -4,20 +4,28 @@ import bank2budget.adapter.account.AccountImporter;
 import bank2budget.adapter.repository.AnalyticsDatabase;
 import bank2budget.adapter.config.ConfigReader;
 import bank2budget.adapter.account.AccountReader;
-import bank2budget.core.rule.RuleFactory;
 import bank2budget.adapter.account.AccountXlsxRepository;
 import bank2budget.adapter.budget.BudgetRepository;
 import bank2budget.adapter.account.AccountWriter;
 import bank2budget.adapter.budget.BudgetReader;
+import bank2budget.adapter.budget.BudgetTemplateReader;
+import bank2budget.adapter.budget.BudgetTemplateRepository;
+import bank2budget.adapter.budget.BudgetTemplateWriter;
 import bank2budget.adapter.budget.BudgetWriter;
+import bank2budget.adapter.rule.RuleReader;
+import bank2budget.adapter.rule.RuleRepository;
+import bank2budget.adapter.rule.RuleWriter;
 import bank2budget.app.AccountService;
 import bank2budget.app.AnalyticsExportService;
 import bank2budget.app.BudgetReportService;
 import bank2budget.app.BudgetService;
+import bank2budget.app.BudgetTemplateService;
 import bank2budget.core.Config;
 import bank2budget.app.CsvCleanupService;
 import bank2budget.app.NoOpAnalyticsExportService;
+import bank2budget.app.RuleService;
 import bank2budget.app.report.BudgetReportAssembler;
+import bank2budget.core.CashTransaction;
 import bank2budget.core.budget.BudgetCalculator;
 import bank2budget.core.rule.RuleEngine;
 import bank2budget.ports.AnalyticsExportPort;
@@ -38,36 +46,42 @@ public class App {
     private final AnalyticsExportPort analyticsExportService;
     private final BudgetService budgetService;
     private final BudgetReportService budgetReportService;
+    private final RuleService ruleService;
 
     public App(AppPaths paths, char decimalSeparatorChar, boolean useSqlite) {
         configureLogging();
 
         Config config = new ConfigReader(paths).getConfig();
 
+        var ruleReader = new RuleReader(paths.getCategorizationRulesFile());
+        var ruleWriter = new RuleWriter(paths.getCategorizationRulesFile());
+        var ruleRepository = new RuleRepository(ruleReader, ruleWriter);
+        var ruleEngine = new RuleEngine<CashTransaction>();
+        this.ruleService = new RuleService(ruleRepository, ruleEngine, config.myAccounts());
+
+        this.csvCleanupService = new CsvCleanupService(paths, ruleService, decimalSeparatorChar);
+
         var accountReader = new AccountReader(paths.getTransactionsFile());
         var accountWriter = new AccountWriter(paths.getTransactionsFile());
-        var analyticsDatabase = useSqlite ? new AnalyticsDatabase(paths.getDatabaseFile().toString(), config.budgetTemplate().firstOfMonth()) : null;
-        var systemRules = RuleFactory.createSystemRules(config.myAccounts());
-        var userRules = config.ruleConfigs().stream().map(RuleFactory::create).toList();
-        var ruleEngine = new RuleEngine<>(systemRules, userRules);
-
-        this.csvCleanupService = new CsvCleanupService(paths, ruleEngine, decimalSeparatorChar);
-
         var accountRepository = new AccountXlsxRepository(accountReader, accountWriter);
         var accountImporter = new AccountImporter(paths);
-        this.accountService = new AccountService(accountRepository, accountImporter, ruleEngine);
-
-        this.analyticsExportService = useSqlite ? new AnalyticsExportService(analyticsDatabase) : new NoOpAnalyticsExportService();
+        this.accountService = new AccountService(accountRepository, accountImporter, ruleService);
 
         var budgetReader = new BudgetReader(paths.getBudgetFile());
         var budgetWriter = new BudgetWriter(paths.getBudgetFile());
-        var newBudgetRepository = new BudgetRepository(budgetReader, budgetWriter);
+        var budgetRepository = new BudgetRepository(budgetReader, budgetWriter);
         var budgetCalculator = new BudgetCalculator();
-        this.budgetService = new BudgetService(accountService, newBudgetRepository, budgetCalculator, config.budgetTemplate());
-        
+        var templateReader = new BudgetTemplateReader(paths.getBudgetTemplateFile());
+        var templateWriter = new BudgetTemplateWriter(paths.getBudgetTemplateFile());
+        var templateRepository = new BudgetTemplateRepository(templateReader, templateWriter);
+        var templateService = new BudgetTemplateService(templateRepository);
+        this.budgetService = new BudgetService(accountService, budgetRepository, budgetCalculator, templateService);
+
         var budgetReportAssembler = new BudgetReportAssembler();
         this.budgetReportService = new BudgetReportService(budgetService, budgetReportAssembler);
-        
+
+        var analyticsDatabase = useSqlite ? new AnalyticsDatabase(paths.getDatabaseFile().toString(), templateService.getTemplate().firstOfMonth()) : null;
+        this.analyticsExportService = useSqlite ? new AnalyticsExportService(analyticsDatabase) : new NoOpAnalyticsExportService();
 
     }
 
@@ -113,9 +127,13 @@ public class App {
     public BudgetService getBudgetService() {
         return budgetService;
     }
-    
+
     public BudgetReportService getBudgetReportService() {
         return budgetReportService;
+    }
+
+    public RuleService getRuleService() {
+        return ruleService;
     }
 
 }

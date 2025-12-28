@@ -10,15 +10,17 @@ import java.util.stream.Stream;
  */
 public class RuleEngine<T> {
 
-    private final List<Rule<T>> rules;
-    private final List<Rule<T>> systemRules;
-    private final List<Rule<T>> userRules;
+    private final List<Rule<T>> systemRules = new ArrayList<>();
+    private final List<Rule<T>> userRules = new ArrayList<>();
 
+    public void setSystemRules(List<Rule<T>> rules) {
+        systemRules.clear();
+        systemRules.addAll(rules);
+    }
 
-    public RuleEngine(List<Rule<T>> systemRules, List<Rule<T>> userRules) {
-        this.systemRules = systemRules;
-        this.userRules = userRules;
-        this.rules = Stream.concat(systemRules.stream(), userRules.stream()).toList();
+    public void setUserRules(List<Rule<T>> rules) {
+        userRules.clear();
+        userRules.addAll(rules);
     }
 
     public List<T> applySystemRules(List<T> transactions) {
@@ -26,7 +28,11 @@ public class RuleEngine<T> {
     }
 
     public List<T> applyRules(List<T> transactions) {
-        return applyRules(rules, transactions);
+        return applyRules(rules(), transactions);
+    }
+
+    private List<Rule<T>> rules() {
+        return Stream.concat(systemRules.stream(), userRules.stream()).toList();
     }
 
     private List<T> applyRules(List<Rule<T>> rules, List<T> transactions) {

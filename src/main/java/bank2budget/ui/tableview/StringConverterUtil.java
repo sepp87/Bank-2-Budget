@@ -36,4 +36,31 @@ public class StringConverterUtil {
             }
         };
     }
+
+    public static StringConverter<Integer> integerConverter() {
+        return new StringConverter<Integer>() {
+            private Integer previous;
+
+            @Override
+            public String toString(Integer value) {
+                previous = value;
+                return value == null ? "1" : value.toString();
+            }
+
+            @Override
+            public Integer fromString(String value) {
+                if (value == null) {
+                    return previous;
+                }
+
+                value = value.trim();
+
+                if (value.matches("^[+-]?\\d+$")) {
+                    return Integer.valueOf(value);
+                }
+
+                return previous;
+            }
+        };
+    }
 }

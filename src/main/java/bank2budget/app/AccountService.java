@@ -24,13 +24,13 @@ public class AccountService {
 
     private final AccountRepositoryPort repository;
     private final AccountImporterPort importer;
-    private final RuleEngine<CashTransaction> ruleEngine;
+    private final RuleService ruleService;
     private Map<String, Account> accountsIndex;
 
-    public AccountService(AccountRepositoryPort repository, AccountImporterPort importer, RuleEngine<CashTransaction> ruleEngine) {
+    public AccountService(AccountRepositoryPort repository, AccountImporterPort importer, RuleService ruleService) {
         this.repository = repository;
         this.importer = importer;
-        this.ruleEngine = ruleEngine;
+        this.ruleService = ruleService;
         load();
     }
 
@@ -72,17 +72,9 @@ public class AccountService {
         merge(imported);
     }
 
-    private void applySystemRules(Collection<Account> accounts) {
-        for (Account account : accounts) {
-            var updated = ruleEngine.applySystemRules(account.transactionsAscending());
-            account.replace(updated);
-            System.out.println("Tx: " + account.transactionsAscending().size() + "\tupdatedTx: " + updated.size());
-        }
-    }
-
     private void applyRules(Collection<Account> accounts) {
         for (Account account : accounts) {
-            var updated = ruleEngine.applyRules(account.transactionsAscending());
+            var updated = ruleService.applyRules(account.transactionsAscending());
             account.replace(updated);
             System.out.println("Tx: " + account.transactionsAscending().size() + "\tupdatedTx: " + updated.size());
         }
