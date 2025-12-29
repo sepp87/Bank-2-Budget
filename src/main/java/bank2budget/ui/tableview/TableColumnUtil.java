@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
@@ -16,7 +16,6 @@ import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-import javafx.util.converter.DefaultStringConverter;
 import org.controlsfx.control.textfield.TextFields;
 
 /**
@@ -24,6 +23,12 @@ import org.controlsfx.control.textfield.TextFields;
  * @author joostmeulenkamp
  */
 public class TableColumnUtil {
+
+    public static <S> TableColumn<S, Void> buildRemoveButtonColumn() {
+        TableColumn<S, Void> column = new TableColumn<>("");
+        column.setCellFactory(removeButtonCellFactory());
+        return column;
+    }
 
     public static <S> TableColumn<S, BigDecimal> buildAmountColumn(String title, Function<S, BigDecimal> getter) {
         return buildColumn(title, getter, amountCellFactory());
@@ -67,12 +72,12 @@ public class TableColumnUtil {
 
     public static <S> TableColumn<S, BigDecimal> buildEditableAmountColumn(String title, Function<S, BigDecimal> getter, BiConsumer<S, BigDecimal> setter, Runnable afterEdit) {
         var converter = StringConverterUtil.bigDecimalConverter();
-        return buildEditableColumn(title, getter, setter, editableAmountCell(converter), afterEdit);
+        return buildEditableColumn(title, getter, setter, editableAmountCellFactory(converter), afterEdit);
     }
 
     public static <S, T> TableColumn<S, T> buildEditableChoiceColumn(String title, Function<S, T> getter, BiConsumer<S, T> setter, ObservableList<T> values, Runnable afterEdit) {
         Callback<TableColumn<S, T>, TableCell<S, T>> choiceCellFactory = tc -> new ChoiceBoxTableCell<>(values);
-       return buildEditableColumn(title, getter, setter, choiceCellFactory, afterEdit);
+        return buildEditableColumn(title, getter, setter, choiceCellFactory, afterEdit);
     }
 
     private static <S, T> TableColumn<S, T> buildEditableColumn(String title, Function<S, T> getter, BiConsumer<S, T> setter, Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory, Runnable afterEdit) {
@@ -94,7 +99,33 @@ public class TableColumnUtil {
         return col;
     }
 
-    private static <S> Callback<TableColumn<S, BigDecimal>, TableCell<S, BigDecimal>> editableAmountCell(StringConverter<BigDecimal> converter) {
+    private static <S> Callback<TableColumn<S, Void>, TableCell<S, Void>> removeButtonCellFactory() {
+        return col -> new TableCell<>() {
+            private final Button button = new Button("✕");
+
+            {
+                button.getStyleClass().add("remove-row-button");
+
+                button.setOnAction(e -> {
+                    S item = getTableView().getItems().get(getIndex());
+                    getTableView().getItems().remove(item);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(button);
+                }
+            }
+        };
+    }
+
+    private static <S> Callback<TableColumn<S, BigDecimal>, TableCell<S, BigDecimal>> editableAmountCellFactory(StringConverter<BigDecimal> converter) {
         return col -> new TextFieldTableCell<>(converter) {
             @Override
             public void updateItem(BigDecimal value, boolean empty) {
@@ -127,7 +158,7 @@ public class TableColumnUtil {
             String title,
             Function<S, String> getter,
             BiConsumer<S, String> setter,
-            List<String> suggestions,
+            ObservableList<String> suggestions,
             Runnable afterEdit
     ) {
         TableColumn<S, String> col = new TableColumn<>(title);
@@ -158,8 +189,17 @@ public class TableColumnUtil {
                         && !editor.getProperties().containsKey("autocomplete")) {
 
                     // Attach ControlsFX autocompletion
-                    TextFields.bindAutoCompletion(editor, suggestions);
-                    editor.getProperties().put("autocomplete", true);
+//                    TextFields.bindAutoCompletion(editor, suggestions);
+//                    editor.getProperties().put("autocomplete", true);
+
+                    var binding = TextFields.bindAutoCompletion(
+                            editor,
+                            request -> suggestions.filtered(s -> s.toLowerCase().contains(request.getUserText().toLowerCase())
+                            ));
+
+                    editor.getProperties().put("autocomplete", binding);
+                    
+
                 }
             }
         });

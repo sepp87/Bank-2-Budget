@@ -8,9 +8,11 @@ import bank2budget.core.rule.RuleConfig;
  */
 public class EditableRuleConfig {
 
+    private RuleConfig initialValue;
     private RuleConfig domain;
 
     public EditableRuleConfig(RuleConfig ruleConfig) {
+        this.initialValue = ruleConfig;
         this.domain = ruleConfig;
     }
 
@@ -44,6 +46,10 @@ public class EditableRuleConfig {
 
     public void setCheckValue(String value) {
         domain = domain.withCheckValue(value);
+    }
+    
+    public boolean isEdited() {
+        return initialValue != domain;
     }
 
 }

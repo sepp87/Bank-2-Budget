@@ -21,5 +21,4 @@ public record RuleConfig(
     public RuleConfig withResultValue(String updated) {
         return new RuleConfig(checkField, checkValue, resultField, updated);
     }
-
 }

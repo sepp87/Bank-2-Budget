@@ -51,7 +51,7 @@ public class App {
     public App(AppPaths paths, char decimalSeparatorChar, boolean useSqlite) {
         configureLogging();
 
-        Config config = new ConfigReader(paths).getConfig();
+        Config config = new ConfigReader(paths).read();
 
         var ruleReader = new RuleReader(paths.getCategorizationRulesFile());
         var ruleWriter = new RuleWriter(paths.getCategorizationRulesFile());

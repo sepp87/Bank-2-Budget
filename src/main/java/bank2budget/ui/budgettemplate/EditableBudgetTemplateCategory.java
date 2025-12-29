@@ -10,9 +10,11 @@ import java.math.BigDecimal;
  */
 public class EditableBudgetTemplateCategory {
 
+    private BudgetTemplateCategory initialValue;
     private BudgetTemplateCategory domain;
 
     public EditableBudgetTemplateCategory(BudgetTemplateCategory category) {
+        this.initialValue = category;
         this.domain = category;
     }
 
@@ -42,5 +44,9 @@ public class EditableBudgetTemplateCategory {
 
     public void setBudgeted(BigDecimal budgeted) {
         domain = domain.withBudgeted(budgeted);
+    }
+    
+    public boolean isEdited() {
+        return initialValue != domain;
     }
 }

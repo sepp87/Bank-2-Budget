@@ -48,7 +48,7 @@ public class TableConfigurator<S> {
         return column;
     }
 
-    public TableColumn<S, String> addEditableTextColumWithAutocomplete(String title, Function<S, String> getter, BiConsumer<S, String> setter, List<String> values) {
+    public TableColumn<S, String> addEditableTextColumWithAutocomplete(String title, Function<S, String> getter, BiConsumer<S, String> setter, ObservableList<String> values) {
         var column = TableColumnUtil.buildAutoCompleteColumn(title, getter, setter, values, table::requestFocus);
         table.getColumns().add(column);
         return column;
@@ -62,6 +62,12 @@ public class TableConfigurator<S> {
 
     public <T> TableColumn<S, T> addEditableChoiceColumn(String title, Function<S, T> getter, BiConsumer<S, T> setter, ObservableList<T> values) {
         var column = TableColumnUtil.buildEditableChoiceColumn(title, getter, setter, values, table::requestFocus);
+        table.getColumns().add(column);
+        return column;
+    }
+
+    public TableColumn<S, Void> addRemoveButtonColumn() {
+        TableColumn<S, Void> column = TableColumnUtil.buildRemoveButtonColumn();
         table.getColumns().add(column);
         return column;
     }

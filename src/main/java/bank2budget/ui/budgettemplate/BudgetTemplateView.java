@@ -1,5 +1,8 @@
 package bank2budget.ui.budgettemplate;
 
+import bank2budget.core.budget.BudgetTemplateCategory;
+import static bank2budget.core.budget.BudgetTemplateCategory.EntryType.EXPENSE;
+import java.math.BigDecimal;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -20,6 +23,7 @@ public class BudgetTemplateView extends VBox {
     private final BudgetTemplateTableView budgetTemplateTableView;
     private final Button cancelButton;
     private final Button finishButton;
+    private final Button addCategoryButton;
 
     public BudgetTemplateView() {
         this.finishButton = new Button("Finish");
@@ -32,12 +36,24 @@ public class BudgetTemplateView extends VBox {
         HBox firstRoot = new HBox(firstLabel, firstOfMonthSpinner);
         firstRoot.setAlignment(Pos.CENTER_LEFT);
 
+        this.addCategoryButton = new Button("Add category");
+
         this.budgetTemplateTableView = new BudgetTemplateTableView();
         VBox.setVgrow(budgetTemplateTableView, Priority.ALWAYS);
         VBox.setVgrow(this, Priority.ALWAYS);
 
-        this.getChildren().addAll(controls, firstRoot, budgetTemplateTableView);
+        this.getChildren().addAll(controls, firstRoot, addCategoryButton, budgetTemplateTableView);
         this.getStyleClass().add("overlay-modal");
+
+        addCategoryButton.setOnAction(e -> {
+            budgetTemplateTableView.requestFocus();
+            var row = new EditableBudgetTemplateCategory(new BudgetTemplateCategory(EXPENSE, "", BigDecimal.ZERO));
+            budgetTemplateTableView.getItems().add(row);
+            var index = budgetTemplateTableView.getItems().indexOf(row);
+            budgetTemplateTableView.getSelectionModel().clearAndSelect(index, budgetTemplateTableView.getNameColumn());
+            budgetTemplateTableView.edit(index, budgetTemplateTableView.getNameColumn());
+            budgetTemplateTableView.scrollTo(row);
+        });
 
     }
 

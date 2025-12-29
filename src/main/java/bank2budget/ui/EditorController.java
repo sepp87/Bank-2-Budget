@@ -46,12 +46,7 @@ public class EditorController {
         this.budgetController = new BudgetController(view.budgetView(), app);
 
         this.budgetTemplateController = new BudgetTemplateController(view.budgetTemplateView());
-        var categories = app.getBudgetService().getBudgetTemplate().operatingCategories().values().stream().map(EditableBudgetTemplateCategory::new).toList();
-        budgetTemplateController.setFirstOfMonth(app.getBudgetService().getBudgetTemplate().firstOfMonth());
-        budgetTemplateController.load(categories);
         this.rulesController = new RuleController(view.rulesView());
-        var rules = new RuleReader(new AppPaths().getCategorizationRulesFile()).read().stream().map(EditableRuleConfig::new).toList();
-        rulesController.load(rules);
         this.transactionReviewController = new TransactionReviewController(view.transactionReviewView());
 
         // File menu - event handlers
@@ -61,8 +56,18 @@ public class EditorController {
         // View menu - event handlers
         view.menuItemAccounts().setOnAction((e) -> view.showAccountsView());
         view.menuItemBudget().setOnAction((e) -> view.showBudgetView());
-        view.menuItemBudgetTemplate().setOnAction((e) -> view.showBudgetTemplateView());
-        view.menuItemRules().setOnAction((e) -> view.showRulesView());
+        view.menuItemBudgetTemplate().setOnAction((e) -> {
+            var categories = app.getBudgetService().getBudgetTemplate().operatingCategories().values().stream().map(EditableBudgetTemplateCategory::new).toList();
+            budgetTemplateController.setFirstOfMonth(app.getBudgetService().getBudgetTemplate().firstOfMonth());
+            budgetTemplateController.load(categories);
+            view.showBudgetTemplateView();
+        });
+        AppPaths paths = new AppPaths();
+        view.menuItemRules().setOnAction((e) -> {
+            var rules = new RuleReader(paths.getCategorizationRulesFile()).read().stream().map(EditableRuleConfig::new).toList();
+            rulesController.load(rules);
+            view.showRulesView();
+        });
 
         // Budget - event handler
         budgetController.setOnReviewTransactions((e) -> startTransactionReview());
@@ -75,6 +80,7 @@ public class EditorController {
         transactionReviewController.setOnFinished((e) -> finishTransactionReview());
         transactionReviewController.setOnCanceled((e) -> closeOverlayModal());
 
+        view.menuItemRules().fire();
     }
 
     private void startTransactionReview() {

@@ -17,14 +17,10 @@ public class Config {
 
     private Map<String, String> myAccounts;
     private Map<String, String> otherAccounts;
-    private List<RuleConfig> ruleConfigs;
-    private BudgetTemplate budgetTemplate;
 
-    public Config(Map<String, String> myAccounts, Map<String, String> otherAccounts, List<RuleConfig> ruleConfigs, BudgetTemplate budgetTemplate) {
+    public Config(Map<String, String> myAccounts, Map<String, String> otherAccounts) {
         this.myAccounts = myAccounts;
         this.otherAccounts = otherAccounts;
-        this.ruleConfigs = ruleConfigs;
-        this.budgetTemplate = budgetTemplate;
     }
 
     public Map<String, String> myAccounts() {
@@ -34,12 +30,5 @@ public class Config {
     public Map<String, String> otherAccounts() {
         return otherAccounts;
     }
-//
-//    public List<RuleConfig> ruleConfigs() {
-//        return ruleConfigs;
-//    }
-//    
-//    public BudgetTemplate budgetTemplate() {
-//        return budgetTemplate;
-//    }
+
 }
