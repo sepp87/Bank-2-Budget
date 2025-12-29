@@ -16,6 +16,11 @@ public class EditableRuleConfig {
         this.domain = ruleConfig;
     }
 
+    // GETTERS
+    public RuleConfig toDomain() {
+        return domain;
+    }
+    
     public String resultValue() {
         return domain.resultValue();
     }
@@ -36,6 +41,7 @@ public class EditableRuleConfig {
         return domain.checkValue();
     }
 
+    // SETTERS
     public void setResultValue(String category) {
         domain = domain.withResultValue(category);
     }

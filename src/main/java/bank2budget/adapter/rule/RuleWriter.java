@@ -30,11 +30,11 @@ public class RuleWriter {
         var size = sorted.size();
         for (int i = 0; i < size; i++) {
             var rule = sorted.get(i);
-            String category = Util.padWithTabs("category;", 3);
-            String name = Util.padWithTabs(rule.resultValue(), 5);
-            String when = Util.padWithTabs("when;", 2);
-            String field = Util.padWithTabs(rule.checkField(), 5);
-            String contains = Util.padWithTabs("contains;", 3);
+            String category = Util.padWithTabs("category;", 2, false);
+            String name = Util.padWithTabs(rule.resultValue() + ";", 3, false);
+            String when = Util.padWithTabs("when;", 1, false);
+            String field = Util.padWithTabs(rule.checkField() + ";", 3, false);
+            String contains = Util.padWithTabs("contains;", 2, false);
             String value = rule.checkValue();
             String entry = category + name + when + field + contains + value;
             result.add(entry);

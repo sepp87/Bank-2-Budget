@@ -24,6 +24,7 @@ public class TableViewShortcutSupport {
                     TableViewClipboardSupport.copySelectionToClipboard(view);
                 }
                 break;
+
             case V:
                 if (isModifierDown) {
                     // paste value to selected cells
@@ -34,7 +35,10 @@ public class TableViewShortcutSupport {
             case ENTER:
                 // select next cell
                 TableViewNavigationSupport.onEnterPressed(view);
+                break;
 
+            case TAB:
+                TableViewNavigationSupport.onTabPressed(view);
                 break;
         }
     }

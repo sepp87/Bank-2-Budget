@@ -17,18 +17,25 @@ public class RuleService {
 
     private final RuleRepositoryPort repository;
     private final RuleEngine<CashTransaction> engine;
-    private final List<RuleConfig> rules;
+    private List<RuleConfig> rules;
     private final Map<String, String> myAccounts;
+    private boolean hasChanges = false;
 
     public RuleService(RuleRepositoryPort repository, RuleEngine<CashTransaction> engine, Map<String, String> myAccounts) {
         this.repository = repository;
         this.engine = engine;
         this.rules = new ArrayList<>(repository.load());
         this.myAccounts = myAccounts;
-        setRules();
+        setRulesToEngine();
     }
 
-    private void setRules() {
+    public void setRules(List<RuleConfig> newRules) {
+        hasChanges = true;
+        this.rules = List.copyOf(newRules);
+        setRulesToEngine();
+    }
+
+    private void setRulesToEngine() {
         var systemRules = RuleFactory.createSystemRules(myAccounts);
         var userRules = rules.stream().map(RuleFactory::create).toList();
         engine.setSystemRules(systemRules);
@@ -44,7 +51,9 @@ public class RuleService {
     }
 
     public void save() {
-        repository.save(rules);
+        if (hasChanges) {
+            repository.save(rules);
+        }
     }
 
 }

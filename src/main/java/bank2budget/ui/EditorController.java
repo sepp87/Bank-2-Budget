@@ -1,12 +1,9 @@
 package bank2budget.ui;
 
 import bank2budget.App;
-import bank2budget.AppPaths;
-import bank2budget.adapter.rule.RuleReader;
 import bank2budget.core.CashTransaction;
 import bank2budget.core.CashTransactionDomainLogic;
 import bank2budget.ui.budgettemplate.BudgetTemplateController;
-import bank2budget.ui.budgettemplate.EditableBudgetTemplateCategory;
 import bank2budget.ui.dashboard.BudgetController;
 import bank2budget.ui.rules.EditableRuleConfig;
 import bank2budget.ui.rules.RuleController;
@@ -35,7 +32,7 @@ public class EditorController {
     private final MultiAccountController accountsController;
     private final BudgetController budgetController;
     private final BudgetTemplateController budgetTemplateController;
-    private final RuleController rulesController;
+    private final RuleController ruleController;
     private final TransactionReviewController transactionReviewController;
 
     public EditorController(EditorView editorView, App app) throws IOException {
@@ -45,8 +42,8 @@ public class EditorController {
         this.accountsController = new MultiAccountController(view.accountsView(), app.getAccountService());
         this.budgetController = new BudgetController(view.budgetView(), app);
 
-        this.budgetTemplateController = new BudgetTemplateController(view.budgetTemplateView());
-        this.rulesController = new RuleController(view.rulesView());
+        this.budgetTemplateController = new BudgetTemplateController(view.budgetTemplateView(), app.getTemplateService());
+        this.ruleController = new RuleController(view.rulesView(), app.getRuleService());
         this.transactionReviewController = new TransactionReviewController(view.transactionReviewView());
 
         // File menu - event handlers
@@ -57,15 +54,12 @@ public class EditorController {
         view.menuItemAccounts().setOnAction((e) -> view.showAccountsView());
         view.menuItemBudget().setOnAction((e) -> view.showBudgetView());
         view.menuItemBudgetTemplate().setOnAction((e) -> {
-            var categories = app.getBudgetService().getBudgetTemplate().operatingCategories().values().stream().map(EditableBudgetTemplateCategory::new).toList();
-            budgetTemplateController.setFirstOfMonth(app.getBudgetService().getBudgetTemplate().firstOfMonth());
-            budgetTemplateController.load(categories);
+            budgetTemplateController.reload();
             view.showBudgetTemplateView();
         });
-        AppPaths paths = new AppPaths();
         view.menuItemRules().setOnAction((e) -> {
-            var rules = new RuleReader(paths.getCategorizationRulesFile()).read().stream().map(EditableRuleConfig::new).toList();
-            rulesController.load(rules);
+            var rules = app.getRuleService().getRules().stream().map(EditableRuleConfig::new).toList();
+            ruleController.load(rules);
             view.showRulesView();
         });
 
@@ -74,9 +68,9 @@ public class EditorController {
 
         // Modal menu - event handlers
         budgetTemplateController.setOnCanceled((e) -> closeOverlayModal());
-        budgetTemplateController.setOnFinished((e) -> closeOverlayModal());
-        rulesController.setOnCanceled((e) -> closeOverlayModal());
-        rulesController.setOnFinished((e) -> closeOverlayModal());
+        budgetTemplateController.setOnFinished((e) -> finishBudgetTemplateEdit());
+        ruleController.setOnCanceled((e) -> closeOverlayModal());
+        ruleController.setOnFinished((e) -> finishRuleEdit());
         transactionReviewController.setOnFinished((e) -> finishTransactionReview());
         transactionReviewController.setOnCanceled((e) -> closeOverlayModal());
 
@@ -88,18 +82,28 @@ public class EditorController {
         transactionReviewController.load(transactions);
         view.showTransactionReview();
     }
+    
+    private void finishBudgetTemplateEdit() {
+        budgetTemplateController.commitChanges();
+        closeOverlayModal();
+    }
+    
+    private void finishRuleEdit() {
+        ruleController.commitChanges();
+        closeOverlayModal();
+    }
 
     private void finishTransactionReview() {
         List<CashTransaction> transactions = transactionReviewController.transactions().stream().map(EditableCashTransaction::toDomain).toList();
         var grouped = CashTransactionDomainLogic.groupByAccountNumber(transactions);
-        for (var ac : app.getAccountService().getAccounts()) {
-            if (grouped.containsKey(ac.getAccountNumber())) {
-                ac.replace(grouped.get(ac.getAccountNumber()));
+        for (var account : app.getAccountService().getAccounts()) {
+            if (grouped.containsKey(account.getAccountNumber())) {
+                account.replace(grouped.get(account.getAccountNumber()));
             }
         }
         app.getBudgetService().recalculate();
         budgetController.reload();
-        view.hideOverlay();
+        closeOverlayModal();
 
     }
 
@@ -159,6 +163,10 @@ public class EditorController {
 //
 //                // save to db
 //                app.getAnalyticsExportService().exportBudget(app.getBudgetService().getBudget());
+
+                // save settings
+                app.getRuleService().save();
+                app.getTemplateService().save();
 
                 // show save finished
                 view.notificationView().showNotification("Save successful!");

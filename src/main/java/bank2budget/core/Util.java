@@ -184,4 +184,23 @@ public class Util {
         return result;
     }
 
+    public static String padWithTabs(String value, int tabs, boolean shortenLongerValues) {
+
+        // When value is null, set result to "null" otherwise convert value to string
+        String result = value == null ? "null" : value;
+
+        // When result is just as long or longer than available space, then shorten the result
+        if (shortenLongerValues && result.length() >= tabs * 8) {
+            result = result.substring(0, (tabs - 1) * 8 + 7);
+        }
+        int lengthToPad = tabs * 8 - result.length();
+        int padding = (int) Math.floor(lengthToPad / 8);
+        padding = lengthToPad % 8 == 0 ? padding - 1 : padding;
+        int i = 0;
+        while (i <= padding) {
+            result = result + "\t";
+            i++;
+        }
+        return result;
+    }
 }

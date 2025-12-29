@@ -1,5 +1,6 @@
 package bank2budget.ui.rules;
 
+import bank2budget.app.RuleService;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,12 +14,14 @@ import javafx.event.EventHandler;
 public class RuleController {
 
     private final RuleView view;
+    private final RuleService service;
 
-    public RuleController(RuleView rulesView) {
+    public RuleController(RuleView rulesView, RuleService ruleService) {
         this.view = rulesView;
+        this.service = ruleService;
     }
-    
-        public void load(List<EditableRuleConfig> rules) {
+
+    public void load(List<EditableRuleConfig> rules) {
         loadCategorySuggestions(rules);
         view.getRuleTable().getItems().setAll(rules);
         view.getRuleTable().sort();
@@ -32,16 +35,20 @@ public class RuleController {
         view.setCategorySuggestions(availableCategories);
     }
 
-
-    public List<EditableRuleConfig> rules() {
-        return List.copyOf(view.getRuleTable().getItems());
-    }
-
     public void setOnFinished(EventHandler<ActionEvent> eh) {
         view.getFinishButton().setOnAction(eh);
     }
 
     public void setOnCanceled(EventHandler<ActionEvent> eh) {
         view.getCancelButton().setOnAction(eh);
+    }
+
+    public void commitChanges() {
+        var rules = view.getRuleTable().getItems().stream().map(EditableRuleConfig::toDomain).toList();
+        var existing = service.getRules();
+
+        if (rules.size() != existing.size() || !rules.containsAll(existing)) {
+            service.setRules(rules);
+        }
     }
 }

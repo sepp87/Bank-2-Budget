@@ -46,6 +46,7 @@ public class App {
     private final AnalyticsExportPort analyticsExportService;
     private final BudgetService budgetService;
     private final BudgetReportService budgetReportService;
+    private final BudgetTemplateService templateService;
     private final RuleService ruleService;
 
     public App(AppPaths paths, char decimalSeparatorChar, boolean useSqlite) {
@@ -74,7 +75,7 @@ public class App {
         var templateReader = new BudgetTemplateReader(paths.getBudgetTemplateFile());
         var templateWriter = new BudgetTemplateWriter(paths.getBudgetTemplateFile());
         var templateRepository = new BudgetTemplateRepository(templateReader, templateWriter);
-        var templateService = new BudgetTemplateService(templateRepository);
+        this.templateService = new BudgetTemplateService(templateRepository);
         this.budgetService = new BudgetService(accountService, budgetRepository, budgetCalculator, templateService);
 
         var budgetReportAssembler = new BudgetReportAssembler();
@@ -130,6 +131,10 @@ public class App {
 
     public BudgetReportService getBudgetReportService() {
         return budgetReportService;
+    }
+
+    public BudgetTemplateService getTemplateService() {
+        return templateService;
     }
 
     public RuleService getRuleService() {

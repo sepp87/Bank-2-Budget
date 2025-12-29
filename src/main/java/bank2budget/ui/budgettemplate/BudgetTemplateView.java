@@ -99,4 +99,8 @@ public class BudgetTemplateView extends VBox {
     public void setFirstOfMonth(int first) {
         firstOfMonthSpinner.getValueFactory().setValue(first);
     }
+    
+    public int getFirstOfMonth() {
+        return firstOfMonthSpinner.getValue();
+    }
 }
