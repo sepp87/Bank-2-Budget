@@ -14,8 +14,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+import javafx.util.converter.DefaultStringConverter;
 import org.controlsfx.control.textfield.TextFields;
 
 /**
@@ -67,7 +70,9 @@ public class TableColumnUtil {
     }
 
     public static <S> TableColumn<S, String> buildEditableTextColumn(String title, Function<S, String> getter, BiConsumer<S, String> setter, Runnable afterEdit) {
-        return buildEditableColumn(title, getter, setter, TextFieldTableCell.forTableColumn(), afterEdit);
+//        return buildEditableColumn(title, getter, setter, TextFieldTableCell.forTableColumn(), afterEdit);
+        return buildEditableColumn(title, getter, setter, editableTextCellFactory(), afterEdit);
+
     }
 
     public static <S> TableColumn<S, BigDecimal> buildEditableAmountColumn(String title, Function<S, BigDecimal> getter, BiConsumer<S, BigDecimal> setter, Runnable afterEdit) {
@@ -125,8 +130,40 @@ public class TableColumnUtil {
         };
     }
 
+    private static <S> Callback<TableColumn<S, String>, TableCell<S, String>> editableTextCellFactory() {
+        return col -> new TextFieldTableCell<>(new DefaultStringConverter()) {
+
+            @Override
+            public void startEdit() {
+                super.startEdit();
+
+                if (getGraphic() instanceof TextField editor) {
+                    editor.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+                        if (e.getCode() == KeyCode.TAB) {
+                            commitEdit(editor.getText());
+                        }
+                    });
+                }
+            }
+        };
+    }
+
     private static <S> Callback<TableColumn<S, BigDecimal>, TableCell<S, BigDecimal>> editableAmountCellFactory(StringConverter<BigDecimal> converter) {
         return col -> new TextFieldTableCell<>(converter) {
+
+            @Override
+            public void startEdit() {
+                super.startEdit();
+
+                if (getGraphic() instanceof TextField editor) {
+                    editor.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+                        if (e.getCode() == KeyCode.TAB) {
+                            commitEdit(getConverter().fromString(editor.getText()));
+                        }
+                    });
+                }
+            }
+
             @Override
             public void updateItem(BigDecimal value, boolean empty) {
                 super.updateItem(value, empty);
@@ -188,17 +225,19 @@ public class TableColumnUtil {
                 if (getGraphic() instanceof TextField editor
                         && !editor.getProperties().containsKey("autocomplete")) {
 
-                    // Attach ControlsFX autocompletion
-//                    TextFields.bindAutoCompletion(editor, suggestions);
-//                    editor.getProperties().put("autocomplete", true);
+                    editor.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+                        if (e.getCode() == KeyCode.TAB) {
+                            commitEdit(editor.getText());
+                        }
+                    });
 
+                    // Attach ControlsFX autocompletion
                     var binding = TextFields.bindAutoCompletion(
                             editor,
                             request -> suggestions.filtered(s -> s.toLowerCase().contains(request.getUserText().toLowerCase())
                             ));
 
                     editor.getProperties().put("autocomplete", binding);
-                    
 
                 }
             }

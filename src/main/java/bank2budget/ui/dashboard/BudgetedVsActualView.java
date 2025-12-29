@@ -5,6 +5,7 @@ import bank2budget.app.report.CategoryRow;
 import bank2budget.app.report.SectionRow;
 import bank2budget.app.report.TotalRow;
 import bank2budget.ui.tableview.TableColumnUtil;
+import bank2budget.ui.tableview.TableConfigurator;
 import java.math.BigDecimal;
 import java.util.function.BiConsumer;
 import javafx.scene.control.TableColumn;
@@ -16,6 +17,8 @@ import javafx.scene.control.TableColumn;
 public class BudgetedVsActualView extends BudgetReportView {
 
     public BudgetedVsActualView() {
+
+        var configurator = new TableConfigurator<>(this);
 
         var categoryColumn = categoryColumn();
         var budgetedColumn = budgetedColumn();
@@ -37,6 +40,20 @@ public class BudgetedVsActualView extends BudgetReportView {
         budgetedColumn.setMaxWidth(80);
         actualColumn.setMaxWidth(80);
         varianceColumn.setMaxWidth(80);
+    }
+
+    private TableColumn<BudgetReportRow, String> categoryColumn(TableConfigurator<BudgetReportRow> configurator) {
+        return configurator.addColumn(
+                "Category",
+                row -> switch (row) {
+            case SectionRow s ->
+                s.label();
+            case CategoryRow c ->
+                c.name();
+            case TotalRow t ->
+                t.label();
+        }
+        );
     }
 
     private TableColumn<BudgetReportRow, String> categoryColumn() {
@@ -75,7 +92,6 @@ public class BudgetedVsActualView extends BudgetReportView {
                         budgetedEditHandler.accept(c, value);
                     }
                 },
-                
                 this::requestFocus
         );
     }

@@ -5,10 +5,10 @@ import bank2budget.app.report.CategoryRow;
 import bank2budget.app.report.SectionRow;
 import bank2budget.app.report.TotalRow;
 import bank2budget.ui.tableview.TableColumnUtil;
+import bank2budget.ui.tableview.TableConfigurator;
 import java.math.BigDecimal;
 import java.util.function.BiConsumer;
 import javafx.scene.control.TableColumn;
-import javafx.util.StringConverter;
 
 /**
  *
@@ -17,6 +17,8 @@ import javafx.util.StringConverter;
 public class ProfitAndLossView extends BudgetReportView {
 
     public ProfitAndLossView() {
+
+        var configurator = new TableConfigurator<>(this);
 
         var categoryColumn = categoryColumn();
 //        var unadjustedClosingColumn = unadjustedClosingColumn();

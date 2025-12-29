@@ -1,6 +1,7 @@
 package bank2budget.ui.tableview;
 
 import bank2budget.ui.platform.ModifierKey;
+import javafx.application.Platform;
 import javafx.scene.control.TableView;
 import static javafx.scene.input.KeyCode.C;
 import static javafx.scene.input.KeyCode.ENTER;
@@ -38,8 +39,13 @@ public class TableViewShortcutSupport {
                 break;
 
             case TAB:
-                TableViewNavigationSupport.onTabPressed(view);
+                Platform.runLater(() -> {
+                    TableViewNavigationSupport.onTabPressed(view);
+                    event.consume();
+
+                });
                 break;
         }
+
     }
 }
