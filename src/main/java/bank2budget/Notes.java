@@ -67,18 +67,21 @@ public class Notes {
     //      DONE Adjustments - from and to XLSX
     //      DONE TableView instead of GridPanes
     //      DONE Balance Ratio - Pie Chart for balance per account 
+    //      DONE Change category rules to only label when null
     //      Budgeted - enable changing the budgeted value and saving it to settings
     //      Category transactions - inspect when clicking on category
     //      Category transactions - change in inspection mode and enable (virtual) save
     //      Support opening account balance
-    //      DONE Change category rules to only label when null
+    //      On accounts updated > recalculate budget
+    //      On budget recalculated > reload budget view
     
     // Transactions
     //      DONE Simplified categorization rules
-    //      Virtual save - when editing categories and recalculate budget accordingly
     //      DONE After editing category manual, regain focus on table view instead of tabs
     //      DONE After editing completed by pressing enter, select next cell
     //      DONE Start editing when user starts typing on keyboard
+    //      Virtual save - when editing categories and recalculate budget accordingly
+
 
     // General
     //      DONE Save on another thread
@@ -86,24 +89,25 @@ public class Notes {
     //      Undo / Redo
     
     // Rules
+    //      DONE Rules View
     //      Add dynamic rules e.g. to rename
     //      Apply rules again
     //      Reload rules
     
     // Budget Settings view
-    //      improve UX Choice Box editing (on hover and select)
     //      DONE Styling
     //      DONE opening/switching overlay
-    //      saving
+    //      DONE saving
     //      DONE First of month
-    //      add row
-    //      remove row
+    //      DONE add row
+    //      DONE remove row
+    //      improve UX Choice Box editing (on hover and select)
+    //      On missing settings follow wizard
     
-    // Rules View
-    //      
+    // 
+  
 
     // WARNING
-    // AppPaths directly created in UI
     // First of Month used as hardcoded value in AnalyticsExportService
     // Template not reloaded dynamically in BudgetService for recalculate
     

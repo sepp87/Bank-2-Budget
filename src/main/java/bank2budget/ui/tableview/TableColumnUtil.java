@@ -29,7 +29,7 @@ public class TableColumnUtil {
 
     public static <S> TableColumn<S, Void> buildRemoveButtonColumn() {
         TableColumn<S, Void> column = new TableColumn<>("");
-        column.setCellFactory(removeButtonCellFactory());
+        column.setCellFactory(CellFactoryUtil.removeButtonCellFactory());
         return column;
     }
 
@@ -71,18 +71,20 @@ public class TableColumnUtil {
 
     public static <S> TableColumn<S, String> buildEditableTextColumn(String title, Function<S, String> getter, BiConsumer<S, String> setter, Runnable afterEdit) {
 //        return buildEditableColumn(title, getter, setter, TextFieldTableCell.forTableColumn(), afterEdit);
-        return buildEditableColumn(title, getter, setter, editableTextCellFactory(), afterEdit);
+        return buildEditableColumn(title, getter, setter, CellFactoryUtil.editableTextCellFactory(), afterEdit);
 
     }
 
     public static <S> TableColumn<S, BigDecimal> buildEditableAmountColumn(String title, Function<S, BigDecimal> getter, BiConsumer<S, BigDecimal> setter, Runnable afterEdit) {
         var converter = StringConverterUtil.bigDecimalConverter();
-        return buildEditableColumn(title, getter, setter, editableAmountCellFactory(converter), afterEdit);
+        return buildEditableColumn(title, getter, setter, CellFactoryUtil.editableAmountCellFactory(converter), afterEdit);
     }
 
     public static <S, T> TableColumn<S, T> buildEditableChoiceColumn(String title, Function<S, T> getter, BiConsumer<S, T> setter, ObservableList<T> values, Runnable afterEdit) {
         Callback<TableColumn<S, T>, TableCell<S, T>> choiceCellFactory = tc -> new ChoiceBoxTableCell<>(values);
-        return buildEditableColumn(title, getter, setter, choiceCellFactory, afterEdit);
+        var column = buildEditableColumn(title, getter, setter, choiceCellFactory, afterEdit);
+        column.getProperties().put("EDIT_ON_SELECT", true);
+        return column;
     }
 
     private static <S, T> TableColumn<S, T> buildEditableColumn(String title, Function<S, T> getter, BiConsumer<S, T> setter, Callback<TableColumn<S, T>, TableCell<S, T>> cellFactory, Runnable afterEdit) {
@@ -102,93 +104,6 @@ public class TableColumnUtil {
         });
         col.setEditable(true);
         return col;
-    }
-
-    private static <S> Callback<TableColumn<S, Void>, TableCell<S, Void>> removeButtonCellFactory() {
-        return col -> new TableCell<>() {
-            private final Button button = new Button("✕");
-
-            {
-                button.getStyleClass().add("remove-row-button");
-
-                button.setOnAction(e -> {
-                    S item = getTableView().getItems().get(getIndex());
-                    getTableView().getItems().remove(item);
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(button);
-                }
-            }
-        };
-    }
-
-    private static <S> Callback<TableColumn<S, String>, TableCell<S, String>> editableTextCellFactory() {
-        return col -> new TextFieldTableCell<>(new DefaultStringConverter()) {
-
-            @Override
-            public void startEdit() {
-                super.startEdit();
-
-                if (getGraphic() instanceof TextField editor) {
-                    editor.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-                        if (e.getCode() == KeyCode.TAB) {
-                            commitEdit(editor.getText());
-                        }
-                    });
-                }
-            }
-        };
-    }
-
-    private static <S> Callback<TableColumn<S, BigDecimal>, TableCell<S, BigDecimal>> editableAmountCellFactory(StringConverter<BigDecimal> converter) {
-        return col -> new TextFieldTableCell<>(converter) {
-
-            @Override
-            public void startEdit() {
-                super.startEdit();
-
-                if (getGraphic() instanceof TextField editor) {
-                    editor.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-                        if (e.getCode() == KeyCode.TAB) {
-                            commitEdit(getConverter().fromString(editor.getText()));
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void updateItem(BigDecimal value, boolean empty) {
-                super.updateItem(value, empty);
-
-                if (empty || value == null) {
-                    setText(null);
-                } else {
-                    setText(value.setScale(2, RoundingMode.HALF_UP).toPlainString());
-                }
-
-                setAlignment(Pos.CENTER_RIGHT);
-            }
-
-            @Override
-            public void cancelEdit() {
-                super.cancelEdit();
-
-                BigDecimal value = getItem();
-                if (value != null) {
-                    setText(value.setScale(2, RoundingMode.HALF_UP).toPlainString());
-                } else {
-                    setText(null);
-                }
-            }
-        };
     }
 
     public static <S> TableColumn<S, String> buildAutoCompleteColumn(

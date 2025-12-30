@@ -41,7 +41,7 @@ public class TableViewShortcutSupport {
             case TAB:
                 Platform.runLater(() -> {
                     TableViewNavigationSupport.onTabPressed(view);
-                    event.consume();
+                    event.consume(); // consume so focus is not lost to parent node e.g. TabPane
 
                 });
                 break;
