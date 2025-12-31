@@ -21,6 +21,8 @@ public class MultiAccountController {
         this.view = accountsView;
         this.accountService = accountService;
 
+        accountService.setOnAccountsUpdated(this::reload);
+        
         load();
     }
 
@@ -30,12 +32,10 @@ public class MultiAccountController {
             addAccountView(account);
         }
     }
-    
-    public void saveToDomain() {
-        for(var account : accountService.getAccounts()) {
-            var number = account.getAccountNumber();
-            var transactions = transactionTableControllers.get(number).transactions().stream().map(EditableCashTransaction::toDomain).toList();
-            account.replace(transactions);
+
+    public void commitChanges() {
+        for (var controller : transactionTableControllers.values()) {
+            accountService.updateAccounts(controller.transactions().stream().map(EditableCashTransaction::toDomain).toList());
         }
     }
 
@@ -48,8 +48,8 @@ public class MultiAccountController {
         transactionTableControllers.put(accountNumber, transactionTableController);
         view.addTab(accountNumber, transactionTableView);
     }
-    
-        public void reload() {
+
+    private void reload() {
         Collection<Account> accounts = accountService.getAccounts();
         for (Account account : accounts) {
             String accountNumber = account.getAccountNumber();

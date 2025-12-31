@@ -101,7 +101,7 @@ public class Notes {
     //      DONE First of month
     //      DONE add row
     //      DONE remove row
-    //      improve UX Choice Box editing (on hover and select)
+    //      DONE improve UX Choice Box editing (on hover and select)
     //      On missing settings follow wizard
     
     // 
@@ -110,6 +110,8 @@ public class Notes {
     // WARNING
     // First of Month used as hardcoded value in AnalyticsExportService
     // Template not reloaded dynamically in BudgetService for recalculate
+    // Account Merge is not immutable
+    // MultiAccountView to modal
     
     // Thoughts
     //      BudgetMonth: should Adjustments, Budgeted and Variance also be streamed from control categories? does it hurt? it makes method pattern consistent with others

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -15,22 +16,22 @@ import java.util.TreeMap;
 public class Account {
 
     private final String accountNumber;
-    private final TreeMap<Integer, CashTransaction> allTransactionsIndex = new TreeMap<>();
+    private final TreeMap<Integer, CashTransaction> transactionsIndex = new TreeMap<>();
 
-    public Account(String accountNumber, List<CashTransaction> transactions) {
+    public Account(String accountNumber, Collection<CashTransaction> transactions) {
         this.accountNumber = accountNumber;
         for (var t : transactions) {
-            allTransactionsIndex.put(t.transactionNumber(), t);
+            transactionsIndex.put(t.transactionNumber(), t);
         }
     }
 
     public BigDecimal getCurrentBalance() {
-        return allTransactionsIndex.lastEntry().getValue().accountBalance();
+        return transactionsIndex.lastEntry().getValue().accountBalance();
     }
 
     public BigDecimal getOpeningBalanceOn(LocalDate date) {
         int boundary = lowerDayBoundary(date);
-        var transaction = allTransactionsIndex.floorEntry(boundary);
+        var transaction = transactionsIndex.floorEntry(boundary);
         return transaction == null ? BigDecimal.ZERO : transaction.getValue().accountBalanceBefore();
     }
 
@@ -40,7 +41,7 @@ public class Account {
 
     public BigDecimal getClosingBalanceOn(LocalDate date) {
         int boundary = upperDayBoundary(date);
-        var transaction = allTransactionsIndex.floorEntry(boundary);
+        var transaction = transactionsIndex.floorEntry(boundary);
         return transaction == null ? BigDecimal.ZERO : transaction.getValue().accountBalance();
     }
 
@@ -63,7 +64,7 @@ public class Account {
     }
 
     public CashTransaction getTransactionBy(int transactionNumber) {
-        return allTransactionsIndex.get(transactionNumber);
+        return transactionsIndex.get(transactionNumber);
     }
 
     /**
@@ -72,7 +73,7 @@ public class Account {
      */
     public LocalDate getOldestTransactionDate() {
         // By default, TreeMap sorts all its entries according to their natural ordering
-        return allTransactionsIndex.firstEntry().getValue().date();
+        return transactionsIndex.firstEntry().getValue().date();
     }
 
     /**
@@ -81,7 +82,7 @@ public class Account {
      */
     public LocalDate getNewestTransactionDate() {
         // By default, TreeMap sorts all its entries according to their natural ordering
-        return allTransactionsIndex.lastEntry().getValue().date();
+        return transactionsIndex.lastEntry().getValue().date();
     }
 
     public void merge(Account incoming) {
@@ -148,26 +149,26 @@ public class Account {
 
     private void addTransactions(List<CashTransaction> transactions) {
         for (var transaction : transactions) {
-            allTransactionsIndex.put(transaction.transactionNumber(), transaction);
+            transactionsIndex.put(transaction.transactionNumber(), transaction);
         }
     }
 
     private void removeTransactions(List<CashTransaction> transactions) {
         for (var transaction : transactions) {
             int number = transaction.transactionNumber();
-            allTransactionsIndex.remove(number);
+            transactionsIndex.remove(number);
         }
     }
 
     private void enrichCategories(List<CashTransaction> transactions, boolean overwriteCategories) {
         for (var incoming : transactions) {
             int number = incoming.transactionNumber();
-            if (allTransactionsIndex.containsKey(number)) {
-                CashTransaction existing = allTransactionsIndex.get(number);
+            if (transactionsIndex.containsKey(number)) {
+                CashTransaction existing = transactionsIndex.get(number);
                 boolean isSame = CashTransactionDomainLogic.areSame(incoming, existing);
                 if (isSame && incoming.category() != null && (existing.category() == null || overwriteCategories)) {
                     var updated = existing.withCategory(incoming.category());
-                    allTransactionsIndex.put(number, updated);
+                    transactionsIndex.put(number, updated);
 //                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});
                 }
 //                else {
@@ -191,19 +192,21 @@ public class Account {
      * ascending order, starting from oldest to most current
      */
     public List<CashTransaction> transactionsAscending() {
-        return allTransactionsIndex.values().stream().toList();
+        return transactionsIndex.values().stream().toList();
     }
 
     public String getAccountNumber() {
         return accountNumber;
     }
 
-    public void replace(List<CashTransaction> transactions) {
-        for (var tx : transactions) {
-            var replaced = allTransactionsIndex.put(tx.transactionNumber(), tx);
+    public Account withUpdatedTransactions(List<CashTransaction> transactions) {
+        Map<Integer, CashTransaction> result = new TreeMap<>(transactionsIndex);
+        for (var updated : transactions) {
+            var replaced = result.put(updated.transactionNumber(), updated);
             if (replaced == null) {
                 System.out.println("ERROR REPLACED WAS NOT AVAILABLE");
             }
         }
+        return new Account(accountNumber, result.values());
     }
 }

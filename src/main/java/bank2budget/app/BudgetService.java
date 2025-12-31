@@ -7,6 +7,7 @@ import bank2budget.core.budget.BudgetTemplate;
 import bank2budget.ports.BudgetRepositoryPort;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +33,8 @@ public class BudgetService {
 
         List<BudgetMonth> created = calculator.create(template, newBudget, accountService.getAccounts());
         List<BudgetMonth> replaced = newBudget.replace(created);
+
+        accountService.setOnAccountsUpdated(this::recalculate);
     }
 
     public void load() {
@@ -45,7 +48,7 @@ public class BudgetService {
         }
         return newBudget;
     }
-    
+
     public BudgetTemplate getBudgetTemplate() {
         return template;
     }
@@ -78,9 +81,21 @@ public class BudgetService {
         save();
     }
 
+    private final List<Runnable> onBudgetRecalculatedListeners = new ArrayList<>();
+
+    public void setOnBudgetRecalculated(Runnable r) {
+        onBudgetRecalculatedListeners.add(r);
+    }
+
+    private void onBudgetRecalculated() {
+        onBudgetRecalculatedListeners.forEach(Runnable::run);
+    }
+
     public void recalculate() {
         List<BudgetMonth> created = calculator.create(template, newBudget, accountService.getAccounts());
         List<BudgetMonth> replaced = newBudget.replace(created);
+
+        onBudgetRecalculated();
     }
 
     private void save() {
@@ -97,6 +112,4 @@ public class BudgetService {
         newBudget.replace(updated);
     }
 
-   
-    
 }

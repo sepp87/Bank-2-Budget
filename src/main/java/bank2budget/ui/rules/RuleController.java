@@ -21,7 +21,12 @@ public class RuleController {
         this.service = ruleService;
     }
 
-    public void load(List<EditableRuleConfig> rules) {
+    public void reload() {
+        var rules = service.getRules().stream().map(EditableRuleConfig::new).toList();
+        load(rules);
+    }
+
+    private void load(List<EditableRuleConfig> rules) {
         loadCategorySuggestions(rules);
         view.getRuleTable().getItems().setAll(rules);
         view.getRuleTable().sort();

@@ -51,7 +51,7 @@ public class EditorView extends BorderPane {
 
         this.budgetView = new BudgetView();
 
-        if (true) {
+        if (false) {
             contentWrapper.getChildren().add(accountsView);
         } else {
             contentWrapper.getChildren().add(budgetView);

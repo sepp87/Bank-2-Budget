@@ -1,8 +1,6 @@
 package bank2budget.ui;
 
 import bank2budget.App;
-import bank2budget.core.CashTransaction;
-import bank2budget.core.CashTransactionDomainLogic;
 import bank2budget.ui.budgettemplate.BudgetTemplateController;
 import bank2budget.ui.dashboard.BudgetController;
 import bank2budget.ui.rules.EditableRuleConfig;
@@ -29,7 +27,7 @@ public class EditorController {
     private final EditorView view;
     private final App app;
 
-    private final MultiAccountController accountsController;
+    private final MultiAccountController multiAccountController;
     private final BudgetController budgetController;
     private final BudgetTemplateController budgetTemplateController;
     private final RuleController ruleController;
@@ -39,12 +37,12 @@ public class EditorController {
         this.view = editorView;
         this.app = app;
 
-        this.accountsController = new MultiAccountController(view.accountsView(), app.getAccountService());
+        this.multiAccountController = new MultiAccountController(view.accountsView(), app.getAccountService());
         this.budgetController = new BudgetController(view.budgetView(), app);
 
         this.budgetTemplateController = new BudgetTemplateController(view.budgetTemplateView(), app.getTemplateService());
         this.ruleController = new RuleController(view.rulesView(), app.getRuleService());
-        this.transactionReviewController = new TransactionReviewController(view.transactionReviewView());
+        this.transactionReviewController = new TransactionReviewController(view.transactionReviewView(), app.getAccountService());
 
         // File menu - event handlers
         view.menuItemImportCsvs().setOnAction((e) -> onImportCsvs(view.getScene().getWindow()));
@@ -58,13 +56,13 @@ public class EditorController {
             view.showBudgetTemplateView();
         });
         view.menuItemRules().setOnAction((e) -> {
-            var rules = app.getRuleService().getRules().stream().map(EditableRuleConfig::new).toList();
-            ruleController.load(rules);
+            ruleController.reload();
             view.showRulesView();
         });
 
         // Budget - event handler
         budgetController.setOnReviewTransactions((e) -> startTransactionReview());
+        app.getBudgetService().setOnBudgetRecalculated(budgetController::reload);
 
         // Modal menu - event handlers
         budgetTemplateController.setOnCanceled((e) -> closeOverlayModal());
@@ -74,7 +72,7 @@ public class EditorController {
         transactionReviewController.setOnFinished((e) -> finishTransactionReview());
         transactionReviewController.setOnCanceled((e) -> closeOverlayModal());
 
-        view.menuItemRules().fire();
+//        view.menuItemRules().fire();
     }
 
     private void startTransactionReview() {
@@ -94,15 +92,7 @@ public class EditorController {
     }
 
     private void finishTransactionReview() {
-        List<CashTransaction> transactions = transactionReviewController.transactions().stream().map(EditableCashTransaction::toDomain).toList();
-        var grouped = CashTransactionDomainLogic.groupByAccountNumber(transactions);
-        for (var account : app.getAccountService().getAccounts()) {
-            if (grouped.containsKey(account.getAccountNumber())) {
-                account.replace(grouped.get(account.getAccountNumber()));
-            }
-        }
-        app.getBudgetService().recalculate();
-        budgetController.reload();
+        transactionReviewController.commitChanges();
         closeOverlayModal();
 
     }
@@ -132,13 +122,11 @@ public class EditorController {
         boolean isSuccess = app.getAccountService().importFromFiles(files); // normalizes, applies rules and merges with existing accounts
 
         // reload table
-        accountsController.reload();
+//        multiAccountController.reload();
 
         // show import finished
         if (isSuccess) {
             view.notificationView().showNotification("Import succesful!");
-            app.getBudgetService().recalculate();
-            budgetController.reload();
         } else {
             view.notificationView().showError("Import aborted! Balance history interrupted.");
         }

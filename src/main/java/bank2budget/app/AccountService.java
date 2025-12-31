@@ -2,17 +2,19 @@ package bank2budget.app;
 
 import bank2budget.core.Account;
 import bank2budget.core.AccountDomainLogic;
-import bank2budget.core.IntegrityChecker;
 import bank2budget.core.CashTransaction;
-import bank2budget.core.rule.RuleEngine;
+import bank2budget.core.CashTransactionDomainLogic;
+import bank2budget.core.IntegrityChecker;
 import bank2budget.ports.AccountRepositoryPort;
 import bank2budget.ports.AccountImporterPort;
 import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,7 +27,7 @@ public class AccountService {
     private final AccountRepositoryPort repository;
     private final AccountImporterPort importer;
     private final RuleService ruleService;
-    private Map<String, Account> accountsIndex;
+    private Map<String, Account> accountsIndex = new TreeMap<>();
 
     public AccountService(AccountRepositoryPort repository, AccountImporterPort importer, RuleService ruleService) {
         this.repository = repository;
@@ -35,8 +37,28 @@ public class AccountService {
     }
 
     private void load() {
-        this.accountsIndex = repository.load();
-        applyRules(accountsIndex.values());
+        applyRules(repository.load().values()).forEach(e -> accountsIndex.put(e.getAccountNumber(), e));
+    }
+
+    private final List<Runnable> onAccountsUpdatedListeners = new ArrayList<>();
+
+    public void setOnAccountsUpdated(Runnable r) {
+        onAccountsUpdatedListeners.add(r);
+    }
+
+    private void onAccountsUpdated() {
+        onAccountsUpdatedListeners.forEach(Runnable::run);
+    }
+
+    public void updateAccounts(List<CashTransaction> transactions) {
+        var grouped = CashTransactionDomainLogic.groupByAccountNumber(transactions);
+        for (var entry : grouped.entrySet()) {
+            String number = entry.getKey();
+            if (accountsIndex.containsKey(number)) {
+                accountsIndex.get(number).withUpdatedTransactions(entry.getValue());
+            }
+        }
+        onAccountsUpdated();
     }
 
     public Collection<Account> getAccounts() {
@@ -47,6 +69,7 @@ public class AccountService {
         List<Account> imported = importer.importFromFiles(files);
         applyRulesAndMerge(imported);
         if (hasValidAccounts()) {
+            onAccountsUpdated();
             return true;
         }
         load(); // reload all if import failed 
@@ -62,22 +85,26 @@ public class AccountService {
 //        }
         if (hasValidAccounts()) {
             save();
+            onAccountsUpdated();
             return true;
         }
         return false;
     }
 
     private void applyRulesAndMerge(List<Account> imported) {
-        applyRules(imported);
-        merge(imported);
+        var applied = applyRules(imported);
+        merge(applied);
     }
 
-    private void applyRules(Collection<Account> accounts) {
+    private List<Account> applyRules(Collection<Account> accounts) {
+        List<Account> result = new ArrayList<>();
         for (Account account : accounts) {
             var updated = ruleService.applyRules(account.transactionsAscending());
-            account.replace(updated);
+            var updatedAccount = account.withUpdatedTransactions(updated);
+            result.add(updatedAccount);
             System.out.println("Tx: " + account.transactionsAscending().size() + "\tupdatedTx: " + updated.size());
         }
+        return result;
     }
 
     private boolean hasValidAccounts() {

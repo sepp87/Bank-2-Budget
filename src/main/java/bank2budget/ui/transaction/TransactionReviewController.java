@@ -1,5 +1,8 @@
 package bank2budget.ui.transaction;
 
+import bank2budget.app.AccountService;
+import bank2budget.core.CashTransaction;
+import java.util.List;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -11,15 +14,14 @@ import javafx.event.EventHandler;
 public class TransactionReviewController {
 
     private final TransactionReviewView view;
+    private final AccountService accountService;
     private final TransactionTableController transactionTableController;
 
-    public TransactionReviewController(TransactionReviewView transactionReviewView) {
+    public TransactionReviewController(TransactionReviewView transactionReviewView, AccountService accountService) {
         this.view = transactionReviewView;
+        this.accountService = accountService;
         this.transactionTableController = new TransactionTableController(view.getTransactionTableView());
-    }
 
-    public ObservableList<EditableCashTransaction> transactions() {
-        return transactionTableController.transactions();
     }
 
     public void load(ObservableList<EditableCashTransaction> transactions) {
@@ -33,6 +35,11 @@ public class TransactionReviewController {
     public void setOnCanceled(EventHandler<ActionEvent> eh) {
         view.getCancelButton().setOnAction(eh);
 
+    }
+
+    public void commitChanges() {
+        List<CashTransaction> transactions = transactionTableController.transactions().stream().map(EditableCashTransaction::toDomain).toList();
+        accountService.updateAccounts(transactions);
     }
 
 }
