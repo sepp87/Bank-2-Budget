@@ -28,9 +28,9 @@ public class BudgetReportService {
     }
     
 
-    public List<BudgetReportRow> getProfitAndLoss(LocalDate firstOfMonth, SortBy sortBy, SortType sortType) {
+    public List<BudgetReportRow> getProfitAndLoss(LocalDate firstOfMonth, SortBy sortBy, SortType sortType, List<String> exclude) {
         BudgetMonth month = budgetService.month(firstOfMonth);
-        return assembler.buildProfitAndLoss(month, sortBy, sortType);
+        return assembler.buildProfitAndLoss(month, sortBy, sortType, exclude);
     }
     
 }

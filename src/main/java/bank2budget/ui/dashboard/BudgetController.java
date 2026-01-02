@@ -23,7 +23,8 @@ public class BudgetController {
     private final BudgetService budgetService;
     private final ProfitAndLossController profitAndLossController;
     private final BudgetedVsActualController budgetedVsActualController;
-    private final AccountBalanceView accountBalanceView;
+//    private final AccountBalanceView accountBalanceView;
+    private final AccountBalanceView accountBalanceNewView;
 
     private Subscription selectMonthSubscription;
 
@@ -36,11 +37,12 @@ public class BudgetController {
         view.lastExport().setText(app.getAccountService().getLastExportDate().toString());
 
         this.profitAndLossController = new ProfitAndLossController(view.getProfitAndLossView(), app.getBudgetReportService(), app.getBudgetService());
-        
+
         this.budgetedVsActualController = new BudgetedVsActualController(view.getBudgetedVsActualView(), app.getBudgetReportService(), app.getBudgetService());
         budgetedVsActualController.setOnEdited(e -> profitAndLossController.reload());
 
-        this.accountBalanceView = view.getAccountBalanceView();
+//        this.accountBalanceView = view.getAccountBalanceView();
+        this.accountBalanceNewView = view.getAccountBalanceView();
 
         this.selectMonthSubscription = newSelectMonthSubscription();
 
@@ -79,7 +81,7 @@ public class BudgetController {
             budgetService.nextMonth(key);
             app.getAccountService().getAccounts().forEach(e -> balanceData.put(e.getAccountNumber(), e.getOpeningBalanceOn(key)));
         }
-        accountBalanceView.setData(balanceData);
+        accountBalanceNewView.setData(balanceData);
     }
 
     private void selectMonth(LocalDate key) {

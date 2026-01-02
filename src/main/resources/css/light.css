@@ -116,3 +116,33 @@
     -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.1) , 10,0,7,7 );
 
 }
+
+.donut-chart {
+    /*-fx-background-color: blue;*/
+    /*-fx-fill: red;*/
+
+}
+
+
+.donut-slice {
+    -slice-fill: #4c6ef5;      /* looked-up color */
+    -fx-fill: -slice-fill;
+    -fx-stroke: white;
+    -fx-stroke-width: 1;
+}
+
+.donut-slice:hover {
+    -fx-fill: derive(-slice-fill, 20%);
+}
+
+.donut-slice-other {
+    -slice-fill: #CED4DA !important;
+}
+
+.debug {
+    -fx-background-color: pink;
+}
+
+.debug2 {
+    -fx-background-color: red;
+}

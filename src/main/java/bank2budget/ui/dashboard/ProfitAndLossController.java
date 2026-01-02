@@ -8,6 +8,7 @@ import bank2budget.app.report.SortBy;
 import bank2budget.app.report.SortType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import javafx.event.EventHandler;
 
@@ -38,7 +39,7 @@ public class ProfitAndLossController {
 
     public final void load(LocalDate firstOfMonth) {
             selected = firstOfMonth;
-            List<BudgetReportRow> rows = reportService.getProfitAndLoss(firstOfMonth, sortBy, sortType);
+            List<BudgetReportRow> rows = reportService.getProfitAndLoss(firstOfMonth, sortBy, sortType, Collections.emptyList());
             view.getItems().setAll(rows);
     }
 

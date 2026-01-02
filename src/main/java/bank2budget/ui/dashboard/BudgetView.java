@@ -5,8 +5,6 @@ import java.time.Month;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.TreeSet;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -35,6 +33,7 @@ public class BudgetView extends AnchorPane {
     private final ProfitAndLossView profitAndLossView;
     private final BudgetedVsActualView budgetedVsActualView;
     private final AccountBalanceView accountBalanceView;
+
     private final Button reviewTransactionsButton;
 
     // Month Year                                               [ month ] [ save ]
