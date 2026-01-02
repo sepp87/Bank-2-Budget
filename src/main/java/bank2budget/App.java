@@ -12,6 +12,8 @@ import bank2budget.adapter.budget.BudgetTemplateReader;
 import bank2budget.adapter.budget.BudgetTemplateRepository;
 import bank2budget.adapter.budget.BudgetTemplateWriter;
 import bank2budget.adapter.budget.BudgetWriter;
+import bank2budget.adapter.config.ConfigRepository;
+import bank2budget.adapter.config.ConfigWriter;
 import bank2budget.adapter.rule.RuleReader;
 import bank2budget.adapter.rule.RuleRepository;
 import bank2budget.adapter.rule.RuleWriter;
@@ -20,6 +22,7 @@ import bank2budget.app.AnalyticsExportService;
 import bank2budget.app.BudgetReportService;
 import bank2budget.app.BudgetService;
 import bank2budget.app.BudgetTemplateService;
+import bank2budget.app.ConfigService;
 import bank2budget.core.Config;
 import bank2budget.app.CsvCleanupService;
 import bank2budget.app.NoOpAnalyticsExportService;
@@ -48,11 +51,16 @@ public class App {
     private final BudgetReportService budgetReportService;
     private final BudgetTemplateService templateService;
     private final RuleService ruleService;
+    private final ConfigService configService;
 
     public App(AppPaths paths, char decimalSeparatorChar, boolean useSqlite) {
         configureLogging();
 
-        Config config = new ConfigReader(paths).read();
+        var config = new ConfigReader(paths).read();
+        var configReader = new ConfigReader(paths);
+        var configWriter = new ConfigWriter(paths);
+        var configRepository = new ConfigRepository(configReader, configWriter);
+        this.configService = new ConfigService(configRepository);
 
         var ruleReader = new RuleReader(paths.getCategorizationRulesFile());
         var ruleWriter = new RuleWriter(paths.getCategorizationRulesFile());
@@ -112,6 +120,10 @@ public class App {
         });
         root.addHandler(handler);
     }
+    
+    public ConfigService getConfigService() {
+        return configService;
+    }
 
     public CsvCleanupService getCsvCleanupService() {
         return csvCleanupService;
@@ -141,4 +153,6 @@ public class App {
         return ruleService;
     }
 
+   
+    
 }

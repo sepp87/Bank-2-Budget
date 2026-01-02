@@ -1,10 +1,7 @@
 package bank2budget.core;
 
-import bank2budget.core.budget.BudgetTemplate;
-import bank2budget.core.rule.RuleConfig;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -15,20 +12,26 @@ public class Config {
 
     private static final Logger LOGGER = Logger.getLogger(Config.class.getName());
 
-    private Map<String, String> myAccounts;
-    private Map<String, String> otherAccounts;
+    private final Map<String, String> myAccounts;
+    private final Map<String, String> otherAccounts;
+    private final List<String> excludePnlCategories;
 
-    public Config(Map<String, String> myAccounts, Map<String, String> otherAccounts) {
+    public Config(Map<String, String> myAccounts, Map<String, String> otherAccounts, List<String> excludePnlCategories) {
         this.myAccounts = myAccounts;
         this.otherAccounts = otherAccounts;
+        this.excludePnlCategories = excludePnlCategories;
     }
 
     public Map<String, String> myAccounts() {
-        return myAccounts;
+        return Map.copyOf(myAccounts);
     }
 
     public Map<String, String> otherAccounts() {
-        return otherAccounts;
+        return Map.copyOf(otherAccounts);
     }
 
+    public List<String> excludePnlCategories() {
+        return List.copyOf(excludePnlCategories);
+    }
+    
 }

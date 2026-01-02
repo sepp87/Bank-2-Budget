@@ -33,7 +33,8 @@ public class ConfigReader {
         this.paths = paths;
         Map<String, String> myAccounts = propertiesToMap(readProperties(paths.getMyAccountsFile()));
         Map<String, String> otherAccounts = propertiesToMap(readProperties(paths.getOtherAccountsFile()));
-        this.config = new Config(myAccounts, otherAccounts);
+        List<String> excludePnlCategories = readLines(paths.getExcludePnlCategoriesFile());
+        this.config = new Config(myAccounts, otherAccounts, excludePnlCategories);
     }
 
     public Config read() {
@@ -58,4 +59,13 @@ public class ConfigReader {
         return result;
     }
 
+    private List<String> readLines(Path path) {
+        try {
+            List<String> lines = Files.readAllLines(path);
+            return lines.stream().map(String::strip).toList();
+        } catch (IOException ex) {
+            LOGGER.log(Level.INFO, "Could NOT read file, proceeding without {0}", path.getFileName());
+        }
+        return List.of();
+    }
 }

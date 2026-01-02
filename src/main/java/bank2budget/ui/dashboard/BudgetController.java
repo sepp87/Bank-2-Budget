@@ -24,7 +24,7 @@ public class BudgetController {
     private final ProfitAndLossController profitAndLossController;
     private final BudgetedVsActualController budgetedVsActualController;
 //    private final AccountBalanceView accountBalanceView;
-    private final AccountBalanceView accountBalanceNewView;
+    private final AccountBalanceView accountBalanceView;
 
     private Subscription selectMonthSubscription;
 
@@ -36,13 +36,13 @@ public class BudgetController {
         view.populateMonthSelector(budgetService.monthKeys(), null);
         view.lastExport().setText(app.getAccountService().getLastExportDate().toString());
 
-        this.profitAndLossController = new ProfitAndLossController(view.getProfitAndLossView(), app.getBudgetReportService(), app.getBudgetService());
+        this.profitAndLossController = new ProfitAndLossController(view.getProfitAndLossView(), app.getBudgetReportService(), app.getBudgetService(), app.getConfigService());
 
         this.budgetedVsActualController = new BudgetedVsActualController(view.getBudgetedVsActualView(), app.getBudgetReportService(), app.getBudgetService());
         budgetedVsActualController.setOnEdited(e -> profitAndLossController.reload());
 
 //        this.accountBalanceView = view.getAccountBalanceView();
-        this.accountBalanceNewView = view.getAccountBalanceView();
+        this.accountBalanceView = view.getAccountBalanceView();
 
         this.selectMonthSubscription = newSelectMonthSubscription();
 
@@ -78,10 +78,10 @@ public class BudgetController {
         if (budgetService.nextMonth(key) == null) {
             app.getAccountService().getAccounts().forEach(e -> balanceData.put(e.getAccountNumber(), e.getCurrentBalance()));
         } else {
-            budgetService.nextMonth(key);
-            app.getAccountService().getAccounts().forEach(e -> balanceData.put(e.getAccountNumber(), e.getOpeningBalanceOn(key)));
+            var next = budgetService.nextMonth(key);
+            app.getAccountService().getAccounts().forEach(e -> balanceData.put(e.getAccountNumber(), e.getOpeningBalanceOn(next.firstOfMonth())));
         }
-        accountBalanceNewView.setData(balanceData);
+        accountBalanceView.setData(balanceData);
     }
 
     private void selectMonth(LocalDate key) {

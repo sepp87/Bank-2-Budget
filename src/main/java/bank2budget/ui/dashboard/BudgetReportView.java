@@ -1,6 +1,7 @@
 package bank2budget.ui.dashboard;
 
 import bank2budget.app.report.BudgetReportRow;
+import bank2budget.app.report.CategoryRow;
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableView;
@@ -20,11 +21,16 @@ public abstract class BudgetReportView extends TableView<BudgetReportRow> {
 
         setRowFactory(tv -> new BudgetReportRowFactory());
 
-        //        setFixedCellSize(26); // match your row height
-        prefHeightProperty().bind(
-                Bindings.size(getItems())
-                        .multiply(26)
-                        .add(30) // header height (approx)
-        );
+        prefHeightProperty().bind(Bindings.createDoubleBinding(this::calculateHeight, getItems()));
+
+    }
+
+    private double calculateHeight() {
+        int totalRowCount = getItems().size();
+        int normalRowCount = getItems().stream().filter(e -> e instanceof CategoryRow).mapToInt(e -> 1).sum();
+        int headerRowCount = totalRowCount - normalRowCount;
+        double columnHeader = 28;
+        return normalRowCount * 24 + headerRowCount * 34 + columnHeader;
+
     }
 }

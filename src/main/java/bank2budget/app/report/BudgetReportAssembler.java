@@ -51,11 +51,12 @@ public class BudgetReportAssembler {
 
     public List<BudgetReportRow> buildProfitAndLoss(BudgetMonth month, SortBy sortBy, SortType sortType, List<String> exclude) {
         BudgetSectionAssembler sectionAssembler = new BudgetSectionAssembler(sortBy, sortType);
+        final var excludeUpper = exclude.stream().map(String::toUpperCase).toList();
 
         List<BudgetReportRow> result = new ArrayList<>();
 
         var profitCategories = month.operatingCategories().stream()
-                .filter(e -> !exclude.contains(e.name()))
+                .filter(e -> !excludeUpper.contains(e.name().toUpperCase()))
                 .filter(e -> e.unadjustedClosing().compareTo(BigDecimal.ZERO) > 0)
                 .toList();
         if (!profitCategories.isEmpty()) {
@@ -64,7 +65,7 @@ public class BudgetReportAssembler {
         }
 
         var lossCategories = month.operatingCategories().stream()
-                .filter(e -> !exclude.contains(e.name()))
+                .filter(e -> !excludeUpper.contains(e.name().toUpperCase()))
                 .filter(e -> e.unadjustedClosing().compareTo(BigDecimal.ZERO) < 0)
                 .toList();
         if (!lossCategories.isEmpty()) {
@@ -79,9 +80,46 @@ public class BudgetReportAssembler {
             result.addAll(controlSection);
         }
 
+        var filteredTotals = buildFilteredSubtotalRow(month, excludeUpper);
+        result.add(filteredTotals);
+
         var totals = buildTotalRow(month);
         result.add(totals);
 
         return result;
+    }
+
+    private TotalRow buildFilteredSubtotalRow(BudgetMonth month, List<String> excludeUpper) {
+
+        var excluded = month.operatingCategories().stream().filter(e -> excludeUpper.contains(e.name().toUpperCase())).toList();
+        var exOpening = excluded.stream()
+                .map(e -> e.opening())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        var exActual = excluded.stream()
+                .map(e -> e.actual())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        var exBudgeted = excluded.stream()
+                .map(e -> e.budgeted())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        var exVariance = excluded.stream()
+                .map(e -> e.variance())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        var exAdjustments = excluded.stream()
+                .map(e -> e.adjustments())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        var exClosing = excluded.stream()
+                .map(e -> e.closing())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        TotalRow totals = new TotalRow(
+                "Subtotal (without excl. categories)",
+                month.opening().subtract(exOpening),
+                month.actual().subtract(exActual),
+                month.budgeted().subtract(exBudgeted),
+                month.variance().subtract(exVariance),
+                month.adjustments().subtract(exAdjustments),
+                month.closing().subtract(exClosing)
+        );
+        return totals;
     }
 }

@@ -2,6 +2,7 @@ package bank2budget.ui.dashboard;
 
 import bank2budget.app.BudgetReportService;
 import bank2budget.app.BudgetService;
+import bank2budget.app.ConfigService;
 import bank2budget.app.report.BudgetReportRow;
 import bank2budget.app.report.CategoryRow;
 import bank2budget.app.report.SortBy;
@@ -21,26 +22,28 @@ public class ProfitAndLossController {
     private final ProfitAndLossView view;
     private final BudgetReportService reportService;
     private final BudgetService budgetService;
+    private final ConfigService configService;
     private SortBy sortBy = SortBy.LABEL;
     private SortType sortType = SortType.ASCENDING;
     private LocalDate selected;
 
-    public ProfitAndLossController(ProfitAndLossView profitAndLossView, BudgetReportService budgetReportService, BudgetService budgetService) {
+    public ProfitAndLossController(ProfitAndLossView profitAndLossView, BudgetReportService budgetReportService, BudgetService budgetService, ConfigService configService) {
         this.view = profitAndLossView;
         this.reportService = budgetReportService;
         this.budgetService = budgetService;
+        this.configService = configService;
 
         view.onAdjustmentEdited(this::onAdjustmentEdit);
     }
-    
+
     public void reload() {
         load(selected);
     }
 
     public final void load(LocalDate firstOfMonth) {
-            selected = firstOfMonth;
-            List<BudgetReportRow> rows = reportService.getProfitAndLoss(firstOfMonth, sortBy, sortType, Collections.emptyList());
-            view.getItems().setAll(rows);
+        selected = firstOfMonth;
+        List<BudgetReportRow> rows = reportService.getProfitAndLoss(firstOfMonth, sortBy, sortType, configService.excludePnlCategories());
+        view.getItems().setAll(rows);
     }
 
     private void onAdjustmentEdit(BudgetReportRow row, BigDecimal newValue) {
@@ -52,5 +55,5 @@ public class ProfitAndLossController {
         // issue command here
         // budgetCommandService.updateAdjustment(...);
     }
-   
+
 }

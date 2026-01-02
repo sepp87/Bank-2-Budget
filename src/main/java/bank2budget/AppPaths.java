@@ -94,6 +94,10 @@ public final class AppPaths {
     public Path getBudgetTemplateFile() {
         return resolve(CONFIG_DIRECTORY, "budget-template.txt");
     }
+    
+    public Path getExcludePnlCategoriesFile() {
+        return resolve(CONFIG_DIRECTORY, "exclude-pnl-categories.txt");
+    }
 
     // Input files
     public Path getTodoDirectory() {
