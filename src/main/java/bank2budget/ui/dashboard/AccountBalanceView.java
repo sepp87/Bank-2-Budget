@@ -3,9 +3,7 @@ package bank2budget.ui.dashboard;
 import bank2budget.ui.donutchart.DonutData;
 import bank2budget.ui.donutchart.DonutChart;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 /**

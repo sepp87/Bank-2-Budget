@@ -85,7 +85,7 @@ public class BudgetReader {
             BigDecimal adjustments = BigDecimal.valueOf(row.getCell(4).getNumericCellValue());
 //            BigDecimal closing = BigDecimal.valueOf(row.getCell(5).getNumericCellValue());
 
-            if (budgeted.compareTo(BigDecimal.ZERO) != 0) {
+            if (budgeted.compareTo(BigDecimal.ZERO) != 0 || adjustments.compareTo(BigDecimal.ZERO) != 0) {
                 BudgetMonthCategory category = new BudgetMonthCategory(
                         firstOfMonth,
                         name,

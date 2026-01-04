@@ -59,58 +59,39 @@ public class Notes {
     //      OR - introduce an alias into the data model
     //      OR - make it a UI only thing
     
-    // BACKLOG
+    // BACKLOG PRIO
+    //      Account Merge is not immutable
+    //      Support opening account balance
+    //      Thoroughly test UX of main use case
+    //      Provide year-in-review dashboard
+    
+    // Config
+    //      Define start of financial year > user needs to declare a month
     
     // Budgeting
-    //      DONE Labels for tiles on dashboards
-    //      DONE Adjustments - support correcting a budget at the end of month to negate variances
-    //      DONE Adjustments - from and to XLSX
-    //      DONE TableView instead of GridPanes
-    //      DONE Balance Ratio - Pie Chart for balance per account 
-    //      DONE Change category rules to only label when null
-    //      Budgeted - enable changing the budgeted value and saving it to settings
-    //      Category transactions - inspect when clicking on category
-    //      Category transactions - change in inspection mode and enable (virtual) save
-    //      Support opening account balance
-    //      On accounts updated > recalculate budget
-    //      On budget recalculated > reload budget view
-    
+    //      Budgeted - enable saving changed budgeted value to settings    
+
     // Transactions
-    //      DONE Simplified categorization rules
-    //      DONE After editing category manual, regain focus on table view instead of tabs
-    //      DONE After editing completed by pressing enter, select next cell
-    //      DONE Start editing when user starts typing on keyboard
     //      Virtual save - when editing categories and recalculate budget accordingly
 
-
     // General
-    //      DONE Save on another thread
-    //      DONE Notifications (saving, integrity check, csvs loaded, ...)
     //      Undo / Redo
+    //      Resolve account aliases for account numbers e.g. "123" is "Savings Account"
+    //      Rename categories (Template, Budget Months, Transactions, Categorization Rules)
+    //      TransactionReview get suggestions from all transactions not only loaded
     
     // Rules
-    //      DONE Rules View
     //      Add dynamic rules e.g. to rename
     //      Apply rules again
     //      Reload rules
     
     // Budget Settings view
-    //      DONE Styling
-    //      DONE opening/switching overlay
-    //      DONE saving
-    //      DONE First of month
-    //      DONE add row
-    //      DONE remove row
-    //      DONE improve UX Choice Box editing (on hover and select)
     //      On missing settings follow wizard
-    
     // 
-  
 
     // WARNING
     // First of Month used as hardcoded value in AnalyticsExportService
     // Template not reloaded dynamically in BudgetService for recalculate
-    // Account Merge is not immutable
     // MultiAccountView to modal
     
     // Thoughts

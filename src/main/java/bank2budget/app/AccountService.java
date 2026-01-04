@@ -55,7 +55,8 @@ public class AccountService {
         for (var entry : grouped.entrySet()) {
             String number = entry.getKey();
             if (accountsIndex.containsKey(number)) {
-                accountsIndex.get(number).withUpdatedTransactions(entry.getValue());
+                var updated = accountsIndex.get(number).withUpdatedTransactions(entry.getValue());
+                accountsIndex.put(number, updated);
             }
         }
         onAccountsUpdated();

@@ -4,7 +4,7 @@ import bank2budget.App;
 import bank2budget.ui.budgettemplate.BudgetTemplateView;
 import bank2budget.ui.dashboard.BudgetView;
 import bank2budget.ui.rules.RuleView;
-import bank2budget.ui.transaction.MultiAccountView;
+import bank2budget.ui.transaction.AccountReviewView;
 import bank2budget.ui.transaction.TransactionReviewView;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -25,7 +25,7 @@ import javafx.scene.layout.VBox;
  */
 public class EditorView extends BorderPane {
 
-    private final MultiAccountView accountsView;
+    private final AccountReviewView accountReviewView;
     private final BudgetView budgetView;
     private final VBox contentWrapper;
     private final VBox overlayWrapper;
@@ -46,16 +46,8 @@ public class EditorView extends BorderPane {
         contentWrapper.prefWidthProperty().bind(this.widthProperty().multiply(0.95));
 //        contentWrapper.setStyle("-fx-background-color: green;");
 
-        this.accountsView = new MultiAccountView();
-        VBox.setVgrow(accountsView, Priority.ALWAYS);
-
         this.budgetView = new BudgetView();
-
-        if (false) {
-            contentWrapper.getChildren().add(accountsView);
-        } else {
-            contentWrapper.getChildren().add(budgetView);
-        }
+        contentWrapper.getChildren().add(budgetView);
 
 //        HBox center = new HBox(contentWrapper);
 //        center.setMaxWidth(USE_PREF_SIZE);
@@ -67,6 +59,10 @@ public class EditorView extends BorderPane {
         contentLayer.getStyleClass().add("center");
         contentLayer.getChildren().add(contentWrapper);
 
+        this.accountReviewView = new AccountReviewView();
+        accountReviewView.setMinWidth(800);
+        accountReviewView.setMaxWidth(1740);
+        accountReviewView.prefWidthProperty().bind(this.widthProperty().multiply(0.95));
         this.budgetTemplateView = new BudgetTemplateView();
         budgetTemplateView.setMinWidth(800);
         budgetTemplateView.setMaxWidth(1740);
@@ -111,8 +107,8 @@ public class EditorView extends BorderPane {
 
     }
 
-    public MultiAccountView accountsView() {
-        return accountsView;
+    public AccountReviewView accountReviewView() {
+        return accountReviewView;
     }
 
     public BudgetView budgetView() {
@@ -135,12 +131,13 @@ public class EditorView extends BorderPane {
         return notificationView;
     }
 
-    public void showAccountsView() {
-        switchContentTo(accountsView);
-    }
-
     public void showBudgetView() {
         switchContentTo(budgetView);
+    }
+
+    public void showAccountsView() {
+        switchOverlayTo(accountReviewView);
+        overlayLayer.setVisible(true);
     }
 
     public void showBudgetTemplateView() {
@@ -180,7 +177,6 @@ public class EditorView extends BorderPane {
     private MenuItem importCsvs;
     private MenuItem save;
     private MenuItem accounts;
-    private MenuItem budget;
     private MenuItem budgetTemplate;
     private MenuItem rules;
 
@@ -196,11 +192,10 @@ public class EditorView extends BorderPane {
         // View menu
         Menu viewMenu = new Menu("View");
         this.accounts = new MenuItem("Transactions");
-        this.budget = new MenuItem("Budget");
         this.budgetTemplate = new MenuItem("Budget Template");
         this.rules = new MenuItem("Categorization Rules");
 
-        viewMenu.getItems().addAll(accounts, budget, budgetTemplate, rules);
+        viewMenu.getItems().addAll(accounts, budgetTemplate, rules);
 
         // Root menu bar
         MenuBar menuBar = new MenuBar();
@@ -221,26 +216,12 @@ public class EditorView extends BorderPane {
         return accounts;
     }
 
-    public MenuItem menuItemBudget() {
-        return budget;
-    }
-    
     public MenuItem menuItemBudgetTemplate() {
         return budgetTemplate;
     }
-    
+
     public MenuItem menuItemRules() {
         return rules;
     }
 
-    private void buildBudgetSettingsView() {
-        // first of month - int (1-28)
-        // category - budgeted (double)
-
-        Label firstOfMonth = new Label("First of Month");
-        Label categories = new Label("Categories");
-        TextField category = new TextField("GROCERIES");
-        TextField budgeted = new TextField("500");
-
-    }
 }

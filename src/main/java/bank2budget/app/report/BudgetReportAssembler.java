@@ -57,7 +57,11 @@ public class BudgetReportAssembler {
 
         var profitCategories = month.operatingCategories().stream()
                 .filter(e -> !excludeUpper.contains(e.name().toUpperCase()))
-                .filter(e -> e.unadjustedClosing().compareTo(BigDecimal.ZERO) > 0)
+                .filter(e -> {
+                    return e.unadjustedClosing().compareTo(BigDecimal.ZERO) > 0
+                            // if unadjustedClosing is ZERO, but there is an positive adjustment
+                            || e.unadjustedClosing().compareTo(BigDecimal.ZERO) == 0 && e.adjustments().compareTo(BigDecimal.ZERO) > 0;
+                })
                 .toList();
         if (!profitCategories.isEmpty()) {
             var profitSection = sectionAssembler.build("Profitable Categories", CategoryType.OPERATING_PROFIT, profitCategories);
@@ -66,7 +70,11 @@ public class BudgetReportAssembler {
 
         var lossCategories = month.operatingCategories().stream()
                 .filter(e -> !excludeUpper.contains(e.name().toUpperCase()))
-                .filter(e -> e.unadjustedClosing().compareTo(BigDecimal.ZERO) < 0)
+                .filter(e -> {
+                    return e.unadjustedClosing().compareTo(BigDecimal.ZERO) < 0
+                            // if unadjustedClosing is ZERO, but there is an negative adjustment
+                            || e.unadjustedClosing().compareTo(BigDecimal.ZERO) == 0 && e.adjustments().compareTo(BigDecimal.ZERO) < 0;
+                })
                 .toList();
         if (!lossCategories.isEmpty()) {
             var lossSection = sectionAssembler.build("Loss-making Categories", CategoryType.OPERATING_LOSS, lossCategories);
@@ -112,7 +120,7 @@ public class BudgetReportAssembler {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         TotalRow totals = new TotalRow(
-                "Subtotal (without excl. categories)",
+                "Subtotal (above categories only)",
                 month.opening().subtract(exOpening),
                 month.actual().subtract(exActual),
                 month.budgeted().subtract(exBudgeted),

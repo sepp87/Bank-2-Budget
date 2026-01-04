@@ -32,7 +32,12 @@ public class Account {
     public BigDecimal getOpeningBalanceOn(LocalDate date) {
         int boundary = lowerDayBoundary(date);
         var transaction = transactionsIndex.ceilingEntry(boundary);
-        return transaction == null ? BigDecimal.ZERO : transaction.getValue().accountBalanceBefore();
+
+        /**
+         * if null there were no new transactions after the specified date. In
+         * this case the most current transaction is the opening balance.
+         */
+        return transaction == null ? getCurrentBalance() : transaction.getValue().accountBalanceBefore();
     }
 
     private int lowerDayBoundary(LocalDate date) {

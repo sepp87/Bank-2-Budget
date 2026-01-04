@@ -37,11 +37,11 @@ public class BudgetController {
         view.lastExport().setText(app.getAccountService().getLastExportDate().toString());
 
         this.profitAndLossController = new ProfitAndLossController(view.getProfitAndLossView(), app.getBudgetReportService(), app.getBudgetService(), app.getConfigService());
-
         this.budgetedVsActualController = new BudgetedVsActualController(view.getBudgetedVsActualView(), app.getBudgetReportService(), app.getBudgetService());
+
+        profitAndLossController.setOnEdited(e -> budgetedVsActualController.reload());
         budgetedVsActualController.setOnEdited(e -> profitAndLossController.reload());
 
-//        this.accountBalanceView = view.getAccountBalanceView();
         this.accountBalanceView = view.getAccountBalanceView();
 
         this.selectMonthSubscription = newSelectMonthSubscription();
@@ -63,6 +63,7 @@ public class BudgetController {
         view.monthSelector().getItems().clear();
         view.populateMonthSelector(budgetService.monthKeys(), key);;
         selectMonthSubscription = newSelectMonthSubscription();
+                view.lastExport().setText(app.getAccountService().getLastExportDate().toString());
     }
 
     private void clearAndSelectMonth(LocalDate key) {

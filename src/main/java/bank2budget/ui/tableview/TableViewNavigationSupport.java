@@ -16,11 +16,11 @@ public class TableViewNavigationSupport {
 
         }
 
+        var pos = selectedCells.get(0);
+        int row = pos.getRow() + 1;
+        var column = pos.getTableColumn();
+        
         Platform.runLater(() -> { // wait for enter to commit changes (if current cell is being edited) before selecting next cell
-            var pos = selectedCells.get(0);
-            int row = pos.getRow() + 1;
-            var column = pos.getTableColumn();
-
             table.getSelectionModel().clearAndSelect(row, column);
         });
 

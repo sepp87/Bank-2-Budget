@@ -29,7 +29,7 @@ public class UiApp extends Application {
     }
 
     private static final double APP_WIDTH = 1200;
-    private static final double APP_HEIGHT = 800;
+    private static final double APP_HEIGHT = 1000;
 
     @Override
     public void start(Stage stage) throws Exception {

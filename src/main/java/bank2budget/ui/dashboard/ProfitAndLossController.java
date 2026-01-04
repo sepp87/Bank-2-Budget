@@ -9,7 +9,6 @@ import bank2budget.app.report.SortBy;
 import bank2budget.app.report.SortType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import javafx.event.EventHandler;
 
@@ -26,6 +25,7 @@ public class ProfitAndLossController {
     private SortBy sortBy = SortBy.LABEL;
     private SortType sortType = SortType.ASCENDING;
     private LocalDate selected;
+    private EventHandler onEditedHandler;
 
     public ProfitAndLossController(ProfitAndLossView profitAndLossView, BudgetReportService budgetReportService, BudgetService budgetService, ConfigService configService) {
         this.view = profitAndLossView;
@@ -51,9 +51,14 @@ public class ProfitAndLossController {
             budgetService.setAdjustmentsForCategory(selected, c.name(), newValue);
             load(selected);
         }
-
+        if (onEditedHandler != null) {
+            onEditedHandler.handle(null);
+        }
         // issue command here
         // budgetCommandService.updateAdjustment(...);
     }
 
+    public void setOnEdited(EventHandler eh) {
+        this.onEditedHandler = eh;
+    }
 }

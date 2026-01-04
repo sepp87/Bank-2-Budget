@@ -137,19 +137,17 @@ public class TableColumnUtil {
                 if (getGraphic() instanceof TextField editor
                         && !editor.getProperties().containsKey("autocomplete")) {
 
-                    editor.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-                        if (e.getCode() == KeyCode.TAB) {
-                            commitEdit(editor.getText());
-                        }
-                    });
-
                     // Attach ControlsFX autocompletion
-                    var binding = TextFields.bindAutoCompletion(
-                            editor,
-                            request -> suggestions.filtered(s -> s.toLowerCase().contains(request.getUserText().toLowerCase())
-                            ));
+                    TextFields.bindAutoCompletion(editor, suggestions);
+                    editor.getProperties().put("autocomplete", true);
 
-                    editor.getProperties().put("autocomplete", binding);
+                    // Attach ControlsFX autocompletion - WARNING: BROKEN since string s is NULL
+//                    var binding = TextFields.bindAutoCompletion(
+//                            editor,
+//                            request -> suggestions.filtered(s -> s.toLowerCase().contains(request.getUserText().toLowerCase())
+//                            ));
+//
+//                    editor.getProperties().put("autocomplete", binding);
 
                 }
             }

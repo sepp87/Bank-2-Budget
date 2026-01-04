@@ -3,14 +3,14 @@ package bank2budget.ui;
 import bank2budget.App;
 import bank2budget.ui.budgettemplate.BudgetTemplateController;
 import bank2budget.ui.dashboard.BudgetController;
-import bank2budget.ui.rules.EditableRuleConfig;
 import bank2budget.ui.rules.RuleController;
 import bank2budget.ui.transaction.EditableCashTransaction;
-import bank2budget.ui.transaction.MultiAccountController;
+import bank2budget.ui.transaction.AccountReviewController;
 import bank2budget.ui.transaction.TransactionReviewController;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -27,7 +27,7 @@ public class EditorController {
     private final EditorView view;
     private final App app;
 
-    private final MultiAccountController multiAccountController;
+    private final AccountReviewController accountReviewController;
     private final BudgetController budgetController;
     private final BudgetTemplateController budgetTemplateController;
     private final RuleController ruleController;
@@ -37,7 +37,7 @@ public class EditorController {
         this.view = editorView;
         this.app = app;
 
-        this.multiAccountController = new MultiAccountController(view.accountsView(), app.getAccountService());
+        this.accountReviewController = new AccountReviewController(view.accountReviewView(), app.getAccountService());
         this.budgetController = new BudgetController(view.budgetView(), app);
 
         this.budgetTemplateController = new BudgetTemplateController(view.budgetTemplateView(), app.getTemplateService());
@@ -50,7 +50,6 @@ public class EditorController {
 
         // View menu - event handlers
         view.menuItemAccounts().setOnAction((e) -> view.showAccountsView());
-        view.menuItemBudget().setOnAction((e) -> view.showBudgetView());
         view.menuItemBudgetTemplate().setOnAction((e) -> {
             budgetTemplateController.reload();
             view.showBudgetTemplateView();
@@ -62,9 +61,13 @@ public class EditorController {
 
         // Budget - event handler
         budgetController.setOnReviewTransactions((e) -> startTransactionReview());
-        app.getBudgetService().setOnBudgetRecalculated(budgetController::reload);
+        app.getBudgetService().setOnBudgetRecalculated(
+                () -> Platform.runLater(budgetController::reload)
+        );
 
         // Modal menu - event handlers
+        accountReviewController.setOnCanceled((e) -> closeOverlayModal());
+        accountReviewController.setOnFinished((e) -> finishAccountReview());
         budgetTemplateController.setOnCanceled((e) -> closeOverlayModal());
         budgetTemplateController.setOnFinished((e) -> finishBudgetTemplateEdit());
         ruleController.setOnCanceled((e) -> closeOverlayModal());
@@ -80,21 +83,25 @@ public class EditorController {
         transactionReviewController.load(transactions);
         view.showTransactionReview();
     }
-    
-    private void finishBudgetTemplateEdit() {
-        budgetTemplateController.commitChanges();
-        closeOverlayModal();
-    }
-    
-    private void finishRuleEdit() {
-        ruleController.commitChanges();
-        closeOverlayModal();
-    }
 
     private void finishTransactionReview() {
         transactionReviewController.commitChanges();
         closeOverlayModal();
+    }
 
+    private void finishAccountReview() {
+        accountReviewController.commitChanges();
+        closeOverlayModal();
+    }
+
+    private void finishBudgetTemplateEdit() {
+        budgetTemplateController.commitChanges();
+        closeOverlayModal();
+    }
+
+    private void finishRuleEdit() {
+        ruleController.commitChanges();
+        closeOverlayModal();
     }
 
     private void closeOverlayModal() {
@@ -123,7 +130,6 @@ public class EditorController {
 
         // reload table
 //        multiAccountController.reload();
-
         // show import finished
         if (isSuccess) {
             view.notificationView().showNotification("Import succesful!");
@@ -140,17 +146,17 @@ public class EditorController {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() {
-//                // save transactions to xlsx and db 
-//                accountsController.saveToDomain();
-//
-//                app.getAccountService().save();
-//                app.getAnalyticsExportService().exportAccounts(app.getAccountService().getAccounts());
-//
-//                // recalculate and save budget
-//                app.getBudgetService().recalculateAndSave();
-//
-//                // save to db
-//                app.getAnalyticsExportService().exportBudget(app.getBudgetService().getBudget());
+                // save transactions to xlsx and db 
+//                multiAccountController.commitChanges();
+
+                app.getAccountService().save();
+                app.getAnalyticsExportService().exportAccounts(app.getAccountService().getAccounts());
+
+                // recalculate and save budget
+                app.getBudgetService().recalculateAndSave();
+
+                // save to db
+                app.getAnalyticsExportService().exportBudget(app.getBudgetService().getBudget());
 
                 // save settings
                 app.getRuleService().save();

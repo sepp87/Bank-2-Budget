@@ -55,7 +55,37 @@ public class BudgetCalculator {
 
         while (next != null) {
             BudgetMonth nextMonth = budget.month(next);
-            var nextUpdatedCategory = nextMonth.operatingCategory(category).withOpening(updatedCategory.closing());
+            boolean nextDoesNotContainCategory = nextMonth.operatingCategory(category) == null;
+            boolean updatedClosingIsNotZero = updatedCategory.closing().compareTo(BigDecimal.ZERO) != 0;
+            BudgetMonthCategory nextUpdatedCategory;
+            if (nextDoesNotContainCategory && updatedClosingIsNotZero) {
+                /**
+                 * Operating categories that are not declared in the budget
+                 * template are treated as month-scoped.
+                 *
+                 * Such categories are only carried forward into the next month
+                 * when their closing balance is non-zero.
+                 *
+                 * If such a category has a non-zero closing balance but is
+                 * absent from the next month, it is recreated explicitly.
+                 *
+                 * The previous month's closing balance becomes both the opening
+                 * and closing balance of the recreated category. Since the
+                 * category was absent, it has no activity (budgeted amount,
+                 * actual amount, adjustments, or transactions)
+                 */
+                nextUpdatedCategory = new BudgetMonthCategory(
+                        next,
+                        category,
+                        updatedCategory.closing(),
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        updatedCategory.closing(),
+                        List.of());
+            } else {
+                nextUpdatedCategory = nextMonth.operatingCategory(category).withOpening(updatedCategory.closing());
+            }
             var nextUpdatedMonth = nextMonth.withOperatingCategory(nextUpdatedCategory);
             result.add(nextUpdatedMonth);
 
