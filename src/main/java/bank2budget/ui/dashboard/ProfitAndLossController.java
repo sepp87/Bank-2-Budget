@@ -26,6 +26,7 @@ public class ProfitAndLossController {
     private SortType sortType = SortType.ASCENDING;
     private LocalDate selected;
     private EventHandler onEditedHandler;
+    private boolean hideCategories = true;
 
     public ProfitAndLossController(ProfitAndLossView profitAndLossView, BudgetReportService budgetReportService, BudgetService budgetService, ConfigService configService) {
         this.view = profitAndLossView;
@@ -35,6 +36,11 @@ public class ProfitAndLossController {
 
         view.onAdjustmentEdited(this::onAdjustmentEdit);
     }
+    
+    public void togglePnlCategories() {
+        hideCategories = !hideCategories;
+        reload();
+    }
 
     public void reload() {
         load(selected);
@@ -42,7 +48,8 @@ public class ProfitAndLossController {
 
     public final void load(LocalDate firstOfMonth) {
         selected = firstOfMonth;
-        List<BudgetReportRow> rows = reportService.getProfitAndLoss(firstOfMonth, sortBy, sortType, configService.excludePnlCategories());
+        List<String> excludeCategories = hideCategories ? configService.excludePnlCategories() : List.of();
+        List<BudgetReportRow> rows = reportService.getProfitAndLoss(firstOfMonth, sortBy, sortType, excludeCategories);
         view.getItems().setAll(rows);
     }
 

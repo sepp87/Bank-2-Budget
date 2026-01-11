@@ -152,4 +152,13 @@ public class CashTransactionDomainLogic {
         return transactionsByAccounts;
     }
 
+    public static Map<LocalDate, List<CashTransaction>> groupByDays(List<LocalDate> range, List<CashTransaction> transactions) {
+        Map<LocalDate, List<CashTransaction>> result = new TreeMap<>();
+        for (LocalDate date : range) {
+            result.put(date, new ArrayList<>());
+        }
+        transactions.stream().forEach(e -> result.get(e.date()).add(e));
+        return result;
+    }
+
 }
