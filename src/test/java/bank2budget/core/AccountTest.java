@@ -46,9 +46,9 @@ public class AccountTest {
                 newTx("2025-01-07", 1, true, 10, 150, "abc", "xyz", "Cee")
         );
 
-        Account existing = new Account("abc", existingTx);
-        Account imported1 = new Account("abc", importedTx1);
-        Account imported2 = new Account("abc", importedTx2);
+        var existing = new Account("abc", existingTx);
+        var imported1 = new Account("abc", importedTx1);
+        var imported2 = new Account("abc", importedTx2);
 
         // Perform test 
         existing.merge(imported1);
@@ -93,9 +93,9 @@ public class AccountTest {
                 newTx("2025-01-07", 1, true, 10, 150, "abc", "xyz", "Cee")
         );
 
-        Account existing = new Account("abc", existingTx);
-        Account imported1 = new Account("abc", importedTx1);
-        Account imported2 = new Account("abc", importedTx2);
+        var existing = new Account("abc", existingTx);
+        var imported1 = new Account("abc", importedTx1);
+        var imported2 = new Account("abc", importedTx2);
 
         // Perform test 
         existing.merge(imported2);
@@ -132,8 +132,8 @@ public class AccountTest {
         );
 
         // Perform test
-        Account existing = new Account("abc", existingTx);
-        Account imported = new Account("abc", importedTx);
+        var existing = new Account("abc", existingTx);
+        var imported = new Account("abc", importedTx);
         existing.merge(imported);
 
         // Prepare results
@@ -170,8 +170,8 @@ public class AccountTest {
         );
 
         // Perform test
-        Account existing = new Account("abc", existingTx);
-        Account imported = new Account("abc", importedTx);
+        var existing = new Account("abc", existingTx);
+        var imported = new Account("abc", importedTx);
         existing.merge(imported);
 
         // Prepare results
@@ -208,8 +208,8 @@ public class AccountTest {
         );
 
         // Perform test
-        Account existing = new Account("abc", existingTx);
-        Account imported = new Account("abc", importedTx);
+        var existing = new Account("abc", existingTx);
+        var imported = new Account("abc", importedTx);
         existing.merge(imported, true);
 
         // Prepare results
