@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 /**
  *
@@ -27,7 +28,7 @@ public class AccountService {
     private final AccountRepositoryPort repository;
     private final AccountImporterPort importer;
     private final RuleService ruleService;
-    private Map<String, Account> accountsIndex = new TreeMap<>();
+    private Map<String, Account> accountIndex = new TreeMap<>();
 
     public AccountService(AccountRepositoryPort repository, AccountImporterPort importer, RuleService ruleService) {
         this.repository = repository;
@@ -37,7 +38,7 @@ public class AccountService {
     }
 
     private void load() {
-        applyRules(repository.load().values()).forEach(e -> accountsIndex.put(e.getAccountNumber(), e));
+        applyRules(repository.load().values()).forEach(e -> accountIndex.put(e.getAccountNumber(), e));
     }
 
     private final List<Runnable> onAccountsUpdatedListeners = new ArrayList<>();
@@ -54,16 +55,16 @@ public class AccountService {
         var grouped = CashTransactionDomainLogic.groupByAccountNumber(transactions);
         for (var entry : grouped.entrySet()) {
             String number = entry.getKey();
-            if (accountsIndex.containsKey(number)) {
-                var updated = accountsIndex.get(number).withUpdatedTransactions(entry.getValue());
-                accountsIndex.put(number, updated);
+            if (accountIndex.containsKey(number)) {
+                var updated = accountIndex.get(number).withUpdatedTransactions(entry.getValue());
+                accountIndex.put(number, updated);
             }
         }
         onAccountsUpdated();
     }
 
     public Collection<Account> getAccounts() {
-        return accountsIndex.values();
+        return accountIndex.values();
     }
 
     public boolean importFromFiles(List<File> files) {
@@ -109,7 +110,7 @@ public class AccountService {
     }
 
     private boolean hasValidAccounts() {
-        boolean isValid = IntegrityChecker.check(accountsIndex.values());
+        boolean isValid = IntegrityChecker.check(accountIndex.values());
         if (!isValid) {
             Logger.getLogger(AccountService.class.getName()).log(Level.SEVERE, "Import aborted.");
         }
@@ -117,17 +118,17 @@ public class AccountService {
     }
 
     public void save() {
-        repository.save(accountsIndex.values());
+        repository.save(accountIndex.values());
     }
 
     private void merge(List<Account> importedAccounts) {
         // TODO Implement
         for (Account imported : importedAccounts) {
-            if (accountsIndex.containsKey(imported.getAccountNumber())) {
-                Account existing = accountsIndex.get(imported.getAccountNumber());
+            if (accountIndex.containsKey(imported.getAccountNumber())) {
+                Account existing = accountIndex.get(imported.getAccountNumber());
                 existing.merge(imported);
             } else {
-                accountsIndex.put(imported.getAccountNumber(), imported);
+                accountIndex.put(imported.getAccountNumber(), imported);
             }
         }
     }
@@ -138,6 +139,101 @@ public class AccountService {
 
     public BigDecimal getTotalBalanceOn(LocalDate date) {
         return AccountDomainLogic.getTotalBalanceOn(getAccounts(), date);
+    }
+
+    // NEW
+    // NEW    
+    // NEW
+    // NEW
+    // NEW    
+    // NEW   
+    // NEW
+    // NEW
+    // NEW    
+    // NEW
+    // NEW
+    // NEW    
+    // NEW   
+    // NEW
+    // NEW
+    // NEW    
+    // NEW
+    // NEW
+    // NEW    
+    // NEW   
+    // NEW
+    // NEW
+    // NEW    
+    // NEW
+    // NEW
+    // NEW    
+    // NEW   
+    // NEW    
+    public boolean importFromFilesNew(List<File> files) {
+        List<Account> imported = importer.importFromFiles(files);
+
+        var applied = applyRulesNew(imported);
+        var newAccounts = applied.stream().filter(e -> accountIndex.containsKey(e.getAccountNumber())).toList();
+        var toMerge = applied.stream().filter(e -> !accountIndex.containsKey(e.getAccountNumber())).toList();
+        var merged = mergeNew(toMerge);
+
+        var processed = Stream.concat(newAccounts.stream(), merged.stream()).toList();
+
+        boolean hasValidAccounts = IntegrityChecker.check(processed);
+        if (hasValidAccounts) {
+            processed.forEach(e -> accountIndex.put(e.getAccountNumber(), e));
+            onAccountsUpdated();
+            return true;
+        }
+        Logger.getLogger(AccountService.class.getName()).log(Level.SEVERE, "Import aborted.");
+        return false;
+    }
+
+    public boolean importFromTodoAndSaveNew() {
+        List<Account> imported = importer.importFromTodo();
+
+        var applied = applyRulesNew(imported);
+        var newAccounts = applied.stream().filter(e -> accountIndex.containsKey(e.getAccountNumber())).toList();
+        var toMerge = applied.stream().filter(e -> !accountIndex.containsKey(e.getAccountNumber())).toList();
+        var merged = mergeNew(toMerge);
+
+        var processed = Stream.concat(newAccounts.stream(), merged.stream()).toList();
+
+        boolean hasValidAccounts = IntegrityChecker.check(processed);
+        if (hasValidAccounts) {
+            processed.forEach(e -> accountIndex.put(e.getAccountNumber(), e));
+            save();
+            onAccountsUpdated();
+            return true;
+        }
+        return false;
+    }
+
+    private List<Account> applyRulesNew(Collection<Account> accounts) {
+        List<Account> result = new ArrayList<>();
+        for (Account account : accounts) {
+            var updated = ruleService.applyRules(account.transactionsAscending());
+            var updatedAccount = account.withUpdatedTransactions(updated);
+            result.add(updatedAccount);
+            System.out.println("Tx: " + account.transactionsAscending().size() + "\tupdatedTx: " + updated.size());
+        }
+        return result;
+    }
+
+    private List<Account> mergeNew(List<Account> imported) {
+        var result = new ArrayList<Account>();
+        for (Account account : imported) {
+
+            var number = account.getAccountNumber();
+            if (!accountIndex.containsKey(number)) {
+                continue;
+            }
+
+            Account existing = accountIndex.get(number);
+            var merged = existing.mergeNew(account);
+            result.add(merged);
+        }
+        return result;
     }
 
 }
