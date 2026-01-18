@@ -22,7 +22,7 @@ public class IntegrityChecker {
 
     }
 
-    private static boolean checkAccountBalanceHistory(Account account) {
+    public static boolean checkAccountBalanceHistory(Account account) {
         boolean allValid = true;
         var transactions = account.transactionsAscending();
         int limit = transactions.size() - 1;

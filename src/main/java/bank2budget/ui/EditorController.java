@@ -28,7 +28,7 @@ public class EditorController {
     private final App app;
 
     private final AccountReviewController accountReviewController;
-    private final BudgetController budgetController;
+    private final BudgetController dashboardController;
     private final BudgetTemplateController budgetTemplateController;
     private final RuleController ruleController;
     private final TransactionReviewController transactionReviewController;
@@ -38,7 +38,7 @@ public class EditorController {
         this.app = app;
 
         this.accountReviewController = new AccountReviewController(view.accountReviewView(), app.getAccountService());
-        this.budgetController = new BudgetController(view.budgetView(), app);
+        this.dashboardController = new BudgetController(view.dashboardView(), app);
 
         this.budgetTemplateController = new BudgetTemplateController(view.budgetTemplateView(), app.getTemplateService());
         this.ruleController = new RuleController(view.rulesView(), app.getRuleService());
@@ -60,9 +60,8 @@ public class EditorController {
         });
 
         // Budget - event handler
-        budgetController.setOnReviewTransactions((e) -> startTransactionReview());
-        app.getBudgetService().setOnBudgetRecalculated(
-                () -> Platform.runLater(budgetController::reload)
+        dashboardController.setOnReviewTransactions((e) -> startTransactionReview());
+        app.getBudgetService().setOnBudgetRecalculated(() -> Platform.runLater(dashboardController::reload)
         );
 
         // Modal menu - event handlers
@@ -79,7 +78,7 @@ public class EditorController {
     }
 
     private void startTransactionReview() {
-        ObservableList<EditableCashTransaction> transactions = FXCollections.observableList(budgetController.getSelectedMonth().transactions().stream().map(EditableCashTransaction::new).toList());
+        ObservableList<EditableCashTransaction> transactions = FXCollections.observableList(dashboardController.getSelectedMonth().transactions().stream().map(EditableCashTransaction::new).toList());
         transactionReviewController.load(transactions);
         view.showTransactionReview();
     }

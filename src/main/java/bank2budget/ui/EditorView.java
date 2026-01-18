@@ -2,20 +2,18 @@ package bank2budget.ui;
 
 import bank2budget.App;
 import bank2budget.ui.budgettemplate.BudgetTemplateView;
-import bank2budget.ui.dashboard.BudgetView;
+import bank2budget.ui.dashboard.DashboardView;
 import bank2budget.ui.rules.RuleView;
 import bank2budget.ui.transaction.AccountReviewView;
 import bank2budget.ui.transaction.TransactionReviewView;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
@@ -26,7 +24,7 @@ import javafx.scene.layout.VBox;
 public class EditorView extends BorderPane {
 
     private final AccountReviewView accountReviewView;
-    private final BudgetView budgetView;
+    private final DashboardView dashboardView;
     private final VBox contentWrapper;
     private final VBox overlayWrapper;
     private final NotificationView notificationView;
@@ -46,18 +44,18 @@ public class EditorView extends BorderPane {
         contentWrapper.prefWidthProperty().bind(this.widthProperty().multiply(0.95));
 //        contentWrapper.setStyle("-fx-background-color: green;");
 
-        this.budgetView = new BudgetView();
-        contentWrapper.getChildren().add(budgetView);
+        this.dashboardView = new DashboardView();
+        contentWrapper.getChildren().add(dashboardView);
 
-//        HBox center = new HBox(contentWrapper);
-//        center.setMaxWidth(USE_PREF_SIZE);
-//        center.setAlignment(Pos.TOP_CENTER);
-//        center.getStyleClass().add("center");
         StackPane contentLayer = new StackPane();
         contentLayer.setMaxWidth(USE_PREF_SIZE); // to negate automatic stretching to full-width of panes by BorderPane
         contentLayer.setAlignment(Pos.TOP_CENTER);
         contentLayer.getStyleClass().add("center");
         contentLayer.getChildren().add(contentWrapper);
+        StackPane centerContentLayer = new StackPane(contentLayer);
+        ScrollPane scrollPane = new ScrollPane(centerContentLayer);
+        scrollPane.setFitToWidth(true);
+//        centerContentLayer.getStyleClass().add("debug");
 
         this.accountReviewView = new AccountReviewView();
         accountReviewView.setMinWidth(800);
@@ -94,7 +92,7 @@ public class EditorView extends BorderPane {
 
         StackPane viewport = new StackPane();
         this.getStyleClass().add("viewport");
-        viewport.getChildren().addAll(contentLayer, overlayLayer, notificationLayer);
+        viewport.getChildren().addAll(scrollPane, overlayLayer, notificationLayer);
 
         notificationLayer.prefWidthProperty().bind(viewport.widthProperty());
         notificationLayer.prefHeightProperty().bind(viewport.heightProperty());
@@ -103,7 +101,7 @@ public class EditorView extends BorderPane {
         this.getStyleClass().add("editor");
 
         viewport.setMinHeight(0); // ensure the viewport shrinks to the window size
-        contentLayer.setMinHeight(0); // ensure the content layer also shrinks to the window size
+//        contentLayer.setMinHeight(0); // ensure the content layer also shrinks to the window size
 
     }
 
@@ -111,8 +109,8 @@ public class EditorView extends BorderPane {
         return accountReviewView;
     }
 
-    public BudgetView budgetView() {
-        return budgetView;
+    public DashboardView dashboardView() {
+        return dashboardView;
     }
 
     public RuleView rulesView() {
@@ -131,8 +129,8 @@ public class EditorView extends BorderPane {
         return notificationView;
     }
 
-    public void showBudgetView() {
-        switchContentTo(budgetView);
+    public void showDashboardView() {
+        switchContentTo(dashboardView);
     }
 
     public void showAccountsView() {

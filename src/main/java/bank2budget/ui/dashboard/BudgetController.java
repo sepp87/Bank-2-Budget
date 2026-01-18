@@ -17,7 +17,7 @@ import javafx.util.Subscription;
  */
 public class BudgetController {
 
-    private final BudgetView view;
+    private final DashboardView view;
     private final App app;
 
     private final BudgetService budgetService;
@@ -28,8 +28,8 @@ public class BudgetController {
 
     private Subscription selectMonthSubscription;
 
-    public BudgetController(BudgetView budgetView, App app) {
-        this.view = budgetView;
+    public BudgetController(DashboardView dashboardView, App app) {
+        this.view = dashboardView;
         this.app = app;
         this.budgetService = app.getBudgetService();
 
@@ -39,6 +39,7 @@ public class BudgetController {
         this.profitAndLossController = new ProfitAndLossController(view.getProfitAndLossView(), app.getBudgetReportService(), app.getBudgetService(), app.getConfigService());
         this.budgetedVsActualController = new BudgetedVsActualController(view.getBudgetedVsActualView(), app.getBudgetReportService(), app.getBudgetService());
 
+        view.getTogglePnlCategoriesButton().setOnAction(e -> profitAndLossController.togglePnlCategories());
         profitAndLossController.setOnEdited(e -> budgetedVsActualController.reload());
         budgetedVsActualController.setOnEdited(e -> profitAndLossController.reload());
 
@@ -63,7 +64,7 @@ public class BudgetController {
         view.monthSelector().getItems().clear();
         view.populateMonthSelector(budgetService.monthKeys(), key);;
         selectMonthSubscription = newSelectMonthSubscription();
-                view.lastExport().setText(app.getAccountService().getLastExportDate().toString());
+        view.lastExport().setText(app.getAccountService().getLastExportDate().toString());
     }
 
     private void clearAndSelectMonth(LocalDate key) {
