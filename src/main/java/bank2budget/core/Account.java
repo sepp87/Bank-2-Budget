@@ -244,7 +244,7 @@ public class Account {
     // NEW   
     // NEW
     public Account mergeNew(Account incoming) {
-        return Account.this.mergeNew(incoming, false);
+        return mergeNew(incoming, false);
     }
 
     public Account mergeNew(Account incoming, boolean overwriteCategories) {
@@ -252,28 +252,28 @@ public class Account {
     }
 
     private Account evaluateOverlapAndMergeNew(List<CashTransaction> incoming, boolean overwriteCategories) {
-        var result = new TreeMap<Integer, CashTransaction>(transactionsIndex);
+        var existing = new TreeMap<Integer, CashTransaction>(transactionsIndex);
 
         // Evaluate overlap
         LocalDate[] overlap = CashTransactionDomainLogic.findOverlap(incoming, transactionsAscending());
 
         // no overlap, so add all incoming
         if (overlap == null) {
-            incoming.forEach(e -> result.put(e.transactionNumber(), e));
+            incoming.forEach(e -> existing.put(e.transactionNumber(), e));
 
             // merge overlap
         } else {
             LocalDate from = overlap[0];
             LocalDate to = overlap[1];
-            var merged = Account.this.mergeTransactions(incoming, from, to, overwriteCategories);
-            merged.forEach(e -> result.put(e.transactionNumber(), e));
+            var merged = mergeTransactions(incoming, from, to, overwriteCategories);
+            merged.forEach(e -> existing.put(e.transactionNumber(), e));
 
             // finally add non-overlapping incoming transactions
             var otherIncoming = CashTransactionDomainLogic.filterByTimespanInverted(incoming, overlap[0], overlap[1]);
-            otherIncoming.forEach(e -> result.put(e.transactionNumber(), e));
+            otherIncoming.forEach(e -> existing.put(e.transactionNumber(), e));
         }
 
-        return new Account(this.accountNumber, result.values());
+        return new Account(this.accountNumber, existing.values());
     }
 
     // decide which transactions to add, discard and add categories to
@@ -317,7 +317,7 @@ public class Account {
                 if (isSame && incoming.category() != null && (existing.category() == null || overwriteCategories)) {
                     var updated = existing.withCategory(incoming.category());
                     result.add(updated);
-                    transactionsIndex.put(number, updated);
+//                    transactionsIndex.put(number, updated);
                 }
 
             } else {
@@ -328,4 +328,5 @@ public class Account {
         }
         return result;
     }
+
 }

@@ -2,6 +2,7 @@ package bank2budget.app;
 
 import bank2budget.core.Account;
 import bank2budget.core.AccountDomainLogic;
+import bank2budget.core.AccountMerger;
 import bank2budget.core.CashTransaction;
 import bank2budget.core.CashTransactionDomainLogic;
 import bank2budget.core.IntegrityChecker;
@@ -67,7 +68,7 @@ public class AccountService {
         return accountIndex.values();
     }
 
-    public boolean importFromFiles(List<File> files) {
+    public boolean importFromFilesOld(List<File> files) {
         List<Account> imported = importer.importFromFiles(files);
         applyRulesAndMerge(imported);
         if (hasValidAccounts()) {
@@ -110,7 +111,7 @@ public class AccountService {
     }
 
     private boolean hasValidAccounts() {
-        boolean isValid = IntegrityChecker.check(accountIndex.values());
+        boolean isValid = IntegrityChecker.areAccountBalancesConsistent(accountIndex.values());
         if (!isValid) {
             Logger.getLogger(AccountService.class.getName()).log(Level.SEVERE, "Import aborted.");
         }
@@ -169,18 +170,17 @@ public class AccountService {
     // NEW    
     // NEW   
     // NEW    
-    public boolean importFromFilesNew(List<File> files) {
+    public boolean importFromFiles(List<File> files) {
         List<Account> imported = importer.importFromFiles(files);
 
-        var applied = applyRulesNew(imported);
-        var newAccounts = applied.stream().filter(e -> accountIndex.containsKey(e.getAccountNumber())).toList();
-        var toMerge = applied.stream().filter(e -> !accountIndex.containsKey(e.getAccountNumber())).toList();
+        var applied = applyRules(imported);
+        var newAccounts = applied.stream().filter(e -> !accountIndex.containsKey(e.getAccountNumber())).toList();
+        var toMerge = applied.stream().filter(e -> accountIndex.containsKey(e.getAccountNumber())).toList();
         var merged = mergeNew(toMerge);
-
         var processed = Stream.concat(newAccounts.stream(), merged.stream()).toList();
 
-        boolean hasValidAccounts = IntegrityChecker.check(processed);
-        if (hasValidAccounts) {
+        boolean isValid = IntegrityChecker.areAccountBalancesConsistent(processed);
+        if (isValid) {
             processed.forEach(e -> accountIndex.put(e.getAccountNumber(), e));
             onAccountsUpdated();
             return true;
@@ -192,15 +192,15 @@ public class AccountService {
     public boolean importFromTodoAndSaveNew() {
         List<Account> imported = importer.importFromTodo();
 
-        var applied = applyRulesNew(imported);
+        var applied = applyRules(imported);
         var newAccounts = applied.stream().filter(e -> accountIndex.containsKey(e.getAccountNumber())).toList();
         var toMerge = applied.stream().filter(e -> !accountIndex.containsKey(e.getAccountNumber())).toList();
         var merged = mergeNew(toMerge);
 
         var processed = Stream.concat(newAccounts.stream(), merged.stream()).toList();
 
-        boolean hasValidAccounts = IntegrityChecker.check(processed);
-        if (hasValidAccounts) {
+        boolean isValid = IntegrityChecker.areAccountBalancesConsistent(processed);
+        if (isValid) {
             processed.forEach(e -> accountIndex.put(e.getAccountNumber(), e));
             save();
             onAccountsUpdated();
@@ -209,28 +209,17 @@ public class AccountService {
         return false;
     }
 
-    private List<Account> applyRulesNew(Collection<Account> accounts) {
-        List<Account> result = new ArrayList<>();
-        for (Account account : accounts) {
-            var updated = ruleService.applyRules(account.transactionsAscending());
-            var updatedAccount = account.withUpdatedTransactions(updated);
-            result.add(updatedAccount);
-            System.out.println("Tx: " + account.transactionsAscending().size() + "\tupdatedTx: " + updated.size());
-        }
-        return result;
-    }
-
     private List<Account> mergeNew(List<Account> imported) {
         var result = new ArrayList<Account>();
-        for (Account account : imported) {
+        for (Account incoming : imported) {
 
-            var number = account.getAccountNumber();
+            var number = incoming.getAccountNumber();
             if (!accountIndex.containsKey(number)) {
                 continue;
             }
 
             Account existing = accountIndex.get(number);
-            var merged = existing.mergeNew(account);
+            var merged = AccountMerger.merge(existing, incoming);
             result.add(merged);
         }
         return result;

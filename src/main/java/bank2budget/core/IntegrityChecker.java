@@ -10,10 +10,10 @@ import java.util.logging.Logger;
  */
 public class IntegrityChecker {
 
-    public static boolean check(Collection<Account> accounts) {
+    public static boolean areAccountBalancesConsistent(Collection<Account> accounts) {
         boolean allValid = true;
         for (Account account : accounts) {
-            boolean isValid = checkAccountBalanceHistory(account);
+            boolean isValid = isBalanceHistoryConsistent(account);
             if (!isValid) {
                 allValid = false;
             }
@@ -22,14 +22,14 @@ public class IntegrityChecker {
 
     }
 
-    public static boolean checkAccountBalanceHistory(Account account) {
+    public static boolean isBalanceHistoryConsistent(Account account) {
         boolean allValid = true;
         var transactions = account.transactionsAscending();
         int limit = transactions.size() - 1;
         for (int i = 0; i < limit; i++) {
             var transaction = transactions.get(i);
             var next = transactions.get(i + 1);
-            boolean isValid = compareBalanceBetween(transaction, next);
+            boolean isValid = isBalanceContinuous(transaction, next);
             if (!isValid) {
                 allValid = false;
             }
@@ -37,7 +37,7 @@ public class IntegrityChecker {
         return allValid;
     }
 
-    private static boolean compareBalanceBetween(CashTransaction transaction, CashTransaction next) {
+    private static boolean isBalanceContinuous(CashTransaction transaction, CashTransaction next) {
         boolean isSame = transaction.accountBalance().compareTo(next.accountBalanceBefore()) == 0;
         if (!isSame) {
             Logger.getLogger(IntegrityChecker.class.getName()).log(
