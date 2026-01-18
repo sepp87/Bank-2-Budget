@@ -15,19 +15,20 @@ import javafx.util.Subscription;
  *
  * @author joostmeulenkamp
  */
-public class DashboardController {
+public class BudgetController {
 
-    private final DashboardView view;
+    private final BudgetView view;
     private final App app;
 
     private final BudgetService budgetService;
     private final ProfitAndLossController profitAndLossController;
     private final BudgetedVsActualController budgetedVsActualController;
+//    private final AccountBalanceView accountBalanceView;
     private final AccountBalanceView accountBalanceView;
 
     private Subscription selectMonthSubscription;
 
-    public DashboardController(DashboardView budgetView, App app) {
+    public BudgetController(BudgetView budgetView, App app) {
         this.view = budgetView;
         this.app = app;
         this.budgetService = app.getBudgetService();
@@ -38,7 +39,6 @@ public class DashboardController {
         this.profitAndLossController = new ProfitAndLossController(view.getProfitAndLossView(), app.getBudgetReportService(), app.getBudgetService(), app.getConfigService());
         this.budgetedVsActualController = new BudgetedVsActualController(view.getBudgetedVsActualView(), app.getBudgetReportService(), app.getBudgetService());
 
-        view.getTogglePnlCategoriesButton().setOnAction(e -> profitAndLossController.togglePnlCategories());
         profitAndLossController.setOnEdited(e -> budgetedVsActualController.reload());
         budgetedVsActualController.setOnEdited(e -> profitAndLossController.reload());
 
@@ -63,7 +63,7 @@ public class DashboardController {
         view.monthSelector().getItems().clear();
         view.populateMonthSelector(budgetService.monthKeys(), key);;
         selectMonthSubscription = newSelectMonthSubscription();
-        view.lastExport().setText(app.getAccountService().getLastExportDate().toString());
+                view.lastExport().setText(app.getAccountService().getLastExportDate().toString());
     }
 
     private void clearAndSelectMonth(LocalDate key) {

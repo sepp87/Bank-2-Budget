@@ -2,7 +2,7 @@ package bank2budget.ui;
 
 import bank2budget.App;
 import bank2budget.ui.budgettemplate.BudgetTemplateView;
-import bank2budget.ui.dashboard.DashboardView;
+import bank2budget.ui.dashboard.BudgetView;
 import bank2budget.ui.rules.RuleView;
 import bank2budget.ui.transaction.AccountReviewView;
 import bank2budget.ui.transaction.TransactionReviewView;
@@ -26,7 +26,7 @@ import javafx.scene.layout.VBox;
 public class EditorView extends BorderPane {
 
     private final AccountReviewView accountReviewView;
-    private final DashboardView budgetView;
+    private final BudgetView budgetView;
     private final VBox contentWrapper;
     private final VBox overlayWrapper;
     private final NotificationView notificationView;
@@ -46,7 +46,7 @@ public class EditorView extends BorderPane {
         contentWrapper.prefWidthProperty().bind(this.widthProperty().multiply(0.95));
 //        contentWrapper.setStyle("-fx-background-color: green;");
 
-        this.budgetView = new DashboardView();
+        this.budgetView = new BudgetView();
         contentWrapper.getChildren().add(budgetView);
 
 //        HBox center = new HBox(contentWrapper);
@@ -111,7 +111,7 @@ public class EditorView extends BorderPane {
         return accountReviewView;
     }
 
-    public DashboardView budgetView() {
+    public BudgetView budgetView() {
         return budgetView;
     }
 

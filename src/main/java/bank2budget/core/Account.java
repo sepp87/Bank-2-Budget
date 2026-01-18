@@ -90,50 +90,42 @@ public class Account {
         return transactionsIndex.lastEntry().getValue().date();
     }
 
-    public Account merge(Account incoming) {
-        return Account.this.merge(incoming, false);
+    public void merge(Account incoming) {
+        merge(incoming, false);
     }
 
-    public Account merge(Account incoming, boolean overwriteCategories) {
-        return evaluateOverlapAndMerge(incoming.transactionsAscending(), overwriteCategories);
+    public void merge(Account incoming, boolean overwriteCategories) {
+        evaluateOverlapAndMerge(incoming.transactionsAscending(), overwriteCategories);
     }
 
-    private Account evaluateOverlapAndMerge(List<CashTransaction> incoming, boolean overwriteCategories) {
-        var result = new TreeMap<Integer, CashTransaction>(transactionsIndex);
-
+    private void evaluateOverlapAndMerge(List<CashTransaction> incoming, boolean overwriteCategories) {
         // Evaluate overlap
         LocalDate[] overlap = CashTransactionDomainLogic.findOverlap(incoming, transactionsAscending());
 
         // no overlap, so add all incoming
         if (overlap == null) {
-            incoming.forEach(e -> result.put(e.transactionNumber(), e));
+            addTransactions(incoming);
 
             // merge overlap
         } else {
             LocalDate from = overlap[0];
             LocalDate to = overlap[1];
-            var merged = Account.this.merge(incoming, from, to, overwriteCategories);
-            merged.forEach(e -> result.put(e.transactionNumber(), e));
+            merge(incoming, from, to, overwriteCategories);
 
             // finally add non-overlapping incoming transactions
-            var otherIncoming = CashTransactionDomainLogic.filterByTimespanInverted(incoming, overlap[0], overlap[1]);
-            otherIncoming.forEach(e -> result.put(e.transactionNumber(), e));
+            List<CashTransaction> otherIncoming = CashTransactionDomainLogic.filterByTimespanInverted(incoming, overlap[0], overlap[1]);
+            addTransactions(otherIncoming);
         }
-
-        return new Account(this.accountNumber, result.values());
     }
 
     // decide which transactions to add, discard and add categories to
-    private Collection<CashTransaction> merge(List<CashTransaction> incoming, LocalDate from, LocalDate to, boolean overwriteCategories) {
-        var result = new TreeMap<Integer, CashTransaction>();
-        var existingOverlap = CashTransactionDomainLogic.filterByTimespan(transactionsAscending(), from, to);
+    private void merge(List<CashTransaction> incoming, LocalDate from, LocalDate to, boolean overwriteCategories) {
+        var existingOverlap = getTransactions(from, to);
         var incomingOverlap = CashTransactionDomainLogic.filterByTimespan(incoming, from, to);
         List<LocalDate> range = DateUtil.dateRange(from, to);
 
-        Map<LocalDate, List<CashTransaction>> existingByDays = CashTransactionDomainLogic.groupByDays(range, existingOverlap);
-        Map<LocalDate, List<CashTransaction>> incomingByDays = CashTransactionDomainLogic.groupByDays(range, incomingOverlap);
-
-        existingOverlap.forEach(e -> result.put(e.transactionNumber(), e));
+        Map<LocalDate, List<CashTransaction>> existingByDays = groupByDays(range, existingOverlap);
+        Map<LocalDate, List<CashTransaction>> incomingByDays = groupByDays(range, incomingOverlap);
 
         for (LocalDate day : range) {
             var existingDay = existingByDays.get(day);
@@ -141,21 +133,39 @@ public class Account {
 
             // if incoming transactions contains more entries, the existing ones should be replaced
             if (incomingDay.size() > existingDay.size()) {
-                incomingDay.forEach(e -> result.put(e.transactionNumber(), e));
-                var enriched = enrichCategories(existingDay, true); // existing categories should overwrite new categories
-                enriched.forEach(e -> result.put(e.transactionNumber(), e));
+                removeTransactions(existingDay);
+                addTransactions(incomingDay);
+                enrichCategories(existingDay, true); // existing categories should overwrite new categories
 
             } else {
-                var enriched = enrichCategories(incomingDay, overwriteCategories); // new categories should enrich existing categories
-                enriched.forEach(e -> result.put(e.transactionNumber(), e));
-
+                enrichCategories(incomingDay, overwriteCategories); // new categories should enrich existing categories
             }
         }
-        return result.values();
     }
 
-    private List<CashTransaction> enrichCategories(List<CashTransaction> transactions, boolean overwriteCategories) {
-        var result = new ArrayList<CashTransaction>();
+    private Map<LocalDate, List<CashTransaction>> groupByDays(List<LocalDate> range, List<CashTransaction> transactions) {
+        Map<LocalDate, List<CashTransaction>> result = new TreeMap<>();
+        for (LocalDate date : range) {
+            result.put(date, new ArrayList<>());
+        }
+        transactions.stream().forEach(e -> result.get(e.date()).add(e));
+        return result;
+    }
+
+    private void addTransactions(List<CashTransaction> transactions) {
+        for (var transaction : transactions) {
+            transactionsIndex.put(transaction.transactionNumber(), transaction);
+        }
+    }
+
+    private void removeTransactions(List<CashTransaction> transactions) {
+        for (var transaction : transactions) {
+            int number = transaction.transactionNumber();
+            transactionsIndex.remove(number);
+        }
+    }
+
+    private void enrichCategories(List<CashTransaction> transactions, boolean overwriteCategories) {
         for (var incoming : transactions) {
             int number = incoming.transactionNumber();
             if (transactionsIndex.containsKey(number)) {
@@ -163,19 +173,23 @@ public class Account {
                 boolean isSame = CashTransactionDomainLogic.areSame(incoming, existing);
                 if (isSame && incoming.category() != null && (existing.category() == null || overwriteCategories)) {
                     var updated = existing.withCategory(incoming.category());
-                    result.add(updated);
                     transactionsIndex.put(number, updated);
+//                Logger.getLogger(Account.class.getName()).log(Level.INFO, "Transaction numbers {0} matched, please check if NOT duplicate: \n\t{1}\n\t{2}\n", new Object[]{transaction.transactionNumber, indexed.toString(), transaction.toString()});
                 }
+//                else {
+//                    System.out.println("isSame " + isSame + "   transaction.getCategory()!=null " + (transaction.getCategory() != null) + "  overwriteExistingCategories " + overwriteExistingCategories);
+//                    System.out.println(existing);
+//                    System.out.println(transaction);
+//                    System.out.println();
 
+//                }
             } else {
                 System.out.println("trying to enrich existing transactions with re-imported transactions, but transaction does not exist, should not be a case to right?");
                 System.out.println(incoming);
                 System.out.println();
             }
         }
-        return result;
     }
-
 
     /**
      *

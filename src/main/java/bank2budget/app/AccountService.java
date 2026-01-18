@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 /**
  *
@@ -28,7 +27,7 @@ public class AccountService {
     private final AccountRepositoryPort repository;
     private final AccountImporterPort importer;
     private final RuleService ruleService;
-    private Map<String, Account> accountIndex = new TreeMap<>();
+    private Map<String, Account> accountsIndex = new TreeMap<>();
 
     public AccountService(AccountRepositoryPort repository, AccountImporterPort importer, RuleService ruleService) {
         this.repository = repository;
@@ -38,7 +37,7 @@ public class AccountService {
     }
 
     private void load() {
-        applyRules(repository.load().values()).forEach(e -> accountIndex.put(e.getAccountNumber(), e));
+        applyRules(repository.load().values()).forEach(e -> accountsIndex.put(e.getAccountNumber(), e));
     }
 
     private final List<Runnable> onAccountsUpdatedListeners = new ArrayList<>();
@@ -55,56 +54,47 @@ public class AccountService {
         var grouped = CashTransactionDomainLogic.groupByAccountNumber(transactions);
         for (var entry : grouped.entrySet()) {
             String number = entry.getKey();
-            if (accountIndex.containsKey(number)) {
-                var updated = accountIndex.get(number).withUpdatedTransactions(entry.getValue());
-                accountIndex.put(number, updated);
+            if (accountsIndex.containsKey(number)) {
+                var updated = accountsIndex.get(number).withUpdatedTransactions(entry.getValue());
+                accountsIndex.put(number, updated);
             }
         }
         onAccountsUpdated();
     }
 
     public Collection<Account> getAccounts() {
-        return accountIndex.values();
+        return accountsIndex.values();
     }
 
     public boolean importFromFiles(List<File> files) {
         List<Account> imported = importer.importFromFiles(files);
-
-        var applied = applyRules(imported);
-        var newAccounts = applied.stream().filter(e -> accountIndex.containsKey(e.getAccountNumber())).toList();
-        var toMerge = applied.stream().filter(e -> !accountIndex.containsKey(e.getAccountNumber())).toList();
-        var merged = merge(toMerge);
-
-        var processed = Stream.concat(newAccounts.stream(), merged.stream()).toList();
-
-        boolean hasValidAccounts = IntegrityChecker.check(processed);
-        if (hasValidAccounts) {
-            processed.forEach(e -> accountIndex.put(e.getAccountNumber(), e));
+        applyRulesAndMerge(imported);
+        if (hasValidAccounts()) {
             onAccountsUpdated();
             return true;
         }
-        Logger.getLogger(AccountService.class.getName()).log(Level.SEVERE, "Import aborted.");
+        load(); // reload all if import failed 
         return false;
     }
 
     public boolean importFromTodoAndSave() {
         List<Account> imported = importer.importFromTodo();
+        applyRulesAndMerge(imported);
 
-        var applied = applyRules(imported);
-        var newAccounts = applied.stream().filter(e -> accountIndex.containsKey(e.getAccountNumber())).toList();
-        var toMerge = applied.stream().filter(e -> !accountIndex.containsKey(e.getAccountNumber())).toList();
-        var merged = merge(toMerge);
-
-        var processed = Stream.concat(newAccounts.stream(), merged.stream()).toList();
-
-        boolean hasValidAccounts = IntegrityChecker.check(processed);
-        if (hasValidAccounts) {
-            processed.forEach(e -> accountIndex.put(e.getAccountNumber(), e));
+//        if(true) {
+//            return false;
+//        }
+        if (hasValidAccounts()) {
             save();
             onAccountsUpdated();
             return true;
         }
         return false;
+    }
+
+    private void applyRulesAndMerge(List<Account> imported) {
+        var applied = applyRules(imported);
+        merge(applied);
     }
 
     private List<Account> applyRules(Collection<Account> accounts) {
@@ -118,24 +108,28 @@ public class AccountService {
         return result;
     }
 
-    public void save() {
-        repository.save(accountIndex.values());
+    private boolean hasValidAccounts() {
+        boolean isValid = IntegrityChecker.check(accountsIndex.values());
+        if (!isValid) {
+            Logger.getLogger(AccountService.class.getName()).log(Level.SEVERE, "Import aborted.");
+        }
+        return isValid;
     }
 
-    private List<Account> merge(List<Account> imported) {
-        var result = new ArrayList<Account>();
-        for (Account account : imported) {
+    public void save() {
+        repository.save(accountsIndex.values());
+    }
 
-            var number = account.getAccountNumber();
-            if (!accountIndex.containsKey(number)) {
-                continue;
+    private void merge(List<Account> importedAccounts) {
+        // TODO Implement
+        for (Account imported : importedAccounts) {
+            if (accountsIndex.containsKey(imported.getAccountNumber())) {
+                Account existing = accountsIndex.get(imported.getAccountNumber());
+                existing.merge(imported);
+            } else {
+                accountsIndex.put(imported.getAccountNumber(), imported);
             }
-
-            Account existing = accountIndex.get(number);
-            var merged = existing.merge(account);
-            result.add(merged);
         }
-        return result;
     }
 
     public LocalDate getLastExportDate() {

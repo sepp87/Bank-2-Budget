@@ -2,7 +2,7 @@ package bank2budget.ui;
 
 import bank2budget.App;
 import bank2budget.ui.budgettemplate.BudgetTemplateController;
-import bank2budget.ui.dashboard.DashboardController;
+import bank2budget.ui.dashboard.BudgetController;
 import bank2budget.ui.rules.RuleController;
 import bank2budget.ui.transaction.EditableCashTransaction;
 import bank2budget.ui.transaction.AccountReviewController;
@@ -28,7 +28,7 @@ public class EditorController {
     private final App app;
 
     private final AccountReviewController accountReviewController;
-    private final DashboardController budgetController;
+    private final BudgetController budgetController;
     private final BudgetTemplateController budgetTemplateController;
     private final RuleController ruleController;
     private final TransactionReviewController transactionReviewController;
@@ -38,7 +38,7 @@ public class EditorController {
         this.app = app;
 
         this.accountReviewController = new AccountReviewController(view.accountReviewView(), app.getAccountService());
-        this.budgetController = new DashboardController(view.budgetView(), app);
+        this.budgetController = new BudgetController(view.budgetView(), app);
 
         this.budgetTemplateController = new BudgetTemplateController(view.budgetTemplateView(), app.getTemplateService());
         this.ruleController = new RuleController(view.rulesView(), app.getRuleService());

@@ -21,7 +21,7 @@ import javafx.scene.layout.VBox;
  *
  * @author joostmeulenkamp
  */
-public class DashboardView extends AnchorPane {
+public class BudgetView extends AnchorPane {
 
     private final ComboBox<LocalDate> monthSelection;
 
@@ -35,14 +35,13 @@ public class DashboardView extends AnchorPane {
     private final AccountBalanceView accountBalanceView;
 
     private final Button reviewTransactionsButton;
-    private final Button togglePnlCategoriesButton;
 
     // Month Year                                               [ month ] [ save ]
     // Budgeted vs. Expenses                                    Savings, Buffers and Deficits
     // Header   category - budgeted - expenses - remainder      Header  category - amount
     // Row      category - budgeted - expenses - remainder      Row     category - amount
 //    public BudgetView(App app) {
-    public DashboardView() {
+    public BudgetView() {
 
         // Build header
         this.currentMonth = new Label("January 2026");
@@ -64,16 +63,15 @@ public class DashboardView extends AnchorPane {
         // Build table - budgeted vs. actual
         Label budgetedVsActualHeader = new Label("Budgeted vs. Actual");
         budgetedVsActualHeader.getStyleClass().add("header");
-        this.budgetedVsActualView = new BudgetedVsActualView();
-        this.reviewTransactionsButton = new Button("Review transactions");
+        budgetedVsActualView = new BudgetedVsActualView();
+        reviewTransactionsButton = new Button("Review transactions");
         VBox budgetedVsActual = new VBox(budgetedVsActualHeader, budgetedVsActualView, reviewTransactionsButton);
 
         // Build table - profit and loss
         Label profitAndLossHeader = new Label("Savings, Buffers and Deficits");
         profitAndLossHeader.getStyleClass().add("header");
         this.profitAndLossView = new ProfitAndLossView();
-        this.togglePnlCategoriesButton = new Button("Toggle categories");
-        VBox profitAndLosses = new VBox(profitAndLossHeader, profitAndLossView, togglePnlCategoriesButton);
+        VBox profitAndLosses = new VBox(profitAndLossHeader, profitAndLossView);
 
         // Build Pie Chart
         Label accountBalanceHeader = new Label("Account Balance");
@@ -117,10 +115,6 @@ public class DashboardView extends AnchorPane {
 
     public ProfitAndLossView getProfitAndLossView() {
         return profitAndLossView;
-    }
-    
-    public Button getTogglePnlCategoriesButton() {
-        return togglePnlCategoriesButton;
     }
 
     public BudgetedVsActualView getBudgetedVsActualView() {

@@ -46,17 +46,17 @@ public class AccountTest {
                 newTx("2025-01-07", 1, true, 10, 150, "abc", "xyz", "Cee")
         );
 
-        var existing = new Account("abc", existingTx);
-        var imported1 = new Account("abc", importedTx1);
-        var imported2 = new Account("abc", importedTx2);
+        Account existing = new Account("abc", existingTx);
+        Account imported1 = new Account("abc", importedTx1);
+        Account imported2 = new Account("abc", importedTx2);
 
         // Perform test 
-        var merged1 = existing.merge(imported1);
-        var merged2 = merged1.merge(imported2);
+        existing.merge(imported1);
+        existing.merge(imported2);
 
         // Prepare results
         int expected = 13;
-        int result = merged2.transactionsAscending().size();
+        int result = existing.transactionsAscending().size();
 
         // Evaluate results
         assertEquals(expected, result, "Expected number of transactions did not match the actual obtained number of transactions");
@@ -93,17 +93,17 @@ public class AccountTest {
                 newTx("2025-01-07", 1, true, 10, 150, "abc", "xyz", "Cee")
         );
 
-        var existing = new Account("abc", existingTx);
-        var imported1 = new Account("abc", importedTx1);
-        var imported2 = new Account("abc", importedTx2);
+        Account existing = new Account("abc", existingTx);
+        Account imported1 = new Account("abc", importedTx1);
+        Account imported2 = new Account("abc", importedTx2);
 
         // Perform test 
-        var merged2 = existing.merge(imported2); // <--- newest first (unordered)
-        var merged1 = merged2.merge(imported1);
+        existing.merge(imported2);
+        existing.merge(imported1);
 
         // Prepare results
         int expected = 13;
-        int result = merged1.transactionsAscending().size();
+        int result = existing.transactionsAscending().size();
 
         // Evaluate results
         assertEquals(expected, result, "Expected number of transactions did not match the actual obtained number of transactions");
@@ -115,8 +115,8 @@ public class AccountTest {
      * Test of addTransactionsToAccounts method, of class Account.
      */
     @Test
-    public void testMerge_WhenOldCategorized_ThenKeepOldCategories() {
-        System.out.println("testMerge_WhenOldCategorized_ThenKeepOldCategories");
+    public void testAddTransactionsToAccounts_WhenOldCategorized_ThenKeepOldCategories() {
+        System.out.println("testAddTransactionsToAccounts_WhenOldCategorized_ThenKeepOldCategories");
 
         // Create test data        
         List<CashTransaction> existingTx = List.of(
@@ -132,17 +132,17 @@ public class AccountTest {
         );
 
         // Perform test
-        var existing = new Account("abc", existingTx);
-        var imported = new Account("abc", importedTx);
-        var merged = existing.merge(imported);
+        Account existing = new Account("abc", existingTx);
+        Account imported = new Account("abc", importedTx);
+        existing.merge(imported);
 
         // Prepare results
         int expected = 3;
-        int result = merged.transactionsAscending().size();
+        int result = existing.transactionsAscending().size();
 
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
-        for (var transaction : merged.transactionsAscending()) {
+        for (var transaction : existing.transactionsAscending()) {
             assertEquals("Aye", transaction.category());
         }
 
@@ -153,8 +153,8 @@ public class AccountTest {
      * Test of addTransactionsToAccounts method, of class Account.
      */
     @Test
-    public void testMerge_WhenOldUncategorized_ThenAddNewCategories() {
-        System.out.println("testMerge_WhenOldUncategorized_ThenAddNewCategories");
+    public void testAddTransactionsToAccounts_WhenOldUncategorized_ThenAddNewCategories() {
+        System.out.println("testAddTransactionsToAccounts_WhenOldUncategorized_ThenAddNewCategories");
 
         // Create test data   
         List<CashTransaction> existingTx = List.of(
@@ -170,17 +170,17 @@ public class AccountTest {
         );
 
         // Perform test
-        var existing = new Account("abc", existingTx);
-        var imported = new Account("abc", importedTx);
-        var merged = existing.merge(imported);
+        Account existing = new Account("abc", existingTx);
+        Account imported = new Account("abc", importedTx);
+        existing.merge(imported);
 
         // Prepare results
         int expected = 3;
-        int result = merged.transactionsAscending().size();
+        int result = existing.transactionsAscending().size();
 
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
-        for (var transaction : merged.transactionsAscending()) {
+        for (var transaction : existing.transactionsAscending()) {
             assertEquals("Bee", transaction.category());
         }
 
@@ -191,8 +191,8 @@ public class AccountTest {
      * Test of addTransactionsToAccounts method, of class Account.
      */
     @Test
-    public void testMerge_WhenNewOverwriteOld_ThenAddNewCategories() {
-        System.out.println("testMerge_WhenNewOverwriteOld_ThenAddNewCategories");
+    public void testAddTransactionsToAccounts_WhenNewOverwriteOld_ThenAddNewCategories() {
+        System.out.println("testAddTransactionsToAccounts_WhenNewOverwriteOld_ThenAddNewCategories");
 
         // Create test data       
         List<CashTransaction> existingTx = List.of(
@@ -208,17 +208,17 @@ public class AccountTest {
         );
 
         // Perform test
-        var existing = new Account("abc", existingTx);
-        var imported = new Account("abc", importedTx);
-        var merged = existing.merge(imported, true);
+        Account existing = new Account("abc", existingTx);
+        Account imported = new Account("abc", importedTx);
+        existing.merge(imported, true);
 
         // Prepare results
         int expected = 3;
-        int result = merged.transactionsAscending().size();
+        int result = existing.transactionsAscending().size();
 
         // Evaluate result
         assertEquals(expected, result, "Expected number of unique transactions did not match the actual obtained number of transactions");
-        for (var transaction : merged.transactionsAscending()) {
+        for (var transaction : existing.transactionsAscending()) {
             assertEquals("Bee", transaction.category());
         }
 

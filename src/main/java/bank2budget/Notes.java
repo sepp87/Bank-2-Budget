@@ -64,8 +64,6 @@ public class Notes {
     //      Support opening account balance
     //      Thoroughly test UX of main use case
     //      Provide year-in-review dashboard
-    //      Toggle filter in PnL view
-    //      Scroll pane for dashboard
     
     // Config
     //      Define start of financial year > user needs to declare a month
@@ -75,14 +73,12 @@ public class Notes {
 
     // Transactions
     //      Virtual save - when editing categories and recalculate budget accordingly
-    //      DONE MultiAccountView to modal
 
     // General
     //      Undo / Redo
     //      Resolve account aliases for account numbers e.g. "123" is "Savings Account"
     //      Rename categories (Template, Budget Months, Transactions, Categorization Rules)
     //      TransactionReview get suggestions from all transactions not only loaded
-    
     
     // Rules
     //      Add dynamic rules e.g. to rename
@@ -96,6 +92,7 @@ public class Notes {
     // WARNING
     // First of Month used as hardcoded value in AnalyticsExportService
     // Template not reloaded dynamically in BudgetService for recalculate
+    // MultiAccountView to modal
     
     // Thoughts
     //      BudgetMonth: should Adjustments, Budgeted and Variance also be streamed from control categories? does it hurt? it makes method pattern consistent with others
