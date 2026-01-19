@@ -16,7 +16,7 @@ public class AccountMerger {
         OVERWRITE_CATEGORIES,
         ENRICH_CATEGORIES
     }
-    
+
     public static Account merge(Account existing, Account incoming) {
         return merge(existing, incoming, MergePolicy.ENRICH_CATEGORIES);
     }
@@ -26,21 +26,8 @@ public class AccountMerger {
         var existingTransactions = existing.transactionsAscending();
         var incomingTransactions = incoming.transactionsAscending();
 
-        LocalDate[] overlap = CashTransactionDomainLogic.findOverlap(existingTransactions, incomingTransactions);
-
-        if (overlap == null) { // no overlap, so add all incoming
-            incomingTransactions.forEach(e -> workingIndex.put(e.transactionNumber(), e));
-
-        } else { // merge overlap
-            var from = overlap[0];
-            var to = overlap[1];
-            mergeOverlap(workingIndex, existingTransactions, incomingTransactions, from, to, policy);
-
-            // finally add non-overlapping incoming transactions
-            var otherIncoming = CashTransactionDomainLogic.filterByTimespanInverted(incomingTransactions, overlap[0], overlap[1]);
-            otherIncoming.forEach(e -> workingIndex.put(e.transactionNumber(), e));
-        }
-
+        evaluateOverlapAndMerge(workingIndex, existingTransactions, incomingTransactions, policy);
+        
         return new Account(existing.getAccountNumber(), workingIndex.values());
     }
 
@@ -48,6 +35,27 @@ public class AccountMerger {
         var result = new TreeMap<Integer, CashTransaction>();
         account.transactionsAscending().forEach(e -> result.put(e.transactionNumber(), e));
         return result;
+    }
+
+    private static void evaluateOverlapAndMerge(
+            Map<Integer, CashTransaction> workingIndex,
+            List<CashTransaction> existing,
+            List<CashTransaction> incoming,
+            MergePolicy policy) {
+        LocalDate[] overlap = CashTransactionDomainLogic.findOverlap(existing, incoming);
+
+        if (overlap == null) { // no overlap, so add all incoming
+            incoming.forEach(e -> workingIndex.put(e.transactionNumber(), e));
+
+        } else { // merge overlap
+            var from = overlap[0];
+            var to = overlap[1];
+            mergeOverlap(workingIndex, existing, incoming, from, to, policy);
+
+            // finally add non-overlapping incoming transactions
+            var otherIncoming = CashTransactionDomainLogic.filterByTimespanInverted(incoming, overlap[0], overlap[1]);
+            otherIncoming.forEach(e -> workingIndex.put(e.transactionNumber(), e));
+        }
     }
 
     private static void mergeOverlap(

@@ -68,36 +68,6 @@ public class AccountService {
         return accountIndex.values();
     }
 
-    public boolean importFromFilesOld(List<File> files) {
-        List<Account> imported = importer.importFromFiles(files);
-        applyRulesAndMerge(imported);
-        if (hasValidAccounts()) {
-            onAccountsUpdated();
-            return true;
-        }
-        load(); // reload all if import failed 
-        return false;
-    }
-
-    public boolean importFromTodoAndSave() {
-        List<Account> imported = importer.importFromTodo();
-        applyRulesAndMerge(imported);
-
-//        if(true) {
-//            return false;
-//        }
-        if (hasValidAccounts()) {
-            save();
-            onAccountsUpdated();
-            return true;
-        }
-        return false;
-    }
-
-    private void applyRulesAndMerge(List<Account> imported) {
-        var applied = applyRules(imported);
-        merge(applied);
-    }
 
     private List<Account> applyRules(Collection<Account> accounts) {
         List<Account> result = new ArrayList<>();
@@ -110,28 +80,9 @@ public class AccountService {
         return result;
     }
 
-    private boolean hasValidAccounts() {
-        boolean isValid = IntegrityChecker.areAccountBalancesConsistent(accountIndex.values());
-        if (!isValid) {
-            Logger.getLogger(AccountService.class.getName()).log(Level.SEVERE, "Import aborted.");
-        }
-        return isValid;
-    }
 
     public void save() {
         repository.save(accountIndex.values());
-    }
-
-    private void merge(List<Account> importedAccounts) {
-        // TODO Implement
-        for (Account imported : importedAccounts) {
-            if (accountIndex.containsKey(imported.getAccountNumber())) {
-                Account existing = accountIndex.get(imported.getAccountNumber());
-                existing.merge(imported);
-            } else {
-                accountIndex.put(imported.getAccountNumber(), imported);
-            }
-        }
     }
 
     public LocalDate getLastExportDate() {
@@ -141,35 +92,7 @@ public class AccountService {
     public BigDecimal getTotalBalanceOn(LocalDate date) {
         return AccountDomainLogic.getTotalBalanceOn(getAccounts(), date);
     }
-
-    // NEW
-    // NEW    
-    // NEW
-    // NEW
-    // NEW    
-    // NEW   
-    // NEW
-    // NEW
-    // NEW    
-    // NEW
-    // NEW
-    // NEW    
-    // NEW   
-    // NEW
-    // NEW
-    // NEW    
-    // NEW
-    // NEW
-    // NEW    
-    // NEW   
-    // NEW
-    // NEW
-    // NEW    
-    // NEW
-    // NEW
-    // NEW    
-    // NEW   
-    // NEW    
+  
     public boolean importFromFiles(List<File> files) {
         List<Account> imported = importer.importFromFiles(files);
 
@@ -189,7 +112,7 @@ public class AccountService {
         return false;
     }
 
-    public boolean importFromTodoAndSaveNew() {
+    public boolean importFromTodoAndSave() {
         List<Account> imported = importer.importFromTodo();
 
         var applied = applyRules(imported);
